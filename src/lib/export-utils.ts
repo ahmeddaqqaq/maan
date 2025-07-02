@@ -3,10 +3,10 @@
 export interface ExportColumn {
   key: string;
   label: string;
-  formatter?: (value: any) => string;
+  formatter?: (value: unknown) => string;
 }
 
-export function exportToCSV(data: any[], columns: ExportColumn[], filename: string) {
+export function exportToCSV(data: Record<string, unknown>[], columns: ExportColumn[], filename: string) {
   // Create CSV headers
   const headers = columns.map(col => col.label).join(',');
   
@@ -36,7 +36,7 @@ export function exportToCSV(data: any[], columns: ExportColumn[], filename: stri
   document.body.removeChild(link);
 }
 
-export function exportToJSON(data: any[], filename: string) {
+export function exportToJSON(data: Record<string, unknown>[], filename: string) {
   const jsonContent = JSON.stringify(data, null, 2);
   const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' });
   const link = document.createElement('a');
@@ -49,7 +49,7 @@ export function exportToJSON(data: any[], filename: string) {
   document.body.removeChild(link);
 }
 
-export function exportToExcel(data: any[], columns: ExportColumn[], filename: string) {
+export function exportToExcel(data: Record<string, unknown>[], columns: ExportColumn[], filename: string) {
   // For Excel export, we'll use a simple HTML table approach that Excel can open
   const headers = columns.map(col => `<th>${col.label}</th>`).join('');
   
@@ -86,8 +86,28 @@ export function exportToExcel(data: any[], columns: ExportColumn[], filename: st
 
 // Format helper functions
 export const formatters = {
-  date: (value: string) => value ? new Date(value).toLocaleDateString() : '',
-  currency: (value: number) => value ? `$${value.toLocaleString()}` : '$0',
-  boolean: (value: boolean) => value ? 'Yes' : 'No',
-  role: (value: string) => value ? value.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase()) : '',
+  date: (value: unknown) => {
+    if (typeof value === 'string' && value) {
+      return new Date(value).toLocaleDateString();
+    }
+    return '';
+  },
+  currency: (value: unknown) => {
+    if (typeof value === 'number' && value) {
+      return `$${value.toLocaleString()}`;
+    }
+    return '$0';
+  },
+  boolean: (value: unknown) => {
+    if (typeof value === 'boolean') {
+      return value ? 'Yes' : 'No';
+    }
+    return '';
+  },
+  role: (value: unknown) => {
+    if (typeof value === 'string' && value) {
+      return value.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+    }
+    return '';
+  },
 };

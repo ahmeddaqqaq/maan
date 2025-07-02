@@ -2,24 +2,14 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+
 export type ApproveRejectClaimDto = {
     /**
      * Status to set (APPROVED or REJECTED)
      */
-    status: ApproveRejectClaimDto.status;
+    status: 'PENDING' | 'APPROVED' | 'REJECTED';
     /**
      * Optional reason for approval/rejection
      */
     reason?: string;
 };
-export namespace ApproveRejectClaimDto {
-    /**
-     * Status to set (APPROVED or REJECTED)
-     */
-    export enum status {
-        PENDING = 'PENDING',
-        APPROVED = 'APPROVED',
-        REJECTED = 'REJECTED',
-    }
-}
-

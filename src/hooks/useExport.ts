@@ -6,7 +6,7 @@ export function useExport() {
   const [isExporting, setIsExporting] = useState(false);
 
   const exportData = async (
-    data: any[],
+    data: Record<string, unknown>[],
     columns: ExportColumn[],
     filename: string,
     format: 'csv' | 'json' | 'excel' = 'csv'

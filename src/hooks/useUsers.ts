@@ -18,11 +18,19 @@ export function useUsers(filters?: UseUsersFilters) {
   return useQuery({
     queryKey: ['users', filters],
     queryFn: async (): Promise<UserFindManyResponse> => {
-      return await UserService.userControllerFindMany(
-        filters?.skip,
-        filters?.take,
-        filters?.search
-      );
+      console.log('🚀 Calling UserService.userControllerFindMany with filters:', filters);
+      try {
+        const result = await UserService.userControllerFindMany(
+          filters?.skip,
+          filters?.take,
+          filters?.search
+        );
+        console.log('✅ UserService response:', result);
+        return result;
+      } catch (error) {
+        console.error('❌ UserService error:', error);
+        throw error;
+      }
     },
   });
 }

@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { InvoiceService } from '../../client';
-import type { CreateInvoiceDto, UpdateInvoiceDto } from '../../client';
+import type { CreateInvoiceDto, UpdateInvoiceDto, InvoiceFindManyResponse, InvoiceResponse } from '../../client';
 import { toast } from 'sonner';
 
 interface UseInvoicesFilters {
@@ -16,7 +16,7 @@ interface UseInvoicesFilters {
 }
 
 export function useInvoices(filters?: UseInvoicesFilters) {
-  return useQuery({
+  return useQuery<InvoiceFindManyResponse>({
     queryKey: ['invoices', filters],
     queryFn: async () => {
       return await InvoiceService.invoiceControllerFindMany(
@@ -33,7 +33,7 @@ export function useInvoices(filters?: UseInvoicesFilters) {
 }
 
 export function useInvoice(id: number) {
-  return useQuery({
+  return useQuery<InvoiceResponse>({
     queryKey: ['invoice', id],
     queryFn: async () => {
       return await InvoiceService.invoiceControllerFindOne(id);
@@ -54,7 +54,19 @@ export function useCreateInvoice() {
       toast.success('Invoice created successfully');
     },
     onError: (error: unknown) => {
-      const errorMessage = (error as {body?: {error?: string}})?.body?.error || 'Failed to create invoice';
+      let errorMessage = 'Failed to create invoice';
+      
+      if (error && typeof error === 'object') {
+        const apiError = error as {body?: {error?: string}; message?: string; response?: {data?: {error?: string}}};
+        if (apiError.body?.error) {
+          errorMessage = apiError.body.error;
+        } else if (apiError.message) {
+          errorMessage = apiError.message;
+        } else if (apiError.response?.data?.error) {
+          errorMessage = apiError.response.data.error;
+        }
+      }
+      
       toast.error(errorMessage);
     },
   });
@@ -73,7 +85,19 @@ export function useUpdateInvoice() {
       toast.success('Invoice updated successfully');
     },
     onError: (error: unknown) => {
-      const errorMessage = (error as {body?: {error?: string}})?.body?.error || 'Failed to update invoice';
+      let errorMessage = 'Failed to update invoice';
+      
+      if (error && typeof error === 'object') {
+        const apiError = error as {body?: {error?: string}; message?: string; response?: {data?: {error?: string}}};
+        if (apiError.body?.error) {
+          errorMessage = apiError.body.error;
+        } else if (apiError.message) {
+          errorMessage = apiError.message;
+        } else if (apiError.response?.data?.error) {
+          errorMessage = apiError.response.data.error;
+        }
+      }
+      
       toast.error(errorMessage);
     },
   });
@@ -91,7 +115,19 @@ export function useDeleteInvoice() {
       toast.success('Invoice deleted successfully');
     },
     onError: (error: unknown) => {
-      const errorMessage = (error as {body?: {error?: string}})?.body?.error || 'Failed to delete invoice';
+      let errorMessage = 'Failed to delete invoice';
+      
+      if (error && typeof error === 'object') {
+        const apiError = error as {body?: {error?: string}; message?: string; response?: {data?: {error?: string}}};
+        if (apiError.body?.error) {
+          errorMessage = apiError.body.error;
+        } else if (apiError.message) {
+          errorMessage = apiError.message;
+        } else if (apiError.response?.data?.error) {
+          errorMessage = apiError.response.data.error;
+        }
+      }
+      
       toast.error(errorMessage);
     },
   });

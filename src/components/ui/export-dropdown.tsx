@@ -12,7 +12,7 @@ import { useExport } from "@/hooks/useExport";
 import { ExportColumn } from "@/lib/export-utils";
 
 interface ExportDropdownProps {
-  data: any[];
+  data: Record<string, unknown>[];
   columns: ExportColumn[];
   filename: string;
   disabled?: boolean;

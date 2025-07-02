@@ -35,23 +35,65 @@ export default function InvoicesPage() {
 
   // Define export columns for invoices
   const exportColumns = [
-    { key: 'id', label: 'Invoice ID' },
+    { 
+      key: 'id', 
+      label: 'Invoice Number',
+      formatter: (value: unknown) => {
+        if (typeof value === 'number' || typeof value === 'string') {
+          return `INV-${String(value).padStart(6, '0')}`;
+        }
+        return 'INV-000000';
+      }
+    },
+    { 
+      key: 'entity', 
+      label: 'Entity', 
+      formatter: (value: unknown) => {
+        if (value && typeof value === 'object' && 'name' in value) {
+          return (value as {name?: string}).name || 'N/A';
+        }
+        return 'N/A';
+      }
+    },
+    { 
+      key: 'Contract', 
+      label: 'Contract', 
+      formatter: (value: unknown) => {
+        if (value && typeof value === 'object') {
+          const contract = value as {description?: string; id?: number};
+          return contract.description || String(contract.id) || 'N/A';
+        }
+        return 'N/A';
+      }
+    },
+    { 
+      key: 'totalAmount', 
+      label: 'Total Amount', 
+      formatter: formatters.currency 
+    },
+    { 
+      key: 'claims', 
+      label: 'Claims Count', 
+      formatter: (value: unknown) => {
+        if (Array.isArray(value)) {
+          return String(value.length);
+        }
+        return '0';
+      }
+    },
+    { 
+      key: 'materialSummary', 
+      label: 'Material Summary', 
+      formatter: (value: unknown) => {
+        if (Array.isArray(value) && value.length > 0) {
+          return value.map((m: {materialName: string; netAmount: number; unit: string}) => `${m.materialName}: ${m.netAmount} ${m.unit}`).join('; ');
+        }
+        return 'No materials';
+      }
+    },
     { key: 'startDate', label: 'Start Date', formatter: formatters.date },
     { key: 'endDate', label: 'End Date', formatter: formatters.date },
-    { key: 'entityId', label: 'Entity ID' },
-    { key: 'contractId', label: 'Contract ID' },
-    { 
-      key: 'claimIds', 
-      label: 'Claims Count', 
-      formatter: (value: number[]) => value ? value.length : 0 
-    },
-    { 
-      key: 'claimIds', 
-      label: 'Claim IDs', 
-      formatter: (value: number[]) => value ? value.join(', ') : 'N/A' 
-    },
     { key: 'createdAt', label: 'Created Date', formatter: formatters.date },
-    { key: 'updatedAt', label: 'Updated Date', formatter: formatters.date },
   ];
 
   return (

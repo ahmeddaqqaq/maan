@@ -36,7 +36,12 @@ export default function ContractsPage() {
     { key: 'id', label: 'ID' },
     { key: 'description', label: 'Description' },
     { key: 'ownerId', label: 'Owner ID' },
-    { key: 'entityIds', label: 'Entity IDs', formatter: (value: number[]) => value?.join(', ') || '' },
+    { key: 'entityIds', label: 'Entity IDs', formatter: (value: unknown) => {
+      if (Array.isArray(value)) {
+        return value.join(', ');
+      }
+      return '';
+    }},
     { key: 'createdAt', label: 'Created Date', formatter: formatters.date },
     { key: 'updatedAt', label: 'Updated Date', formatter: formatters.date },
   ];

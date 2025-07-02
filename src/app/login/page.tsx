@@ -60,8 +60,9 @@ export default function LoginPage() {
       login(response.access_token, response.refresh_token);
       toast.success("Login successful");
       router.push("/");
-    } catch (error: any) {
-      toast.error(error?.message || "Login failed");
+    } catch (error: unknown) {
+      const apiError = error as {message?: string; body?: {error?: string}};
+      toast.error(apiError?.body?.error || apiError?.message || "Login failed");
     } finally {
       setIsLoading(false);
     }

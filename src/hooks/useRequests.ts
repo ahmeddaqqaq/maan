@@ -61,7 +61,8 @@ export function useCreateRequest() {
       toast.success('Request created successfully');
     },
     onError: (error: Error) => {
-      toast.error((error as any)?.body?.error || 'Failed to create request');
+      const apiError = error as {body?: {error?: string}; message?: string};
+      toast.error(apiError?.body?.error || apiError?.message || 'Failed to create request');
     },
   });
 }
@@ -79,7 +80,8 @@ export function useUpdateRequest() {
       toast.success('Request updated successfully');
     },
     onError: (error: Error) => {
-      toast.error((error as any)?.body?.error || 'Failed to update request');
+      const apiError = error as {body?: {error?: string}; message?: string};
+      toast.error(apiError?.body?.error || apiError?.message || 'Failed to update request');
     },
   });
 }
@@ -96,7 +98,8 @@ export function useDeleteRequest() {
       toast.success('Request deleted successfully');
     },
     onError: (error: Error) => {
-      toast.error((error as any)?.body?.error || 'Failed to delete request');
+      const apiError = error as {body?: {error?: string}; message?: string};
+      toast.error(apiError?.body?.error || apiError?.message || 'Failed to delete request');
     },
   });
 }

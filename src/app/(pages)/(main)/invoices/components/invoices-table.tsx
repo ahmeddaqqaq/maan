@@ -41,19 +41,9 @@ import {
 import { useInvoices, useDeleteInvoice } from "@/hooks/useInvoices";
 import { Skeleton } from "@/components/ui/skeleton";
 import EditInvoiceDialog from "./edit-invoice-dialog";
+import type { InvoiceResponse } from "../../../../../../client";
 
-// Define a proper type for the invoice object
-interface Invoice {
-  id: number | string;
-  startDate?: string;
-  endDate?: string;
-  entityId?: number;
-  contractId?: number;
-  claimIds?: number[];
-  totalClaims?: number;
-  createdAt?: string;
-  updatedAt?: string;
-}
+type Invoice = InvoiceResponse;
 
 interface InvoicesTableProps {
   searchQuery?: string;
@@ -150,10 +140,12 @@ export function InvoicesTable({
                 onCheckedChange={(checked) => handleSelectAll(checked as boolean)}
               />
             </TableHead>
-            <TableHead>Invoice ID</TableHead>
+            <TableHead>Invoice #</TableHead>
             <TableHead>Entity</TableHead>
             <TableHead>Contract</TableHead>
             <TableHead>Claims</TableHead>
+            <TableHead>Total Amount</TableHead>
+            <TableHead>Material Summary</TableHead>
             <TableHead>Start Date</TableHead>
             <TableHead>End Date</TableHead>
             <TableHead>Created Date</TableHead>
@@ -163,7 +155,7 @@ export function InvoicesTable({
         <TableBody>
           {invoices.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+              <TableCell colSpan={10} className="text-center py-8 text-gray-500">
                 No invoices found
               </TableCell>
             </TableRow>
@@ -176,16 +168,18 @@ export function InvoicesTable({
                     onCheckedChange={(checked) => handleSelectInvoice(invoice.id?.toString() || "", checked as boolean)}
                   />
                 </TableCell>
-                <TableCell className="font-mono text-sm">INV-{invoice.id}</TableCell>
+                <TableCell className="font-mono text-sm">INV-{String(invoice.id).padStart(6, '0')}</TableCell>
                 <TableCell>
-                  {invoice.entityId ? (
-                    <Badge variant="outline">Entity {invoice.entityId}</Badge>
+                  {invoice.entity ? (
+                    <Badge variant="outline">{invoice.entity.name}</Badge>
                   ) : (
-                    <span className="text-gray-400">N/A</span>
+                    <Badge variant="outline">Entity {invoice.entityId}</Badge>
                   )}
                 </TableCell>
                 <TableCell>
-                  {invoice.contractId ? (
+                  {invoice.Contract ? (
+                    <Badge variant="outline">{invoice.Contract.description || `Contract ${invoice.contractId}`}</Badge>
+                  ) : invoice.contractId ? (
                     <Badge variant="outline">Contract {invoice.contractId}</Badge>
                   ) : (
                     <span className="text-gray-400">N/A</span>
@@ -193,8 +187,26 @@ export function InvoicesTable({
                 </TableCell>
                 <TableCell>
                   <Badge variant="secondary">
-                    {invoice.claimIds?.length || 0} claims
+                    {invoice.claims?.length || 0} claims
                   </Badge>
+                </TableCell>
+                <TableCell className="font-medium">
+                  <span className="text-green-600">
+                    ${invoice.totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <div className="text-xs space-y-1">
+                    {invoice.materialSummary?.slice(0, 2).map((material, idx) => (
+                      <div key={idx} className="flex justify-between">
+                        <span className="truncate mr-2">{material.materialName}:</span>
+                        <span className="font-medium">{material.netAmount} {material.unit}</span>
+                      </div>
+                    ))}
+                    {invoice.materialSummary && invoice.materialSummary.length > 2 && (
+                      <div className="text-gray-500">+{invoice.materialSummary.length - 2} more</div>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell className="text-sm">{formatDate(invoice.startDate)}</TableCell>
                 <TableCell className="text-sm">{formatDate(invoice.endDate)}</TableCell>

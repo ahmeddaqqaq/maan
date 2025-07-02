@@ -2,9 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ApproveRejectClaimDto } from '../models/ApproveRejectClaimDto';
 import type { CreateClaimDto } from '../models/CreateClaimDto';
 import type { UpdateClaimDto } from '../models/UpdateClaimDto';
+import type { ApproveRejectClaimDto } from '../models/ApproveRejectClaimDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
