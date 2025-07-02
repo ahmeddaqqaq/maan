@@ -8,13 +8,16 @@ import {
   FiSettings,
   FiChevronDown,
   FiChevronRight,
-  FiBarChart2,
   FiBriefcase,
-  FiDollarSign,
-  FiFileText,
   FiRepeat,
+  FiEdit,
+  FiLogOut,
+  FiSend,
+  FiCreditCard,
 } from "react-icons/fi";
 import { ReactNode, useState } from "react";
+import { useAuth } from "@/providers/auth-provider";
+import { SettingsDialog } from "@/components/settings-dialog";
 
 export default function MainLayout({
   children,
@@ -22,6 +25,7 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { logout } = useAuth();
   const isActive = (path: string) => pathname === path;
   const [isScheduleOpen, setIsScheduleOpen] = useState(
     pathname.startsWith("/schedule")
@@ -33,35 +37,50 @@ export default function MainLayout({
     icon: ReactNode;
     submenu?: { name: string; path: string }[];
   }[] = [
-    {
-      name: "Monthly Production",
-      path: "/home",
-      icon: <FiBarChart2 className="h-5 w-5" />,
-    },
+    // {
+    //   name: "Monthly Production",
+    //   path: "/home",
+    //   icon: <FiBarChart2 className="h-5 w-5" />,
+    // },
     {
       name: "Affiliated Companies",
       path: "/affiliated-companies",
       icon: <FiBriefcase className="h-5 w-5" />,
     },
+    // {
+    //   name: "Financial Claims",
+    //   path: "/financial-claims",
+    //   icon: <FiDollarSign className="h-5 w-5" />,
+    // },
     {
-      name: "Financial Claims",
-      path: "/financial-claims",
-      icon: <FiDollarSign className="h-5 w-5" />,
+      name: "Contracts",
+      path: "/contracts",
+      icon: <FiEdit className="h-5 w-5" />,
     },
-    {
-      name: "Document Center",
-      path: "/document-center",
-      icon: <FiFileText className="h-5 w-5" />,
-    },
+    // {
+    //   name: "Document Center",
+    //   path: "/document-center",
+    //   icon: <FiFileText className="h-5 w-5" />,
+    // },
     {
       name: "Users",
       path: "/users",
       icon: <FiUsers className="h-5 w-5" />,
     },
     {
+      name: "Claims",
+      path: "/claims",
+      icon: <FiRepeat className="h-5 w-5" />,
+    },
+    {
       name: "Requests",
       path: "/requests",
-      icon: <FiRepeat className="h-5 w-5" />,
+      icon: <FiSend className="h-5 w-5" />,
+    },
+    {
+      name: "Invoices",
+      path: "/invoices",
+      icon: <FiCreditCard className="h-5 w-5" />,
     },
   ];
 
@@ -77,7 +96,7 @@ export default function MainLayout({
         <div className="p-4 mb-6 flex items-center space-x-3">
           <div>
             <h1 className="text-2xl font-bold font-poppins text-gray-800">
-              Ma'an
+              Ma&apos;an
             </h1>
           </div>
         </div>
@@ -154,22 +173,28 @@ export default function MainLayout({
           ))}
         </nav>
 
-        {/* Settings */}
-        <div className="mt-auto">
-          <Link href="/settings">
+        {/* Settings and Logout */}
+        <div className="mt-auto space-y-2">
+          <SettingsDialog>
             <motion.div
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className={`flex items-center gap-2 p-2 rounded-lg transition-all duration-200 ${
-                isActive("/settings")
-                  ? "text-blue-600"
-                  : "text-gray-500 hover:text-blue-500"
-              }`}
+              className="flex items-center gap-2 p-2 rounded-lg transition-all duration-200 text-gray-500 hover:text-blue-500 cursor-pointer w-full"
             >
               <FiSettings className="h-5 w-5" />
               <span className="font-medium text-sm">Settings</span>
             </motion.div>
-          </Link>
+          </SettingsDialog>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={logout}
+            className="flex items-center gap-2 p-2 rounded-lg transition-all duration-200 text-gray-500 hover:text-red-500 w-full"
+          >
+            <FiLogOut className="h-5 w-5" />
+            <span className="font-medium text-sm">Logout</span>
+          </motion.button>
         </div>
       </aside>
 

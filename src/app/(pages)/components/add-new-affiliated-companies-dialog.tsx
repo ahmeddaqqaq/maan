@@ -1,5 +1,9 @@
 "use client";
 
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,31 +13,65 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Form } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { FiPlus } from "react-icons/fi";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { EntityService } from '../../../../client';
+import type { CreateEntityDto } from '../../../../client';
+import { toast } from 'sonner';
+
+const createEntitySchema = z.object({
+  name: z.string().min(1, "Company name is required"),
+});
+
+type CreateEntityFormData = z.infer<typeof createEntitySchema>;
 
 export default function AddNewAffiliatedCompaniesDialog() {
-  const form = useForm();
+  const [open, setOpen] = useState(false);
+  const queryClient = useQueryClient();
 
-  const onSubmit = (data: any) => {
-    console.log(data);
-    // Handle form submission here
+  const createEntityMutation = useMutation({
+    mutationFn: async (data: CreateEntityDto) => {
+      return await EntityService.entityControllerCreate(data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['entities'] });
+      toast.success('Company created successfully');
+      setOpen(false);
+      form.reset();
+    },
+    onError: (error: Error) => {
+      toast.error(error?.message || 'Failed to create company');
+    },
+  });
+
+  const form = useForm<CreateEntityFormData>({
+    resolver: zodResolver(createEntitySchema),
+    defaultValues: {
+      name: "",
+    },
+  });
+
+  const onSubmit = async (data: CreateEntityFormData) => {
+    await createEntityMutation.mutateAsync({
+      name: data.name,
+    });
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="default" className="bg-blue-600 hover:bg-blue-700">
-          Add
+          <FiPlus className="mr-2 h-4 w-4" />
+          Add Company
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[450px]">
@@ -42,75 +80,36 @@ export default function AddNewAffiliatedCompaniesDialog() {
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* Name Input */}
-            <div className="space-y-2">
-              <Label htmlFor="name">Company Name</Label>
-              <Input
-                id="name"
-                placeholder="Enter company name"
-                {...form.register("name")}
-              />
-            </div>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Company Name *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter company name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-            {/* Email Input */}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter company email"
-                {...form.register("email")}
-              />
-            </div>
-
-            {/* Phone Number with Country Code */}
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
-              <div className="flex gap-0">
-                <Select
-                  onValueChange={(value) => form.setValue("countryCode", value)}
-                  defaultValue="+962"
-                >
-                  <SelectTrigger className="w-[120px] rounded-e-none">
-                    <SelectValue placeholder="Code" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="+962">+962</SelectItem>
-                    <SelectItem value="+971">+971</SelectItem>
-                    <SelectItem value="+966">+966</SelectItem>
-                    <SelectItem value="+1">+1</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Input
-                  className="border-s-0 rounded-s-none"
-                  id="phone"
-                  type="tel"
-                  placeholder="Enter phone number"
-                  {...form.register("phoneNumber")}
-                />
-              </div>
-            </div>
-
-            {/* Location Input */}
-            <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
-              <Input
-                id="location"
-                placeholder="Enter company location"
-                {...form.register("location")}
-              />
-            </div>
-
-            <DialogFooter className="grid grid-cols-2 gap-3">
-              <Button variant="outline" className="w-full" type="button">
+            <DialogFooter className="gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setOpen(false)}
+                disabled={createEntityMutation.isPending}
+              >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700"
+                disabled={createEntityMutation.isPending}
+                className="bg-blue-600 hover:bg-blue-700"
               >
-                Add
+                {createEntityMutation.isPending ? "Creating..." : "Create Company"}
               </Button>
             </DialogFooter>
           </form>

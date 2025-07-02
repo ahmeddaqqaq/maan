@@ -24,7 +24,7 @@ import {
 export default function AddNewMonthlyProductionDialog() {
   const form = useForm();
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: Record<string, unknown>) => {
     console.log(data);
     // Handle form submission here
   };

@@ -7,13 +7,13 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class AppService {
     /**
-     * @returns any
+     * @returns string Application ping successful
      * @throws ApiError
      */
-    public static appControllerPing(): CancelablePromise<any> {
+    public static appControllerPing(): CancelablePromise<string> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/express/ping',
+            url: '/api/healthCheck',
         });
     }
 }

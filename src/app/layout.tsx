@@ -1,6 +1,11 @@
-import MainLayout from "./components/main-layout";
+// import MainLayout from "./components/main-layout";
 import "./globals.css";
 import { Geist, Geist_Mono, Roboto, Nunito } from "next/font/google";
+import { QueryProvider } from "@/providers/query-provider";
+import { AuthProvider } from "@/providers/auth-provider";
+import { Toaster } from "@/components/ui/sonner";
+// Initialize API configuration
+import "@/lib/api-config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,7 +39,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${roboto.variable} ${nunito.variable}`}
       >
-        {children}
+        <QueryProvider>
+          <AuthProvider>
+            {children}
+            <Toaster />
+          </AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );
