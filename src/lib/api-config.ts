@@ -12,18 +12,24 @@ OpenAPI.CREDENTIALS = "include";
 // Log the configured base URL for debugging
 if (typeof window !== "undefined") {
   console.log("🚀 API Base URL configured:", OpenAPI.BASE);
-  
+
   // Debug token setting
-  Object.defineProperty(OpenAPI, 'TOKEN', {
+  Object.defineProperty(OpenAPI, "TOKEN", {
     get() {
       const token = this._token;
-      console.log("🔑 Getting token:", token ? `${token.substring(0, 10)}...` : 'null');
+      console.log(
+        "🔑 Getting token:",
+        token ? `${token.substring(0, 10)}...` : "null"
+      );
       return token;
     },
     set(value) {
-      console.log("🔑 Setting token:", value ? `${value.substring(0, 10)}...` : 'null');
+      console.log(
+        "🔑 Setting token:",
+        value ? `${value.substring(0, 10)}...` : "null"
+      );
       this._token = value;
-    }
+    },
   });
 }
 
