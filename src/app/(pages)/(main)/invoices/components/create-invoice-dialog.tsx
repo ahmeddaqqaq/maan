@@ -34,6 +34,7 @@ import { useContracts } from "@/hooks/useContracts";
 import { useClaims } from "@/hooks/useClaims";
 import { useEntities } from "@/hooks/useUsers";
 import { FiPlus } from "react-icons/fi";
+import { useTranslations } from "next-intl";
 
 // Define interfaces for the data objects
 interface Contract {
@@ -54,22 +55,23 @@ interface Claim {
   status?: string;
 }
 
-const createInvoiceSchema = z.object({
-  startDate: z.string().min(1, "Start date is required"),
-  endDate: z.string().min(1, "End date is required"),
-  entityId: z.number().min(1, "Please select an entity"),
-  contractId: z.number().optional(),
-  claimIds: z.array(z.number()).min(1, "Please select at least one claim"),
-});
-
-type CreateInvoiceFormData = z.infer<typeof createInvoiceSchema>;
-
 export default function CreateInvoiceDialog() {
   const [open, setOpen] = useState(false);
   const { data: contractsData } = useContracts();
   const { data: claimsData } = useClaims();
   const { data: entitiesData } = useEntities();
   const createInvoiceMutation = useCreateInvoice();
+  const t = useTranslations();
+
+  const createInvoiceSchema = z.object({
+    startDate: z.string().min(1, t("dialogs.createInvoice.validation.startDateRequired")),
+    endDate: z.string().min(1, t("dialogs.createInvoice.validation.endDateRequired")),
+    entityId: z.number().min(1, t("dialogs.createInvoice.validation.entityRequired")),
+    contractId: z.number().optional(),
+    claimIds: z.array(z.number()).min(1, t("dialogs.createInvoice.validation.claimsRequired")),
+  });
+
+  type CreateInvoiceFormData = z.infer<typeof createInvoiceSchema>;
 
   const form = useForm<CreateInvoiceFormData>({
     resolver: zodResolver(createInvoiceSchema),
@@ -103,12 +105,12 @@ export default function CreateInvoiceDialog() {
       <DialogTrigger asChild>
         <Button variant="default" className="bg-blue-600 hover:bg-blue-700">
           <FiPlus className="mr-2 h-4 w-4" />
-          Create Invoice
+          {t("dialogs.createInvoice.button")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Create New Invoice</DialogTitle>
+          <DialogTitle>{t("dialogs.createInvoice.title")}</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -119,7 +121,7 @@ export default function CreateInvoiceDialog() {
                 name="startDate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Start Date *</FormLabel>
+                    <FormLabel>{t("dialogs.createInvoice.fields.startDate")}</FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
@@ -133,7 +135,7 @@ export default function CreateInvoiceDialog() {
                 name="endDate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>End Date *</FormLabel>
+                    <FormLabel>{t("dialogs.createInvoice.fields.endDate")}</FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
@@ -148,7 +150,7 @@ export default function CreateInvoiceDialog() {
               name="contractId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Contract (Optional)</FormLabel>
+                  <FormLabel>{t("dialogs.createInvoice.fields.contract")}</FormLabel>
                   <Select
                     onValueChange={(value) =>
                       field.onChange(
@@ -159,18 +161,20 @@ export default function CreateInvoiceDialog() {
                   >
                     <FormControl>
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a contract" />
+                        <SelectValue placeholder={t("dialogs.createInvoice.placeholders.selectContract")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="none">No Contract</SelectItem>
+                      <SelectItem value="none">{t("dialogs.createInvoice.options.noContract")}</SelectItem>
                       {contractsData?.data?.map((contract: Contract) => (
                         <SelectItem
                           key={contract.id}
                           value={contract.id?.toString() || "none"}
                         >
-                          Contract #{contract.id} -{" "}
-                          {contract.description || "No description"}
+                          {t("dialogs.createInvoice.displays.contractWithId", {
+                            id: contract.id,
+                            description: contract.description || t("dialogs.createInvoice.displays.noDescription")
+                          })}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -185,14 +189,14 @@ export default function CreateInvoiceDialog() {
               name="entityId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Entity *</FormLabel>
+                  <FormLabel>{t("dialogs.createInvoice.fields.entity")}</FormLabel>
                   <Select
                     onValueChange={(value) => field.onChange(Number(value))}
                     value={field.value ? field.value.toString() : ""}
                   >
                     <FormControl>
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select an entity" />
+                        <SelectValue placeholder={t("dialogs.createInvoice.placeholders.selectEntity")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -216,7 +220,7 @@ export default function CreateInvoiceDialog() {
               name="claimIds"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Claims *</FormLabel>
+                  <FormLabel>{t("dialogs.createInvoice.fields.claims")}</FormLabel>
                   <Select
                     onValueChange={(value) => {
                       const claimId = Number(value);
@@ -229,14 +233,17 @@ export default function CreateInvoiceDialog() {
                   >
                     <FormControl>
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select claims" />
+                        <SelectValue placeholder={t("dialogs.createInvoice.placeholders.selectClaims")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {claimsData?.data?.map((claim: Claim) => (
                         <SelectItem key={claim.id} value={claim.id.toString()}>
-                          Claim #{claim.id} - {claim.startDate} to{" "}
-                          {claim.endDate}
+                          {t("dialogs.createInvoice.displays.claimWithId", {
+                            id: claim.id,
+                            startDate: claim.startDate,
+                            endDate: claim.endDate
+                          })}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -247,7 +254,7 @@ export default function CreateInvoiceDialog() {
                         key={claimId}
                         className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm flex items-center gap-1"
                       >
-                        Claim #{claimId}
+                        {t("claims.title")} #{claimId}
                         <button
                           type="button"
                           onClick={() =>
@@ -276,7 +283,7 @@ export default function CreateInvoiceDialog() {
                 onClick={() => setOpen(false)}
                 disabled={createInvoiceMutation.isPending}
               >
-                Cancel
+                {t("dialogs.createInvoice.buttons.cancel")}
               </Button>
               <Button
                 type="submit"
@@ -284,8 +291,8 @@ export default function CreateInvoiceDialog() {
                 className="bg-blue-600 hover:bg-blue-700"
               >
                 {createInvoiceMutation.isPending
-                  ? "Creating..."
-                  : "Create Invoice"}
+                  ? t("dialogs.createInvoice.buttons.creating")
+                  : t("dialogs.createInvoice.buttons.create")}
               </Button>
             </DialogFooter>
           </form>

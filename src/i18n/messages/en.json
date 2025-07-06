@@ -42,7 +42,10 @@
     "entities": "Entities",
     "mines": "Mines",
     "materials": "Materials",
-    "affiliatedCompanies": "Affiliated Companies"
+    "affiliatedCompanies": "Affiliated Companies",
+    "financialClaims": "Financial Claims",
+    "documentCenter": "Document Center",
+    "settings": "Settings"
   },
   "claims": {
     "title": "Claims",
@@ -103,5 +106,1295 @@
       "mineRequired": "Please select a mine",
       "entityRequired": "Please select an entity"
     }
+  },
+  "login": {
+    "title": "Sign in",
+    "description": "Enter your credentials to access your account",
+    "fields": {
+      "username": "Username",
+      "password": "Password"
+    },
+    "placeholders": {
+      "username": "Enter your username",
+      "password": "Enter your password"
+    },
+    "buttons": {
+      "signIn": "Sign in",
+      "signingIn": "Signing in..."
+    },
+    "messages": {
+      "loginSuccess": "Login successful",
+      "loginFailed": "Login failed"
+    },
+    "validation": {
+      "usernameRequired": "Username is required",
+      "passwordRequired": "Password is required"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome to Ma'an Mining Management System",
+    "stats": {
+      "totalUsers": "Total Users",
+      "activeContracts": "Active Contracts",
+      "claimsProcessed": "Claims Processed",
+      "monthlyRevenue": "Monthly Revenue",
+      "active": "active",
+      "fromLastMonth": "+{percent}% from last month"
+    },
+    "charts": {
+      "monthlyProduction": "Monthly Production",
+      "revenueTrend": "Revenue Trend",
+      "materialDistribution": "Material Distribution",
+      "phosphate": "Phosphate",
+      "potassium": "Potassium"
+    },
+    "activities": {
+      "title": "Recent Activities",
+      "newContract": "New contract created",
+      "claimApproved": "Claim approved",
+      "invoiceGenerated": "Invoice generated",
+      "userRegistered": "New user registered",
+      "hoursAgo": "{hours} hours ago",
+      "dayAgo": "{days} day ago"
+    },
+    "alerts": {
+      "title": "System Alerts",
+      "lowInventory": "Low inventory alert",
+      "phosphateRunningLow": "Phosphate A1 running low",
+      "contractExpiring": "Contract expiring",
+      "contractExpiresIn": "Contract #{id} expires in {days} days",
+      "systemUpdate": "System update",
+      "scheduledMaintenance": "Scheduled maintenance tonight",
+      "critical": "Critical",
+      "warning": "Warning",
+      "info": "Info"
+    },
+    "buttons": {
+      "exportReport": "Export Report"
+    }
+  },
+  "documentCenter": {
+    "title": "Document Center",
+    "description": "Manage contracts, reports, and other mining documents",
+    "buttons": {
+      "newFolder": "New Folder",
+      "uploadDocument": "Upload Document"
+    },
+    "search": {
+      "placeholder": "Search documents..."
+    },
+    "filters": {
+      "documentType": "Document Type",
+      "allTypes": "All Types",
+      "contracts": "Contracts",
+      "reports": "Reports",
+      "invoices": "Invoices",
+      "claims": "Claims",
+      "other": "Other",
+      "category": "Category",
+      "allCategories": "All Categories",
+      "legal": "Legal",
+      "production": "Production",
+      "financial": "Financial",
+      "safety": "Safety",
+      "technical": "Technical"
+    },
+    "actions": {
+      "view": "View",
+      "download": "Download",
+      "share": "Share"
+    },
+    "properties": {
+      "size": "Size:",
+      "category": "Category:",
+      "uploaded": "Uploaded:",
+      "by": "By:"
+    },
+    "noDocuments": "No documents found",
+    "tryAdjusting": "Try adjusting your search criteria"
+  },
+  "requests": {
+    "title": "Requests",
+    "create": "Create Request",
+    "createNew": "Create New Request",
+    "edit": "Edit Request",
+    "editRequest": "Edit Request #{id}",
+    "delete": "Delete Request",
+    "noRequests": "No requests found",
+    "fields": {
+      "description": "Description",
+      "requestingEntity": "Requesting Entity",
+      "targetEntity": "Target Entity",
+      "contract": "Contract",
+      "mine": "Mine",
+      "material": "Material",
+      "startDate": "Start Date",
+      "endDate": "End Date"
+    },
+    "placeholders": {
+      "enterDescription": "Enter description",
+      "selectRequestingEntity": "Select requesting entity",
+      "selectTargetEntity": "Select target entity",
+      "selectContract": "Select contract",
+      "selectMine": "Select mine",
+      "selectMaterial": "Select material",
+      "noContract": "No Contract"
+    },
+    "messages": {
+      "createSuccess": "Request created successfully",
+      "updateSuccess": "Request updated successfully",
+      "deleteSuccess": "Request deleted successfully",
+      "createError": "Failed to create request",
+      "updateError": "Failed to update request",
+      "deleteError": "Failed to delete request",
+      "confirmDelete": "Are you sure you want to delete this request?",
+      "creating": "Creating...",
+      "saving": "Saving..."
+    },
+    "validation": {
+      "descriptionRequired": "Description is required",
+      "requestingEntityRequired": "Please select requesting entity",
+      "targetEntityRequired": "Please select target entity",
+      "startDateRequired": "Start date is required",
+      "endDateRequired": "End date is required"
+    }
+  },
+  "contracts": {
+    "title": "Contracts",
+    "description": "Manage mining contracts, agreements, and configurations",
+    "create": "Create Contract",
+    "createNew": "Create New Contract",
+    "edit": "Edit Contract",
+    "editContract": "Edit Contract #{id}",
+    "delete": "Delete Contract",
+    "noContracts": "No contracts found",
+    "fields": {
+      "description": "Description",
+      "owner": "Owner",
+      "entities": "Entities",
+      "startDate": "Start Date",
+      "endDate": "End Date"
+    },
+    "placeholders": {
+      "enterDescription": "Enter contract description",
+      "selectOwner": "Select owner",
+      "selectEntities": "Select entities"
+    },
+    "messages": {
+      "createSuccess": "Contract created successfully",
+      "updateSuccess": "Contract updated successfully",
+      "deleteSuccess": "Contract deleted successfully",
+      "createError": "Failed to create contract",
+      "updateError": "Failed to update contract",
+      "deleteError": "Failed to delete contract",
+      "confirmDelete": "Are you sure you want to delete this contract?",
+      "creating": "Creating...",
+      "saving": "Saving..."
+    },
+    "validation": {
+      "descriptionRequired": "Contract description is required",
+      "ownerRequired": "Please select owner",
+      "startDateRequired": "Start date is required",
+      "endDateRequired": "End date is required"
+    }
+  },
+  "invoices": {
+    "title": "Invoices",
+    "description": "Generate and manage claim invoices",
+    "create": "Create Invoice",
+    "createNew": "Create New Invoice",
+    "edit": "Edit Invoice",
+    "editInvoice": "Edit Invoice #{id}",
+    "delete": "Delete Invoice",
+    "noInvoices": "No invoices found",
+    "noMaterials": "No materials found",
+    "fields": {
+      "description": "Description",
+      "amount": "Amount",
+      "entity": "Entity",
+      "contract": "Contract",
+      "dueDate": "Due Date",
+      "paid": "Paid",
+      "paidAt": "Paid At",
+      "invoiceNumber": "Invoice Number",
+      "claimsCount": "Claims Count",
+      "materialSummary": "Material Summary",
+      "startDate": "Start Date",
+      "endDate": "End Date"
+    },
+    "placeholders": {
+      "enterDescription": "Enter invoice description",
+      "enterAmount": "Enter amount",
+      "selectEntity": "Select entity",
+      "selectContract": "Select contract"
+    },
+    "messages": {
+      "createSuccess": "Invoice created successfully",
+      "updateSuccess": "Invoice updated successfully",
+      "deleteSuccess": "Invoice deleted successfully",
+      "createError": "Failed to create invoice",
+      "updateError": "Failed to update invoice",
+      "deleteError": "Failed to delete invoice",
+      "confirmDelete": "Are you sure you want to delete this invoice?",
+      "creating": "Creating...",
+      "saving": "Saving..."
+    },
+    "validation": {
+      "descriptionRequired": "Invoice description is required",
+      "amountRequired": "Amount is required",
+      "entityRequired": "Please select entity",
+      "dueDateRequired": "Due date is required"
+    },
+    "filters": {
+      "filterByContract": "Filter by contract",
+      "filterByEntity": "Filter by entity",
+      "allContracts": "All Contracts",
+      "allEntities": "All Entities",
+      "contractNumber": "Contract #{id}"
+    },
+    "actions": {
+      "downloadPDF": "Download PDF",
+      "sendInvoice": "Send Invoice",
+      "markPaid": "Mark as Paid"
+    }
+  },
+  "users": {
+    "title": "Users",
+    "description": "Manage system users, roles, and permissions",
+    "create": "Create User",
+    "createNew": "Create New User",
+    "edit": "Edit User",
+    "editUser": "Edit User #{id}",
+    "delete": "Delete User",
+    "noUsers": "No users found",
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "role": "Role",
+      "active": "Active",
+      "lastLogin": "Last Login",
+      "entity": "Entity",
+      "noEntity": "No Entity",
+      "noEmail": "No Email"
+    },
+    "placeholders": {
+      "enterName": "Enter name",
+      "enterEmail": "Enter email",
+      "enterPhone": "Enter phone number",
+      "selectRole": "Select role",
+      "newPassword": "Enter new password (minimum 6 characters)"
+    },
+    "roles": {
+      "admin": "Admin",
+      "user": "User",
+      "viewer": "Viewer"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "actions": {
+      "resetPassword": "Reset Password"
+    },
+    "messages": {
+      "createSuccess": "User created successfully",
+      "updateSuccess": "User updated successfully",
+      "deleteSuccess": "User deleted successfully",
+      "createError": "Failed to create user",
+      "updateError": "Failed to update user",
+      "deleteError": "Failed to delete user",
+      "confirmDelete": "Are you sure you want to delete this user? This action cannot be undone.",
+      "resetPasswordDescription": "Enter a new password for this user. The user will need to use the new password to sign in.",
+      "resetting": "Resetting...",
+      "creating": "Creating...",
+      "saving": "Saving..."
+    },
+    "validation": {
+      "nameRequired": "Name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Invalid email format",
+      "phoneRequired": "Phone number is required",
+      "roleRequired": "Please select a role"
+    }
+  },
+  "affiliatedCompanies": {
+    "title": "Affiliated Companies",
+    "create": "Create Affiliated Company",
+    "createNew": "Create New Affiliated Company",
+    "edit": "Edit Affiliated Company",
+    "editCompany": "Edit Affiliated Company #{id}",
+    "delete": "Delete Affiliated Company",
+    "noCompanies": "No affiliated companies found",
+    "fields": {
+      "name": "Company Name",
+      "code": "Company Code",
+      "type": "Company Type",
+      "status": "Status",
+      "contactPerson": "Contact Person",
+      "phone": "Phone",
+      "email": "Email",
+      "address": "Address"
+    },
+    "placeholders": {
+      "enterName": "Enter company name",
+      "enterCode": "Enter company code",
+      "selectType": "Select company type",
+      "enterContactPerson": "Enter contact person name",
+      "enterPhone": "Enter phone number",
+      "enterEmail": "Enter email address",
+      "enterAddress": "Enter address"
+    },
+    "messages": {
+      "createSuccess": "Affiliated company created successfully",
+      "updateSuccess": "Affiliated company updated successfully",
+      "deleteSuccess": "Affiliated company deleted successfully",
+      "createError": "Failed to create affiliated company",
+      "updateError": "Failed to update affiliated company",
+      "deleteError": "Failed to delete affiliated company",
+      "loadError": "Error loading companies",
+      "confirmDelete": "Are you sure you want to delete this affiliated company?",
+      "creating": "Creating...",
+      "saving": "Saving..."
+    }
+  },
+  "export": {
+    "title": "Export Data",
+    "excel": "Export to Excel",
+    "csv": "Export to CSV",
+    "json": "Export to JSON",
+    "pdf": "Export to PDF",
+    "filename": "Filename",
+    "exporting": "Exporting...",
+    "messages": {
+      "noData": "No data to export",
+      "success": "Data exported successfully as {format}",
+      "error": "Failed to export data",
+      "unsupportedFormat": "Unsupported export format"
+    }
+  },
+  "pagination": {
+    "showing": "Showing {start} to {end} of {total}",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "of": "of",
+    "rowsPerPage": "Rows per page"
+  },
+  "table": {
+    "show": "Show",
+    "entries": "entries",
+    "noDataFound": "No data found",
+    "loadingData": "Loading data...",
+    "na": "N/A"
+  },
+  "forms": {
+    "required": "Required",
+    "optional": "Optional",
+    "selectOption": "Select an option",
+    "selectDate": "Select date"
+  },
+  "components": {
+    "noData": {
+      "message": "You don't have {title}.",
+      "checkBack": "You can always check back"
+    },
+    "destructiveDialog": {
+      "title": "Destructive Dialog",
+      "message": "Do you really want to delete {description}?",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "topBar": {
+      "refresh": "Refresh",
+      "notifications": "Notifications"
+    },
+    "languageSwitcher": {
+      "english": "English"
+    }
+  },
+  "settings": {
+    "title": "Settings"
+  },
+  "financialClaims": {
+    "title": "Financial Claims",
+    "add": "Add"
+  },
+  "tables": {
+    "headers": {
+      "id": "ID",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "status": "Status",
+      "actions": "Actions",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At",
+      "workArea": "Work Area",
+      "category": "Category",
+      "material": "Material",
+      "qty": "Qty",
+      "from": "From",
+      "to": "To",
+      "contract": "Contract",
+      "contractWith": "Contract With",
+      "contractDate": "Contract Date",
+      "type": "Type",
+      "module": "Module",
+      "generatedOn": "Generated On",
+      "company": "Company",
+      "expenseType": "Expense Type",
+      "amount": "Amount",
+      "date": "Date",
+      "description": "Description",
+      "owner": "Owner",
+      "entities": "Entities",
+      "createdDate": "Created Date",
+      "location": "Location",
+      "entity": "Entity",
+      "unit": "Unit",
+      "mine": "Mine"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "view": "View",
+      "viewDetails": "View Details",
+      "download": "Download",
+      "editContract": "Edit Contract",
+      "deleteContract": "Delete Contract",
+      "editMaterial": "Edit Material",
+      "deleteMaterial": "Delete Material",
+      "editMine": "Edit Mine",
+      "deleteMine": "Delete Mine"
+    },
+    "filters": {
+      "search": "Search...",
+      "workArea": "Work Area",
+      "company": "Company",
+      "contractWith": "Contract with",
+      "contractDate": "Contract Date",
+      "type": "Type",
+      "module": "Module",
+      "generatedOn": "Generated On",
+      "expenseType": "Expense Type",
+      "selectDate": "Select Date",
+      "show": "Show",
+      "searchMaterials": "Search materials...",
+      "searchMines": "Search mines and locations..."
+    },
+    "options": {
+      "construction": "Construction",
+      "electrical": "Electrical",
+      "plumbing": "Plumbing",
+      "companyA": "Company A",
+      "companyB": "Company B",
+      "companyC": "Company C",
+      "gulfMining": "Gulf Mining & Resources",
+      "northernProduction": "Northern Production Unit",
+      "southernArea": "Southern Area",
+      "detailed": "Detailed",
+      "summary": "Summary",
+      "production": "Production",
+      "expenses": "Expenses",
+      "travel": "Travel",
+      "supplies": "Supplies",
+      "equipment": "Equipment",
+      "other": "Other"
+    },
+    "pagination": {
+      "showing": "Showing",
+      "to": "to",
+      "of": "of",
+      "contracts": "contracts",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "noData": {
+      "noContracts": "No contracts found",
+      "noDescription": "No description",
+      "noEntities": "No entities",
+      "noMaterials": "No materials found",
+      "noMines": "No mines found",
+      "noMaterialsSearch": "No materials found matching your search",
+      "noMinesSearch": "No mines found matching your search"
+    },
+    "alerts": {
+      "deleteContract": "Delete Contract",
+      "deleteContractConfirm": "Are you sure you want to delete this contract? This action cannot be undone.",
+      "cancel": "Cancel",
+      "deleting": "Deleting...",
+      "delete": "Delete"
+    },
+    "errors": {
+      "loadingMaterials": "Error loading materials:",
+      "loadingMines": "Error loading mines:"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "menu": {
+      "rolesPermissions": "Roles & Permissions",
+      "rolesDescription": "User roles management",
+      "materials": "Materials",
+      "materialsDescription": "Mining materials",
+      "minesWorkAreas": "Mines & Work Areas",
+      "minesDescription": "Mining locations",
+      "account": "Account",
+      "roles": "Roles",
+      "mines": "Mines",
+      "production": "Production"
+    },
+    "account": {
+      "title": "Account Settings",
+      "description": "Manage your account information and preferences",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "username": "Username",
+      "placeholders": {
+        "firstName": "Enter first name",
+        "lastName": "Enter last name",
+        "email": "Enter email address",
+        "username": "Enter username"
+      },
+      "comingSoon": "Account settings functionality will be implemented soon."
+    },
+    "rolesPermissions": {
+      "title": "Roles & Permissions",
+      "description": "Manage user roles and access permissions",
+      "administrator": "Administrator",
+      "fullAccess": "Full Access",
+      "adminDescription": "Complete system access and management capabilities",
+      "productionManager": "Production Manager",
+      "production": "Production",
+      "productionDescription": "Production oversight and management",
+      "financialManager": "Financial Manager",
+      "financial": "Financial",
+      "financialDescription": "Financial operations and reporting",
+      "standardUser": "Standard User",
+      "limited": "Limited",
+      "userDescription": "Basic system access and operations"
+    },
+    "materials": {
+      "title": "Materials Management",
+      "description": "Manage mining materials and their properties",
+      "searchPlaceholder": "Search materials...",
+      "headers": {
+        "id": "ID",
+        "name": "Name",
+        "unit": "Unit",
+        "entity": "Entity",
+        "mine": "Mine",
+        "status": "Status"
+      },
+      "actions": {
+        "edit": "Edit Material",
+        "delete": "Delete Material"
+      }
+    },
+    "mines": {
+      "title": "Mines & Work Areas",
+      "description": "Manage mining locations and work areas",
+      "searchPlaceholder": "Search mines and locations...",
+      "headers": {
+        "id": "ID",
+        "name": "Name",
+        "location": "Location",
+        "entity": "Entity",
+        "status": "Status",
+        "createdDate": "Created Date"
+      },
+      "actions": {
+        "edit": "Edit Mine",
+        "delete": "Delete Mine"
+      }
+    },
+    "productionSettings": {
+      "title": "Production Settings",
+      "description": "Configure production parameters and workflows",
+      "productionTargets": "Production Targets",
+      "targetsDescription": "Set monthly and yearly production goals",
+      "monthlyTarget": "Monthly Target",
+      "yearlyTarget": "Yearly Target",
+      "placeholders": {
+        "monthlyTarget": "Enter monthly target",
+        "yearlyTarget": "Enter yearly target"
+      },
+      "qualityStandards": "Quality Standards",
+      "qualityDescription": "Define quality control parameters",
+      "minimumGrade": "Minimum Grade (%)",
+      "minimumGradePlaceholder": "Enter minimum grade",
+      "safetyProtocols": "Safety Protocols",
+      "safetyDescription": "Safety guidelines and emergency procedures",
+      "comingSoon": "Production settings functionality will be implemented soon."
+    }
+  },
+  "dialogs": {
+    "destructiveAction": {
+      "title": "Destructive Dialog",
+      "message": "Do you really want to delete {description}?",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "monthlyProduction": {
+      "add": "Add",
+      "title": "Add Monthly Production",
+      "fields": {
+        "workArea": "Work Area",
+        "company": "Company",
+        "material": "Material",
+        "quantity": "Quantity",
+        "from": "From",
+        "to": "To"
+      },
+      "placeholders": {
+        "selectWorkArea": "Select work area",
+        "selectCompany": "Select company",
+        "selectMaterial": "Select material",
+        "enterQuantity": "Enter quantity"
+      },
+      "options": {
+        "area1": "Area 1",
+        "area2": "Area 2",
+        "area3": "Area 3",
+        "companyA": "Company A",
+        "companyB": "Company B",
+        "companyC": "Company C",
+        "cement": "Cement",
+        "steel": "Steel",
+        "sand": "Sand"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "add": "Add"
+      }
+    },
+    "submitRequest": {
+      "title": "Submit Request",
+      "fields": {
+        "company": "Company",
+        "mine": "Mine",
+        "material": "Material",
+        "quantity": "Quantity (tons)",
+        "diesel": "Diesel",
+        "explosives": "Explosives",
+        "electricity": "Electricity",
+        "medicalSupplies": "Medical Supplies"
+      },
+      "sections": {
+        "expenseClaim": "Expense Claim"
+      },
+      "placeholders": {
+        "selectCompany": "Select a company",
+        "selectMine": "Select a mine",
+        "selectMaterial": "Select material",
+        "enterQuantity": "Enter quantity in tons",
+        "enterAmount": "Enter amount",
+        "enterCost": "Enter cost"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "upload": "Upload"
+      }
+    },
+    "affiliatedCompanies": {
+      "addButton": "Add Company",
+      "title": "Add New Affiliated Company",
+      "fields": {
+        "companyName": "Company Name *"
+      },
+      "placeholders": {
+        "enterCompanyName": "Enter company name"
+      },
+      "validation": {
+        "companyNameRequired": "Company name is required"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "creating": "Creating...",
+        "create": "Create Company"
+      }
+    },
+    "createUser": {
+      "addButton": "Add User",
+      "title": "Create New User",
+      "fields": {
+        "username": "Username *",
+        "password": "Password *",
+        "email": "Email",
+        "role": "Role *",
+        "entity": "Entity *"
+      },
+      "placeholders": {
+        "enterUsername": "Enter username",
+        "enterPassword": "Enter password",
+        "enterEmail": "Enter email (optional)",
+        "selectRole": "Select a role",
+        "selectEntity": "Select an entity"
+      },
+      "roles": {
+        "admin": "Admin",
+        "productionManager": "Production Manager",
+        "financialManager": "Financial Manager",
+        "standardUser": "Standard User"
+      },
+      "loading": {
+        "entities": "Loading entities...",
+        "noEntities": "No entities found"
+      },
+      "validation": {
+        "usernameMin": "Username must be at least 3 characters",
+        "passwordMin": "Password must be at least 6 characters",
+        "emailInvalid": "Invalid email address",
+        "selectEntity": "Please select an entity"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "creating": "Creating...",
+        "create": "Create User"
+      }
+    },
+    "workArea": {
+      "addButton": "Add Work Area",
+      "title": "Add new work area",
+      "fields": {
+        "workAreaName": "Work Area Name *",
+        "location": "Location *",
+        "entity": "Entity *",
+        "activeStatus": "Active Status"
+      },
+      "placeholders": {
+        "workAreaName": "e.g. Northern Production Unit",
+        "location": "Enter location",
+        "selectEntity": "Select an entity"
+      },
+      "descriptions": {
+        "activeStatus": "Enable or disable this work area"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "creating": "Creating...",
+        "create": "Create Work Area"
+      }
+    },
+    "material": {
+      "addButton": "Add Material",
+      "title": "Add New Material",
+      "fields": {
+        "materialName": "Material Name *",
+        "unit": "Unit *",
+        "entity": "Entity *",
+        "mine": "Mine (Optional)",
+        "activeStatus": "Active Status"
+      },
+      "placeholders": {
+        "materialName": "Enter material name",
+        "selectUnit": "Select unit",
+        "selectEntity": "Select an entity",
+        "selectMine": "Select a mine"
+      },
+      "units": {
+        "kilogram": "Kilogram (kg)",
+        "tons": "Tons",
+        "liters": "Liters",
+        "cubicMeters": "Cubic Meters (m³)",
+        "bags": "Bags",
+        "units": "Units"
+      },
+      "options": {
+        "noMine": "No Mine"
+      },
+      "descriptions": {
+        "activeStatus": "Enable or disable this material"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "creating": "Creating...",
+        "create": "Create Material"
+      }
+    },
+    "contract": {
+      "addButton": "Add New Contract",
+      "title": "Add New Contract",
+      "fields": {
+        "contractWith": "Contract With",
+        "workArea": "Work Area"
+      },
+      "placeholders": {
+        "selectContractParty": "Select contract party",
+        "selectWorkArea": "Select work area"
+      },
+      "fileUpload": {
+        "dragDrop": "Drag and drop contract here, or click to add file",
+        "fileTypes": "PDF, DOC, DOCX (Max 10MB)"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "add": "Add"
+      }
+    },
+    "editUser": {
+      "title": "Edit User",
+      "fields": {
+        "username": "Username *",
+        "email": "Email",
+        "role": "Role *",
+        "entity": "Entity",
+        "activeStatus": "Active Status"
+      },
+      "placeholders": {
+        "selectRole": "Select a role",
+        "selectEntity": "Select an entity"
+      },
+      "roles": {
+        "admin": "Admin",
+        "productionManager": "Production Manager",
+        "financialManager": "Financial Manager",
+        "standardUser": "Standard User"
+      },
+      "options": {
+        "noEntity": "No Entity"
+      },
+      "descriptions": {
+        "activeStatus": "Enable or disable user access"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "updating": "Updating...",
+        "update": "Update User"
+      }
+    },
+    "createContract": {
+      "button": "Create Contract",
+      "title": "Create New Contract",
+      "editTitle": "Edit Contract",
+      "fields": {
+        "description": "Contract Description *",
+        "owner": "Contract Owner *",
+        "entities": "Participating Entities *"
+      },
+      "placeholders": {
+        "description": "Enter detailed contract description...",
+        "selectOwner": "Select the contract owner entity"
+      },
+      "validation": {
+        "descriptionMin": "Description must be at least 10 characters",
+        "selectEntities": "Please select at least one participating entity"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "creating": "Creating...",
+        "create": "Create Contract",
+        "updating": "Updating...",
+        "update": "Update Contract"
+      }
+    },
+    "createRequest": {
+      "button": "Create Request",
+      "title": "Create New Request",
+      "editTitle": "Edit Request #{id}",
+      "fields": {
+        "description": "Description (Optional)",
+        "requestingEntity": "Requesting Entity *",
+        "targetEntity": "Target Entity *",
+        "startDate": "Start Date *",
+        "endDate": "End Date *",
+        "contract": "Contract (Optional)",
+        "mine": "Mine (Optional)",
+        "material": "Material (Optional)"
+      },
+      "placeholders": {
+        "description": "Describe the request...",
+        "selectRequestingEntity": "Select requesting entity",
+        "selectTargetEntity": "Select target entity",
+        "selectContract": "Select a contract",
+        "selectMine": "Select a mine",
+        "selectMaterial": "Select a material"
+      },
+      "options": {
+        "noContract": "No Contract",
+        "noMine": "No Mine",
+        "noMaterial": "No Material"
+      },
+      "displays": {
+        "contractWithId": "Contract #{id} - {description}",
+        "noDescription": "No description"
+      },
+      "validation": {
+        "requestingEntityRequired": "Please select a requesting entity",
+        "targetEntityRequired": "Please select a target entity",
+        "startDateRequired": "Start date is required",
+        "endDateRequired": "End date is required"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "creating": "Creating...",
+        "create": "Create Request",
+        "saving": "Saving...",
+        "save": "Save Changes"
+      }
+    },
+    "createInvoice": {
+      "button": "Create Invoice",
+      "title": "Create New Invoice",
+      "editTitle": "Edit Invoice",
+      "fields": {
+        "startDate": "Start Date *",
+        "endDate": "End Date *",
+        "contract": "Contract (Optional)",
+        "entity": "Entity *",
+        "claims": "Claims *"
+      },
+      "placeholders": {
+        "selectContract": "Select a contract",
+        "selectEntity": "Select an entity",
+        "selectClaims": "Select claims"
+      },
+      "options": {
+        "noContract": "No Contract"
+      },
+      "displays": {
+        "contractWithId": "Contract #{id} - {description}",
+        "claimWithId": "Claim #{id} - {startDate} to {endDate}",
+        "noDescription": "No description"
+      },
+      "validation": {
+        "startDateRequired": "Start date is required",
+        "endDateRequired": "End date is required",
+        "entityRequired": "Please select an entity",
+        "claimsRequired": "Please select at least one claim"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "creating": "Creating...",
+        "create": "Create Invoice",
+        "updating": "Updating...",
+        "update": "Update Invoice"
+      }
+    },
+    "createClaim": {
+      "fields": {
+        "startDate": "Start Date *",
+        "endDate": "End Date *",
+        "status": "Status",
+        "mine": "Mine *",
+        "entity": "Entity *",
+        "contract": "Contract (Optional)"
+      },
+      "placeholders": {
+        "selectStatus": "Select status",
+        "selectMine": "Select mine",
+        "selectEntity": "Select entity",
+        "selectContract": "Select a contract"
+      },
+      "status": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      },
+      "options": {
+        "noContract": "No Contract"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "creating": "Creating...",
+        "create": "Create Claim"
+      }
+    }
+  },
+  "buttons": {
+    "add": "Add",
+    "cancel": "Cancel",
+    "save": "Save",
+    "create": "Create",
+    "update": "Update",
+    "delete": "Delete",
+    "edit": "Edit",
+    "upload": "Upload",
+    "creating": "Creating...",
+    "updating": "Updating...",
+    "saving": "Saving...",
+    "deleting": "Deleting...",
+    "loading": "Loading...",
+    "signingIn": "Signing in...",
+    "exporting": "Exporting..."
+  },
+  "validation": {
+    "required": "This field is required",
+    "usernameRequired": "Username is required",
+    "passwordRequired": "Password is required",
+    "usernameMinLength": "Username must be at least 3 characters",
+    "passwordMinLength": "Password must be at least 6 characters",
+    "invalidEmail": "Invalid email address",
+    "selectEntity": "Please select an entity",
+    "selectRole": "Please select a role",
+    "descriptionMinLength": "Description must be at least 10 characters",
+    "selectParticipatingEntities": "Please select at least one participating entity",
+    "companyNameRequired": "Company name is required",
+    "selectOwnerEntity": "Please select an owner entity",
+    "contractDescriptionRequired": "Contract description is required"
+  },
+  "messages": {
+    "loginSuccess": "Login successful",
+    "loginFailed": "Login failed",
+    "createSuccess": "Created successfully",
+    "updateSuccess": "Updated successfully",
+    "deleteSuccess": "Deleted successfully",
+    "createError": "Failed to create",
+    "updateError": "Failed to update",
+    "deleteError": "Failed to delete",
+    "loadingError": "Error loading data",
+    "noDataFound": "No data found",
+    "searchNoResults": "No results found matching your search",
+    "companyCreatedSuccess": "Company created successfully",
+    "companyCreateError": "Failed to create company"
+  },
+  "avatars": {
+    "fallback": "JO"
+  },
+  "accessibility": {
+    "refresh": "Refresh",
+    "notifications": "Notifications"
+  },
+  "pages": {
+    "home": {
+      "title": "Dashboard",
+      "welcome": "Welcome to Ma'an Mining Management System"
+    },
+    "documentCenter": {
+      "title": "Document Center",
+      "description": "Manage contracts, reports, and other mining documents"
+    },
+    "materials": {
+      "title": "Materials Management",
+      "description": "Manage mining materials and their properties"
+    },
+    "mines": {
+      "title": "Mines & Work Areas",
+      "description": "Manage mining locations and work areas"
+    },
+    "account": {
+      "title": "Account Settings",
+      "description": "Manage your account information and preferences"
+    },
+    "rolesPermissions": {
+      "title": "Roles & Permissions",
+      "description": "Manage user roles and access permissions"
+    }
+  },
+  "tableActions": {
+    "edit": "Edit",
+    "delete": "Delete",
+    "viewDetails": "View Details",
+    "download": "Download",
+    "editContract": "Edit Contract",
+    "deleteContract": "Delete Contract",
+    "editMaterial": "Edit Material",
+    "deleteMaterial": "Delete Material",
+    "editMine": "Edit Mine",
+    "deleteMine": "Delete Mine",
+    "editUser": "Edit User",
+    "deleteUser": "Delete User"
+  },
+  "tableControls": {
+    "search": "Search...",
+    "selectDate": "Select Date",
+    "show": "Show",
+    "export": "Export",
+    "filterBy": "Filter by {field}",
+    "all": "All {items}"
+  },
+  "tableData": {
+    "noData": "No {item} found",
+    "noDescription": "No description",
+    "noEntities": "No entities",
+    "noMine": "No Mine",
+    "noContract": "No Contract",
+    "noMaterial": "No Material",
+    "noEntity": "No Entity",
+    "loadingData": "Loading {item}...",
+    "errorLoading": "Error loading {item}",
+    "na": "N/A"
+  },
+  "contractsTable": {
+    "headers": {
+      "id": "ID",
+      "description": "Description",
+      "owner": "Owner",
+      "entities": "Entities",
+      "status": "Status",
+      "createdDate": "Created Date"
+    },
+    "pagination": {
+      "showing": "Showing {start} to {end} of {total} contracts",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "noContracts": "No contracts found",
+    "deleteConfirm": {
+      "title": "Delete Contract",
+      "message": "Are you sure you want to delete this contract? This action cannot be undone.",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "deleting": "Deleting..."
+    }
+  },
+  "affiliatedCompaniesTable": {
+    "headers": {
+      "id": "ID",
+      "name": "Name",
+      "createdAt": "Created At"
+    }
+  },
+  "financialClaimsTable": {
+    "headers": {
+      "id": "ID",
+      "company": "Company",
+      "expenseType": "Expense Type",
+      "amount": "Amount",
+      "date": "Date"
+    },
+    "filters": {
+      "company": "Company",
+      "expenseType": "Expense Type"
+    }
+  },
+  "contractTable": {
+    "headers": {
+      "id": "ID",
+      "contract": "Contract",
+      "contractWith": "Contract With",
+      "workArea": "Work Area",
+      "contractDate": "Contract Date"
+    },
+    "filters": {
+      "contractWith": "Contract with",
+      "workArea": "Work Area",
+      "contractDate": "Contract Date"
+    }
+  },
+  "reportsTable": {
+    "headers": {
+      "id": "ID",
+      "name": "Name",
+      "type": "Type",
+      "module": "Module",
+      "generatedOn": "Generated On"
+    },
+    "filters": {
+      "type": "Type",
+      "module": "Module",
+      "generatedOn": "Generated On"
+    },
+    "options": {
+      "detailed": "Detailed",
+      "summary": "Summary",
+      "production": "Production",
+      "material": "Material",
+      "expenses": "Expenses"
+    }
+  },
+  "monthlyProductionTable": {
+    "headers": {
+      "id": "ID",
+      "workArea": "Work Area",
+      "category": "Category",
+      "material": "Material",
+      "qty": "Qty",
+      "from": "From",
+      "to": "To"
+    },
+    "filters": {
+      "workArea": "Work Area",
+      "company": "Company"
+    },
+    "options": {
+      "construction": "Construction",
+      "electrical": "Electrical",
+      "plumbing": "Plumbing",
+      "companyA": "Company A",
+      "companyB": "Company B",
+      "companyC": "Company C",
+      "gulfMining": "Gulf Mining & Resources",
+      "northernProduction": "Northern Production Unit",
+      "southernArea": "Southern Area"
+    }
+  },
+  "roles": {
+    "administrator": "Administrator",
+    "productionManager": "Production Manager",
+    "financialManager": "Financial Manager",
+    "standardUser": "Standard User",
+    "admin": "Admin",
+    "user": "User",
+    "viewer": "Viewer"
+  },
+  "roleDescriptions": {
+    "administrator": "Complete system access and management capabilities",
+    "productionManager": "Production oversight and management",
+    "financialManager": "Financial operations and reporting",
+    "standardUser": "Basic system access and operations"
+  },
+  "roleBadges": {
+    "fullAccess": "Full Access",
+    "production": "Production",
+    "financial": "Financial",
+    "limited": "Limited"
+  },
+  "units": {
+    "kilogram": "Kilogram (kg)",
+    "tons": "Tons",
+    "liters": "Liters",
+    "cubicMeters": "Cubic Meters (m³)",
+    "bags": "Bags",
+    "units": "Units"
+  },
+  "settingsDialog": {
+    "menuItems": {
+      "rolesPermissions": "Roles & Permissions",
+      "rolesDescription": "User roles management",
+      "materials": "Materials",
+      "materialsDescription": "Mining materials",
+      "minesWorkAreas": "Mines & Work Areas",
+      "minesDescription": "Mining locations"
+    },
+    "searchPlaceholders": {
+      "materials": "Search materials...",
+      "mines": "Search mines and locations..."
+    },
+    "noDataMessages": {
+      "materialsNotFound": "No materials found matching your search",
+      "materialsEmpty": "No materials found",
+      "minesNotFound": "No mines found matching your search",
+      "minesEmpty": "No mines found"
+    },
+    "comingSoon": "Account settings functionality will be implemented soon."
+  },
+  "errorMessages": {
+    "loadingUsers": "Error loading users",
+    "loadingInvoices": "Error loading invoices",
+    "loadingContracts": "Error loading contracts",
+    "loadingMaterials": "Error loading materials",
+    "loadingMines": "Error loading mines",
+    "loadingEntities": "Loading entities...",
+    "noEntitiesFound": "No entities found"
+  },
+  "loadingStates": {
+    "loading": "Loading...",
+    "creating": "Creating...",
+    "updating": "Updating...",
+    "saving": "Saving...",
+    "deleting": "Deleting...",
+    "signingIn": "Signing in...",
+    "exporting": "Exporting..."
   }
 }
