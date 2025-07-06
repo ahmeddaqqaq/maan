@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -28,12 +29,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useUpdateRequest } from "@/hooks/useRequests";
+import { useUpdateRequestWithClaimBackend } from "@/hooks/useRequestsWithClaimBackend";
 import { useEntities } from "@/hooks/useUsers";
 import { useContracts, useMaterials } from "@/hooks/useContracts";
 import { useMines } from "@/hooks/useClaims";
 
-// Define interfaces for the data objects
 interface Request {
   id: number | string;
   description?: string;
@@ -95,28 +95,45 @@ export default function EditRequestDialog({
   const { data: contractsData } = useContracts();
   const { data: materialsData } = useMaterials();
   const { data: minesData } = useMines();
-  const updateRequestMutation = useUpdateRequest();
+  // Using claim backend for requests frontend
+  const updateRequestMutation = useUpdateRequestWithClaimBackend();
 
   const form = useForm<EditRequestFormData>({
     resolver: zodResolver(editRequestSchema),
     defaultValues: {
-      description: request.description || "",
-      requestingEntityId: request.requestingEntityId || 0,
-      targetEntityId: request.targetEntityId || 0,
-      contractId: request.contractId || undefined,
-      mineId: request.mineId || undefined,
-      materialId: request.materialId || undefined,
-      startDate: request.startDate?.split('T')[0] || "",
-      endDate: request.endDate?.split('T')[0] || "",
+      description: "",
+      requestingEntityId: 0,
+      targetEntityId: 0,
+      contractId: undefined,
+      mineId: undefined,
+      materialId: undefined,
+      startDate: "",
+      endDate: "",
     },
   });
 
+  useEffect(() => {
+    if (request && open) {
+      form.reset({
+        description: request.description || "",
+        requestingEntityId: request.requestingEntityId || 0,
+        targetEntityId: request.targetEntityId || 0,
+        contractId: request.contractId,
+        mineId: request.mineId,
+        materialId: request.materialId,
+        startDate: request.startDate?.split("T")[0] || "",
+        endDate: request.endDate?.split("T")[0] || "",
+      });
+    }
+  }, [request, open, form]);
+
   const onSubmit = async (data: EditRequestFormData) => {
     try {
+      // Data conversion is handled in the hook
       await updateRequestMutation.mutateAsync({
         id: Number(request.id),
         data: {
-          description: data.description || undefined,
+          description: data.description,
           requestingEntityId: data.requestingEntityId,
           targetEntityId: data.targetEntityId,
           contractId: data.contractId,
@@ -136,7 +153,7 @@ export default function EditRequestDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Edit Request</DialogTitle>
+          <DialogTitle>Edit Request #{request.id}</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -167,7 +184,7 @@ export default function EditRequestDialog({
                     <FormLabel>Requesting Entity *</FormLabel>
                     <Select
                       onValueChange={(value) => field.onChange(Number(value))}
-                      value={field.value?.toString()}
+                      value={field.value ? field.value?.toString() : ""}
                     >
                       <FormControl>
                         <SelectTrigger className="w-full">
@@ -195,7 +212,7 @@ export default function EditRequestDialog({
                     <FormLabel>Target Entity *</FormLabel>
                     <Select
                       onValueChange={(value) => field.onChange(Number(value))}
-                      value={field.value?.toString()}
+                      value={field.value ? field.value?.toString() : ""}
                     >
                       <FormControl>
                         <SelectTrigger className="w-full">
@@ -371,7 +388,7 @@ export default function EditRequestDialog({
                 disabled={updateRequestMutation.isPending}
                 className="bg-blue-600 hover:bg-blue-700"
               >
-                {updateRequestMutation.isPending ? "Updating..." : "Update Request"}
+                {updateRequestMutation.isPending ? "Saving..." : "Save Changes"}
               </Button>
             </DialogFooter>
           </form>

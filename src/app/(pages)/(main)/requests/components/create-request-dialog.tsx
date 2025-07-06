@@ -30,13 +30,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCreateRequest } from "@/hooks/useRequests";
+import { useCreateRequestWithClaimBackend } from "@/hooks/useRequestsWithClaimBackend";
 import { useEntities } from "@/hooks/useUsers";
 import { useContracts, useMaterials } from "@/hooks/useContracts";
 import { useMines } from "@/hooks/useClaims";
 import { FiPlus } from "react-icons/fi";
 
-// Define interfaces for the data objects
 interface Contract {
   id: number | string;
   description?: string;
@@ -77,7 +76,8 @@ export default function CreateRequestDialog() {
   const { data: contractsData } = useContracts();
   const { data: materialsData } = useMaterials();
   const { data: minesData } = useMines();
-  const createRequestMutation = useCreateRequest();
+  // Using claim backend for requests frontend
+  const createRequestMutation = useCreateRequestWithClaimBackend();
 
   const form = useForm<CreateRequestFormData>({
     resolver: zodResolver(createRequestSchema),
@@ -95,8 +95,9 @@ export default function CreateRequestDialog() {
 
   const onSubmit = async (data: CreateRequestFormData) => {
     try {
+      // Data conversion is handled in the hook
       await createRequestMutation.mutateAsync({
-        description: data.description || undefined,
+        description: data.description,
         requestingEntityId: data.requestingEntityId,
         targetEntityId: data.targetEntityId,
         contractId: data.contractId,

@@ -1,0 +1,386 @@
+{
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "create": "إنشاء",
+    "search": "بحث",
+    "filter": "تصفية",
+    "export": "تصدير",
+    "loading": "جاري التحميل...",
+    "noData": "لا توجد بيانات",
+    "confirm": "تأكيد",
+    "yes": "نعم",
+    "no": "لا",
+    "all": "الكل",
+    "status": "الحالة",
+    "actions": "الإجراءات",
+    "id": "المعرف",
+    "name": "الاسم",
+    "description": "الوصف",
+    "date": "التاريخ",
+    "createdAt": "تاريخ الإنشاء",
+    "updatedAt": "تاريخ التحديث",
+    "startDate": "تاريخ البداية",
+    "endDate": "تاريخ النهاية",
+    "approve": "موافقة",
+    "reject": "رفض",
+    "pending": "معلق",
+    "approved": "موافق عليه",
+    "rejected": "مرفوض",
+    "view": "عرض",
+    "details": "التفاصيل",
+    "settings": "الإعدادات",
+    "logout": "تسجيل الخروج",
+    "deleting": "جاري الحذف..."
+  },
+  "navigation": {
+    "dashboard": "لوحة التحكم",
+    "claims": "المطالبات",
+    "requests": "الطلبات",
+    "contracts": "العقود", 
+    "invoices": "الفواتير",
+    "users": "المستخدمين",
+    "entities": "الكيانات",
+    "mines": "المناجم",
+    "materials": "المواد",
+    "affiliatedCompanies": "الشركات التابعة",
+    "financialClaims": "المطالبات المالية",
+    "documentCenter": "مركز الوثائق"
+  },
+  "claims": {
+    "title": "المطالبات",
+    "create": "إنشاء مطالبة",
+    "createNew": "إنشاء مطالبة جديدة",
+    "edit": "تعديل المطالبة",
+    "editClaim": "تعديل المطالبة #{id}",
+    "delete": "حذف المطالبة",
+    "approve": "موافقة على المطالبة",
+    "reject": "رفض المطالبة",
+    "noClaims": "لا توجد مطالبات",
+    "fields": {
+      "startDate": "تاريخ البداية",
+      "endDate": "تاريخ النهاية",
+      "status": "الحالة",
+      "mine": "المنجم",
+      "entity": "الكيان",
+      "contract": "العقد",
+      "request": "الطلب",
+      "mineId": "معرف المنجم",
+      "entityId": "معرف الكيان",
+      "contractId": "معرف العقد",
+      "requestId": "معرف الطلب"
+    },
+    "placeholders": {
+      "selectMine": "اختر منجم",
+      "selectEntity": "اختر كيان",
+      "selectContract": "اختر عقد",
+      "selectStatus": "اختر الحالة",
+      "noContract": "بدون عقد"
+    },
+    "filters": {
+      "byStatus": "تصفية حسب الحالة",
+      "byMine": "تصفية حسب المنجم",
+      "allStatuses": "جميع الحالات",
+      "allMines": "جميع المناجم"
+    },
+    "messages": {
+      "createSuccess": "تم إنشاء المطالبة بنجاح",
+      "updateSuccess": "تم تحديث المطالبة بنجاح",
+      "deleteSuccess": "تم حذف المطالبة بنجاح",
+      "approveSuccess": "تم الموافقة على المطالبة بنجاح",
+      "rejectSuccess": "تم رفض المطالبة بنجاح",
+      "createError": "فشل في إنشاء المطالبة",
+      "updateError": "فشل في تحديث المطالبة",
+      "deleteError": "فشل في حذف المطالبة",
+      "approveError": "فشل في الموافقة على المطالبة",
+      "rejectError": "فشل في رفض المطالبة",
+      "confirmDelete": "هل أنت متأكد من حذف هذه المطالبة؟",
+      "confirmApprove": "هل أنت متأكد من الموافقة على هذه المطالبة؟",
+      "confirmReject": "هل أنت متأكد من رفض هذه المطالبة؟",
+      "creating": "جاري الإنشاء...",
+      "saving": "جاري الحفظ..."
+    },
+    "validation": {
+      "startDateRequired": "تاريخ البداية مطلوب",
+      "endDateRequired": "تاريخ النهاية مطلوب",
+      "mineRequired": "يرجى اختيار منجم",
+      "entityRequired": "يرجى اختيار كيان"
+    }
+  },
+  "requests": {
+    "title": "الطلبات",
+    "create": "إنشاء طلب",
+    "createNew": "إنشاء طلب جديد",
+    "edit": "تعديل الطلب",
+    "editRequest": "تعديل الطلب #{id}",
+    "delete": "حذف الطلب",
+    "noRequests": "لا توجد طلبات",
+    "fields": {
+      "description": "الوصف",
+      "requestingEntity": "الكيان الطالب",
+      "targetEntity": "الكيان المستهدف",
+      "contract": "العقد",
+      "mine": "المنجم",
+      "material": "المادة",
+      "startDate": "تاريخ البداية",
+      "endDate": "تاريخ النهاية"
+    },
+    "placeholders": {
+      "enterDescription": "أدخل الوصف",
+      "selectRequestingEntity": "اختر الكيان الطالب",
+      "selectTargetEntity": "اختر الكيان المستهدف",
+      "selectContract": "اختر عقد",
+      "selectMine": "اختر منجم",
+      "selectMaterial": "اختر مادة",
+      "noContract": "بدون عقد"
+    },
+    "messages": {
+      "createSuccess": "تم إنشاء الطلب بنجاح",
+      "updateSuccess": "تم تحديث الطلب بنجاح",
+      "deleteSuccess": "تم حذف الطلب بنجاح",
+      "createError": "فشل في إنشاء الطلب",
+      "updateError": "فشل في تحديث الطلب",
+      "deleteError": "فشل في حذف الطلب",
+      "confirmDelete": "هل أنت متأكد من حذف هذا الطلب؟",
+      "creating": "جاري الإنشاء...",
+      "saving": "جاري الحفظ..."
+    },
+    "validation": {
+      "descriptionRequired": "الوصف مطلوب",
+      "requestingEntityRequired": "يرجى اختيار الكيان الطالب",
+      "targetEntityRequired": "يرجى اختيار الكيان المستهدف",
+      "startDateRequired": "تاريخ البداية مطلوب",
+      "endDateRequired": "تاريخ النهاية مطلوب"
+    }
+  },
+  "contracts": {
+    "title": "العقود",
+    "description": "إدارة عقود التعدين والاتفاقيات والتكوينات",
+    "create": "إنشاء عقد",
+    "createNew": "إنشاء عقد جديد",
+    "edit": "تعديل العقد",
+    "editContract": "تعديل العقد #{id}",
+    "delete": "حذف العقد",
+    "noContracts": "لا توجد عقود",
+    "fields": {
+      "description": "الوصف",
+      "owner": "المالك",
+      "entities": "الكيانات",
+      "startDate": "تاريخ البداية",
+      "endDate": "تاريخ النهاية"
+    },
+    "placeholders": {
+      "enterDescription": "أدخل وصف العقد",
+      "selectOwner": "اختر المالك",
+      "selectEntities": "اختر الكيانات"
+    },
+    "messages": {
+      "createSuccess": "تم إنشاء العقد بنجاح",
+      "updateSuccess": "تم تحديث العقد بنجاح",
+      "deleteSuccess": "تم حذف العقد بنجاح",
+      "createError": "فشل في إنشاء العقد",
+      "updateError": "فشل في تحديث العقد",
+      "deleteError": "فشل في حذف العقد",
+      "confirmDelete": "هل أنت متأكد من حذف هذا العقد؟",
+      "creating": "جاري الإنشاء...",
+      "saving": "جاري الحفظ..."
+    },
+    "validation": {
+      "descriptionRequired": "وصف العقد مطلوب",
+      "ownerRequired": "يرجى اختيار المالك",
+      "startDateRequired": "تاريخ البداية مطلوب",
+      "endDateRequired": "تاريخ النهاية مطلوب"
+    }
+  },
+  "invoices": {
+    "title": "الفواتير",
+    "description": "إنتاج وإدارة فواتير المطالبات",
+    "create": "إنشاء فاتورة",
+    "createNew": "إنشاء فاتورة جديدة",
+    "edit": "تعديل الفاتورة",
+    "editInvoice": "تعديل الفاتورة #{id}",
+    "delete": "حذف الفاتورة",
+    "noInvoices": "لا توجد فواتير",
+    "noMaterials": "لا توجد مواد",
+    "fields": {
+      "description": "الوصف",
+      "amount": "المبلغ",
+      "entity": "الكيان",
+      "contract": "العقد",
+      "dueDate": "تاريخ الاستحقاق",
+      "paid": "مدفوعة",
+      "paidAt": "تاريخ الدفع",
+      "invoiceNumber": "رقم الفاتورة",
+      "claimsCount": "عدد المطالبات",
+      "materialSummary": "ملخص المواد",
+      "startDate": "تاريخ البداية",
+      "endDate": "تاريخ النهاية"
+    },
+    "placeholders": {
+      "enterDescription": "أدخل وصف الفاتورة",
+      "enterAmount": "أدخل المبلغ",
+      "selectEntity": "اختر الكيان",
+      "selectContract": "اختر العقد"
+    },
+    "messages": {
+      "createSuccess": "تم إنشاء الفاتورة بنجاح",
+      "updateSuccess": "تم تحديث الفاتورة بنجاح",
+      "deleteSuccess": "تم حذف الفاتورة بنجاح",
+      "createError": "فشل في إنشاء الفاتورة",
+      "updateError": "فشل في تحديث الفاتورة",
+      "deleteError": "فشل في حذف الفاتورة",
+      "confirmDelete": "هل أنت متأكد من حذف هذه الفاتورة؟",
+      "creating": "جاري الإنشاء...",
+      "saving": "جاري الحفظ..."
+    },
+    "validation": {
+      "descriptionRequired": "وصف الفاتورة مطلوب",
+      "amountRequired": "المبلغ مطلوب",
+      "entityRequired": "يرجى اختيار الكيان",
+      "dueDateRequired": "تاريخ الاستحقاق مطلوب"
+    },
+    "filters": {
+      "filterByContract": "تصفية حسب العقد",
+      "filterByEntity": "تصفية حسب الكيان",
+      "allContracts": "جميع العقود",
+      "allEntities": "جميع الكيانات",
+      "contractNumber": "العقد رقم {id}"
+    },
+    "actions": {
+      "downloadPDF": "تحميل PDF",
+      "sendInvoice": "إرسال الفاتورة",
+      "markPaid": "تمييز كمدفوعة"
+    }
+  },
+  "users": {
+    "title": "المستخدمين",
+    "description": "إدارة مستخدمي النظام والأدوار والصلاحيات",
+    "create": "إنشاء مستخدم",
+    "createNew": "إنشاء مستخدم جديد",
+    "edit": "تعديل المستخدم",
+    "editUser": "تعديل المستخدم #{id}",
+    "delete": "حذف المستخدم",
+    "noUsers": "لا يوجد مستخدمين",
+    "fields": {
+      "name": "الاسم",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "role": "الدور",
+      "active": "نشط",
+      "lastLogin": "آخر تسجيل دخول",
+      "entity": "الكيان",
+      "noEntity": "بدون كيان",
+      "noEmail": "بدون بريد إلكتروني"
+    },
+    "placeholders": {
+      "enterName": "أدخل الاسم",
+      "enterEmail": "أدخل البريد الإلكتروني",
+      "enterPhone": "أدخل رقم الهاتف",
+      "selectRole": "اختر الدور",
+      "newPassword": "أدخل كلمة المرور الجديدة (6 أحرف على الأقل)"
+    },
+    "roles": {
+      "admin": "مدير",
+      "user": "مستخدم",
+      "viewer": "عارض"
+    },
+    "status": {
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "actions": {
+      "resetPassword": "إعادة تعيين كلمة المرور"
+    },
+    "messages": {
+      "createSuccess": "تم إنشاء المستخدم بنجاح",
+      "updateSuccess": "تم تحديث المستخدم بنجاح",
+      "deleteSuccess": "تم حذف المستخدم بنجاح",
+      "createError": "فشل في إنشاء المستخدم",
+      "updateError": "فشل في تحديث المستخدم",
+      "deleteError": "فشل في حذف المستخدم",
+      "confirmDelete": "هل أنت متأكد من حذف هذا المستخدم؟ لا يمكن التراجع عن هذا الإجراء.",
+      "resetPasswordDescription": "أدخل كلمة مرور جديدة لهذا المستخدم. سيحتاج المستخدم لاستخدام كلمة المرور الجديدة لتسجيل الدخول.",
+      "resetting": "جاري إعادة التعيين...",
+      "creating": "جاري الإنشاء...",
+      "saving": "جاري الحفظ..."
+    },
+    "validation": {
+      "nameRequired": "الاسم مطلوب",
+      "emailRequired": "البريد الإلكتروني مطلوب",
+      "emailInvalid": "البريد الإلكتروني غير صحيح",
+      "phoneRequired": "رقم الهاتف مطلوب",
+      "roleRequired": "يرجى اختيار الدور"
+    }
+  },
+  "affiliatedCompanies": {
+    "title": "الشركات التابعة",
+    "create": "إنشاء شركة تابعة",
+    "createNew": "إنشاء شركة تابعة جديدة",
+    "edit": "تعديل الشركة التابعة",
+    "editCompany": "تعديل الشركة التابعة #{id}",
+    "delete": "حذف الشركة التابعة",
+    "noCompanies": "لا توجد شركات تابعة",
+    "fields": {
+      "name": "اسم الشركة",
+      "code": "رمز الشركة",
+      "type": "نوع الشركة",
+      "status": "الحالة",
+      "contactPerson": "الشخص المسؤول",
+      "phone": "الهاتف",
+      "email": "البريد الإلكتروني",
+      "address": "العنوان"
+    },
+    "placeholders": {
+      "enterName": "أدخل اسم الشركة",
+      "enterCode": "أدخل رمز الشركة",
+      "selectType": "اختر نوع الشركة",
+      "enterContactPerson": "أدخل اسم الشخص المسؤول",
+      "enterPhone": "أدخل رقم الهاتف",
+      "enterEmail": "أدخل البريد الإلكتروني",
+      "enterAddress": "أدخل العنوان"
+    },
+    "messages": {
+      "createSuccess": "تم إنشاء الشركة التابعة بنجاح",
+      "updateSuccess": "تم تحديث الشركة التابعة بنجاح",
+      "deleteSuccess": "تم حذف الشركة التابعة بنجاح",
+      "createError": "فشل في إنشاء الشركة التابعة",
+      "updateError": "فشل في تحديث الشركة التابعة",
+      "deleteError": "فشل في حذف الشركة التابعة",
+      "loadError": "خطأ في تحميل الشركات",
+      "confirmDelete": "هل أنت متأكد من حذف هذه الشركة التابعة؟",
+      "creating": "جاري الإنشاء...",
+      "saving": "جاري الحفظ..."
+    }
+  },
+  "export": {
+    "title": "تصدير البيانات",
+    "excel": "تصدير إلى Excel",
+    "csv": "تصدير إلى CSV",
+    "json": "تصدير إلى JSON",
+    "pdf": "تصدير إلى PDF",
+    "filename": "اسم الملف",
+    "exporting": "جاري التصدير..."
+  },
+  "pagination": {
+    "showing": "عرض {start} إلى {end} من {total}",
+    "previous": "السابق",
+    "next": "التالي",
+    "page": "صفحة",
+    "of": "من",
+    "rowsPerPage": "عدد الصفوف في الصفحة"
+  },
+  "table": {
+    "show": "عرض",
+    "entries": "إدخالات",
+    "noDataFound": "لم يتم العثور على بيانات",
+    "loadingData": "جاري تحميل البيانات..."
+  },
+  "forms": {
+    "required": "مطلوب",
+    "optional": "اختياري",
+    "selectOption": "اختر خيار",
+    "selectDate": "اختر تاريخ"
+  }
+}

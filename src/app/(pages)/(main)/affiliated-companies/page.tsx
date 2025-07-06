@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from 'next-intl';
 import TopBar from "@/app/(pages)/components/top-bar";
 import { AffiliatedTable } from "./components/affiliated-companies-table";
 import AddNewAffiliatedCompaniesDialog from "../../components/add-new-affiliated-companies-dialog";
@@ -9,31 +10,36 @@ import type { EntityResponse } from "../../../../../client";
 import { toast } from "sonner";
 
 export default function AffiliatedCompaniesPage() {
+  const t = useTranslations();
   const queryClient = useQueryClient();
 
-  const { data: entitiesResponse, isLoading, error } = useQuery({
-    queryKey: ['entities'],
+  const {
+    data: entitiesResponse,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["entities"],
     queryFn: () => EntityService.entityControllerFindMany(),
   });
 
   const deleteEntityMutation = useMutation({
     mutationFn: (id: number) => EntityService.entityControllerDelete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['entities'] });
-      toast.success('Company deleted successfully');
+      queryClient.invalidateQueries({ queryKey: ["entities"] });
+      toast.success(t('affiliatedCompanies.messages.deleteSuccess'));
     },
     onError: (error: Error) => {
-      toast.error(error?.message || 'Failed to delete company');
+      toast.error(error?.message || t('affiliatedCompanies.messages.deleteError'));
     },
   });
 
   const handleEdit = (entity: EntityResponse) => {
     // TODO: Implement edit functionality
-    console.log('Edit entity:', entity);
+    console.log("Edit entity:", entity);
   };
 
   const handleDelete = (entity: EntityResponse) => {
-    if (window.confirm(`Are you sure you want to delete "${entity.name}"?`)) {
+    if (window.confirm(t('affiliatedCompanies.messages.confirmDelete'))) {
       deleteEntityMutation.mutate(Number(entity.id));
     }
   };
@@ -43,10 +49,10 @@ export default function AffiliatedCompaniesPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col h-full">
-        <TopBar />
+        {/* <TopBar /> */}
         <div className="flex-1 overflow-auto p-6">
           <div className="flex items-center justify-center h-64">
-            <div className="text-gray-500">Loading companies...</div>
+            <div className="text-gray-500">{t('common.loading')}</div>
           </div>
         </div>
       </div>
@@ -56,10 +62,12 @@ export default function AffiliatedCompaniesPage() {
   if (error) {
     return (
       <div className="flex flex-col h-full">
-        <TopBar />
+        {/* <TopBar /> */}
         <div className="flex-1 overflow-auto p-6">
           <div className="flex items-center justify-center h-64">
-            <div className="text-red-500">Error loading companies: {error.message}</div>
+            <div className="text-red-500">
+              {t('affiliatedCompanies.messages.loadError')}: {error.message}
+            </div>
           </div>
         </div>
       </div>
@@ -68,20 +76,20 @@ export default function AffiliatedCompaniesPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <TopBar />
+      {/* <TopBar /> */}
 
       <div className="flex-1 overflow-auto p-6">
         <div className="flex flex-col space-y-4 pb-6">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-semibold text-gray-800">
-              Affiliated Companies
+              {t('affiliatedCompanies.title')}
             </h1>
             <AddNewAffiliatedCompaniesDialog />
           </div>
         </div>
 
-        <AffiliatedTable 
-          data={entities} 
+        <AffiliatedTable
+          data={entities}
           onEdit={handleEdit}
           onDelete={handleDelete}
         />

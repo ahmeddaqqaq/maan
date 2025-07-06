@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -58,6 +59,7 @@ export function InvoicesTable({
   contractFilter,
   pageSize = 10 
 }: InvoicesTableProps) {
+  const t = useTranslations();
   const [selectedInvoices, setSelectedInvoices] = useState<string[]>([]);
   const [deleteInvoiceId, setDeleteInvoiceId] = useState<number | null>(null);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
@@ -96,7 +98,7 @@ export function InvoicesTable({
 
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return t('common.noData');
     return new Date(dateString).toLocaleDateString();
   };
 
@@ -140,15 +142,15 @@ export function InvoicesTable({
                 onCheckedChange={(checked) => handleSelectAll(checked as boolean)}
               />
             </TableHead>
-            <TableHead>Invoice #</TableHead>
-            <TableHead>Entity</TableHead>
-            <TableHead>Contract</TableHead>
-            <TableHead>Claims</TableHead>
-            <TableHead>Total Amount</TableHead>
-            <TableHead>Material Summary</TableHead>
-            <TableHead>Start Date</TableHead>
-            <TableHead>End Date</TableHead>
-            <TableHead>Created Date</TableHead>
+            <TableHead>{t('invoices.fields.invoiceNumber')}</TableHead>
+            <TableHead>{t('invoices.fields.entity')}</TableHead>
+            <TableHead>{t('invoices.fields.contract')}</TableHead>
+            <TableHead>{t('invoices.fields.claimsCount')}</TableHead>
+            <TableHead>{t('invoices.fields.amount')}</TableHead>
+            <TableHead>{t('invoices.fields.materialSummary')}</TableHead>
+            <TableHead>{t('invoices.fields.startDate')}</TableHead>
+            <TableHead>{t('invoices.fields.endDate')}</TableHead>
+            <TableHead>{t('common.createdAt')}</TableHead>
             <TableHead className="w-[40px]"></TableHead>
           </TableRow>
         </TableHeader>
@@ -156,7 +158,7 @@ export function InvoicesTable({
           {invoices.length === 0 ? (
             <TableRow>
               <TableCell colSpan={10} className="text-center py-8 text-gray-500">
-                No invoices found
+                {t('invoices.noInvoices')}
               </TableCell>
             </TableRow>
           ) : (
@@ -170,24 +172,18 @@ export function InvoicesTable({
                 </TableCell>
                 <TableCell className="font-mono text-sm">INV-{String(invoice.id).padStart(6, '0')}</TableCell>
                 <TableCell>
-                  {invoice.entity ? (
-                    <Badge variant="outline">{invoice.entity.name}</Badge>
-                  ) : (
                     <Badge variant="outline">Entity {invoice.entityId}</Badge>
-                  )}
                 </TableCell>
                 <TableCell>
-                  {invoice.Contract ? (
-                    <Badge variant="outline">{invoice.Contract.description || `Contract ${invoice.contractId}`}</Badge>
-                  ) : invoice.contractId ? (
+                  {invoice.contractId ? (
                     <Badge variant="outline">Contract {invoice.contractId}</Badge>
                   ) : (
-                    <span className="text-gray-400">N/A</span>
+                    <span className="text-gray-400">{t('common.noData')}</span>
                   )}
                 </TableCell>
                 <TableCell>
                   <Badge variant="secondary">
-                    {invoice.claims?.length || 0} claims
+                    {t('invoices.title')}
                   </Badge>
                 </TableCell>
                 <TableCell className="font-medium">
@@ -224,23 +220,23 @@ export function InvoicesTable({
                         className="cursor-pointer"
                       >
                         <FiEdit3 className="mr-2 h-4 w-4" />
-                        Edit Invoice
+                        {t('invoices.edit')}
                       </DropdownMenuItem>
                       <DropdownMenuItem className="cursor-pointer">
                         <FiEye className="mr-2 h-4 w-4" />
-                        View Details
+                        {t('common.view')}
                       </DropdownMenuItem>
                       <DropdownMenuItem className="cursor-pointer">
                         <FiDownload className="mr-2 h-4 w-4" />
-                        Download PDF
+                        {t('invoices.actions.downloadPDF')}
                       </DropdownMenuItem>
                       <DropdownMenuItem className="cursor-pointer text-blue-600">
                         <FiSend className="mr-2 h-4 w-4" />
-                        Send Invoice
+                        {t('invoices.actions.sendInvoice')}
                       </DropdownMenuItem>
                       <DropdownMenuItem className="cursor-pointer text-green-600">
                         <FiCheck className="mr-2 h-4 w-4" />
-                        Mark as Paid
+                        {t('invoices.actions.markPaid')}
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
@@ -248,7 +244,7 @@ export function InvoicesTable({
                         className="cursor-pointer text-red-600 focus:text-red-600"
                       >
                         <FiTrash2 className="mr-2 h-4 w-4" />
-                        Delete Invoice
+                        {t('invoices.delete')}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -263,7 +259,7 @@ export function InvoicesTable({
       {totalPages > 1 && (
         <div className="flex items-center justify-between p-4 border-t">
           <div className="text-sm text-gray-600">
-            Showing {currentPage * pageSize + 1} to {Math.min((currentPage + 1) * pageSize, totalInvoices)} of {totalInvoices} invoices
+            {t('pagination.showing', { start: currentPage * pageSize + 1, end: Math.min((currentPage + 1) * pageSize, totalInvoices), total: totalInvoices })}
           </div>
           <div className="flex gap-2">
             <Button
@@ -272,7 +268,7 @@ export function InvoicesTable({
               onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
               disabled={currentPage === 0}
             >
-              Previous
+              {t('pagination.previous')}
             </Button>
             <Button
               variant="outline"
@@ -280,7 +276,7 @@ export function InvoicesTable({
               onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
               disabled={currentPage === totalPages - 1}
             >
-              Next
+              {t('pagination.next')}
             </Button>
           </div>
         </div>
@@ -299,19 +295,19 @@ export function InvoicesTable({
       <AlertDialog open={!!deleteInvoiceId} onOpenChange={() => setDeleteInvoiceId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Invoice</AlertDialogTitle>
+            <AlertDialogTitle>{t('invoices.delete')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this invoice? This action cannot be undone.
+              {t('invoices.messages.confirmDelete')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteInvoiceId && handleDeleteInvoice(deleteInvoiceId)}
               className="bg-red-600 hover:bg-red-700"
               disabled={deleteInvoiceMutation.isPending}
             >
-              {deleteInvoiceMutation.isPending ? "Deleting..." : "Delete"}
+              {deleteInvoiceMutation.isPending ? t('common.deleting') : t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -142,3 +142,124 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* RTL Support using logical properties */
+[dir="rtl"] {
+  direction: rtl;
+}
+
+/* Use logical properties instead of left/right */
+.me-2 {
+  margin-inline-end: 0.5rem;
+}
+
+.ms-2 {
+  margin-inline-start: 0.5rem;
+}
+
+.me-3 {
+  margin-inline-end: 0.75rem;
+}
+
+.ms-3 {
+  margin-inline-start: 0.75rem;
+}
+
+.me-4 {
+  margin-inline-end: 1rem;
+}
+
+.ms-4 {
+  margin-inline-start: 1rem;
+}
+
+.pe-2 {
+  padding-inline-end: 0.5rem;
+}
+
+.ps-2 {
+  padding-inline-start: 0.5rem;
+}
+
+.pe-3 {
+  padding-inline-end: 0.75rem;
+}
+
+.ps-3 {
+  padding-inline-start: 0.75rem;
+}
+
+.pe-4 {
+  padding-inline-end: 1rem;
+}
+
+.ps-4 {
+  padding-inline-start: 1rem;
+}
+
+.pe-6 {
+  padding-inline-end: 1.5rem;
+}
+
+.ps-6 {
+  padding-inline-start: 1.5rem;
+}
+
+.pe-8 {
+  padding-inline-end: 2rem;
+}
+
+.ps-8 {
+  padding-inline-start: 2rem;
+}
+
+.text-start {
+  text-align: start;
+}
+
+.text-end {
+  text-align: end;
+}
+
+/* Space between elements using logical properties */
+.space-x-inline > * + * {
+  margin-inline-start: 0.5rem;
+}
+
+.space-x-inline-2 > * + * {
+  margin-inline-start: 0.5rem;
+}
+
+.space-x-inline-3 > * + * {
+  margin-inline-start: 0.75rem;
+}
+
+.space-x-inline-4 > * + * {
+  margin-inline-start: 1rem;
+}
+
+/* Arabic font support */
+[dir="rtl"] {
+  font-family: 'Nunito', 'Tajawal', 'IBM Plex Sans Arabic', Arial, sans-serif;
+}
+
+/* Override default Tailwind classes to use logical properties */
+.ml-2 {
+  margin-inline-start: 0.5rem !important;
+  margin-left: unset;
+}
+
+.mr-2 {
+  margin-inline-end: 0.5rem !important;
+  margin-right: unset;
+}
+
+.pl-8 {
+  padding-inline-start: 2rem !important;
+  padding-left: unset;
+}
+
+.absolute.left-3 {
+  inset-inline-start: 0.75rem !important;
+  left: unset;
+}

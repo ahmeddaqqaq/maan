@@ -3,6 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { CreateInvoiceDto } from '../models/CreateInvoiceDto';
+import type { InvoiceFindManyResponse } from '../models/InvoiceFindManyResponse';
+import type { InvoiceResponse } from '../models/InvoiceResponse';
 import type { UpdateInvoiceDto } from '../models/UpdateInvoiceDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -10,12 +12,12 @@ import { request as __request } from '../core/request';
 export class InvoiceService {
     /**
      * @param requestBody
-     * @returns any
+     * @returns InvoiceResponse Invoice successfully created
      * @throws ApiError
      */
     public static invoiceControllerCreate(
         requestBody: CreateInvoiceDto,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<InvoiceResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/invoice',
@@ -31,7 +33,7 @@ export class InvoiceService {
      * @param contractId
      * @param startDate
      * @param endDate
-     * @returns any
+     * @returns InvoiceFindManyResponse All invoices successfully fetched
      * @throws ApiError
      */
     public static invoiceControllerFindMany(
@@ -42,7 +44,7 @@ export class InvoiceService {
         contractId?: number,
         startDate?: string,
         endDate?: string,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<InvoiceFindManyResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/invoice/findMany',
@@ -59,12 +61,12 @@ export class InvoiceService {
     }
     /**
      * @param id
-     * @returns any
+     * @returns InvoiceResponse Invoice successfully fetched
      * @throws ApiError
      */
     public static invoiceControllerFindOne(
         id: number,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<InvoiceResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/invoice/{id}',
@@ -76,13 +78,13 @@ export class InvoiceService {
     /**
      * @param id
      * @param requestBody
-     * @returns any
+     * @returns InvoiceResponse Invoice successfully updated
      * @throws ApiError
      */
     public static invoiceControllerUpdate(
         id: number,
         requestBody: UpdateInvoiceDto,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<InvoiceResponse> {
         return __request(OpenAPI, {
             method: 'PATCH',
             url: '/api/invoice/{id}',
@@ -95,7 +97,7 @@ export class InvoiceService {
     }
     /**
      * @param id
-     * @returns any
+     * @returns any Invoice successfully deleted
      * @throws ApiError
      */
     public static invoiceControllerDelete(

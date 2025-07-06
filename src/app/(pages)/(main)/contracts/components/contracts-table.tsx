@@ -22,8 +22,6 @@ import {
   FiMoreVertical,
   FiEdit3,
   FiTrash2,
-  FiEye,
-  FiSettings,
 } from "react-icons/fi";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -229,14 +227,6 @@ export function ContractsTable({
                       >
                         <FiEdit3 className="mr-2 h-4 w-4" />
                         Edit Contract
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer">
-                        <FiEye className="mr-2 h-4 w-4" />
-                        View Details
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer">
-                        <FiSettings className="mr-2 h-4 w-4" />
-                        Configure Pricing
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem

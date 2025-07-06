@@ -167,7 +167,7 @@ export default function CreateInvoiceDialog() {
                       {contractsData?.data?.map((contract: Contract) => (
                         <SelectItem
                           key={contract.id}
-                          value={contract.id?.toString() || ""}
+                          value={contract.id?.toString() || "none"}
                         >
                           Contract #{contract.id} -{" "}
                           {contract.description || "No description"}

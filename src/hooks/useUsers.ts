@@ -1,8 +1,8 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { UserService, EntityService } from '../../client';
-import type { UserResponse, CreateUserDto, UpdateUserDto, UserFindManyResponse } from '../../client';
+import { UserService, EntityService, AuthService } from '../../client';
+import type { UserResponse, CreateUserDto, UpdateUserDto, UserFindManyResponse, ResetPasswordDto } from '../../client';
 import { toast } from 'sonner';
 
 interface UseUsersFilters {
@@ -93,6 +93,24 @@ export function useDeleteUser() {
     },
     onError: (error: Error) => {
       toast.error(error?.message || 'Failed to delete user');
+    },
+  });
+}
+
+export function useResetPassword() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: ResetPasswordDto) => {
+      return await AuthService.authControllerResetPassword(data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      toast.success('Password reset successfully');
+    },
+    onError: (error: Error) => {
+      const apiError = error as {body?: {error?: string}; message?: string};
+      toast.error(apiError?.body?.error || apiError?.message || 'Failed to reset password');
     },
   });
 }

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from 'next-intl';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableHeader,
@@ -18,10 +18,17 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { FiMoreVertical, FiSearch, FiEdit3, FiTrash2 } from "react-icons/fi";
+import { FiMoreVertical, FiEdit3, FiTrash2 } from "react-icons/fi";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useRequests, useDeleteRequest } from "@/hooks/useRequests";
+import { useRequestsWithClaimBackend, useDeleteRequestWithClaimBackend } from "@/hooks/useRequestsWithClaimBackend";
 import EditRequestDialog from "./edit-request-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Request {
   id: number | string;
@@ -37,15 +44,23 @@ interface Request {
   updatedAt?: string;
 }
 
-export function RequestsTable() {
-  const [search, setSearch] = useState("");
+interface RequestsTableProps {
+  pageSize?: number;
+  onPageSizeChange?: (pageSize: number) => void;
+}
+
+export function RequestsTable({ pageSize = 10, onPageSizeChange }: RequestsTableProps) {
+  const t = useTranslations();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
   
-  const { data: requestsData, isLoading } = useRequests({
-    description: search || undefined,
+  // Using claim backend for requests frontend
+  const { data: requestsData, isLoading } = useRequestsWithClaimBackend({
+    skip: currentPage * pageSize,
+    take: pageSize,
   });
-  const deleteRequestMutation = useDeleteRequest();
+  const deleteRequestMutation = useDeleteRequestWithClaimBackend();
 
   const handleEdit = (request: Request) => {
     setSelectedRequest(request);
@@ -53,7 +68,7 @@ export function RequestsTable() {
   };
 
   const handleDelete = async (id: number | string) => {
-    if (window.confirm("Are you sure you want to delete this request?")) {
+    if (window.confirm(t('requests.messages.confirmDelete'))) {
       try {
         await deleteRequestMutation.mutateAsync(Number(id));
       } catch (error) {
@@ -70,73 +85,77 @@ export function RequestsTable() {
   if (isLoading) {
     return (
       <div className="rounded-md bg-white shadow-sm">
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-10 w-64" />
-          </div>
+        <div className="p-4 border-b">
+          <Skeleton className="h-10 w-full" />
         </div>
-        <div className="p-6">
+        <div className="p-4 space-y-4">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="flex items-center space-x-4 py-4">
-              <Skeleton className="h-4 w-20" />
-              <Skeleton className="h-4 w-40" />
-              <Skeleton className="h-4 w-32" />
-              <Skeleton className="h-4 w-32" />
-              <Skeleton className="h-4 w-24" />
-            </div>
+            <Skeleton key={i} className="h-12 w-full" />
           ))}
         </div>
       </div>
     );
   }
 
+  const requests = requestsData?.data || [];
+  const totalRequests = requestsData?.rows || 0;
+  const totalPages = Math.ceil(totalRequests / pageSize);
+
   return (
     <>
       <div className="rounded-md bg-white shadow-sm">
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-800">All Requests</h2>
-            <div className="flex items-center space-x-2">
-              <div className="relative">
-                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Search requests..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-10 w-64"
-                />
-              </div>
-            </div>
+        {/* Table Controls */}
+        <div className="p-4 border-b flex justify-between items-center gap-3">
+          <div className="flex items-center space-x-inline-2">
+            <span className="text-sm text-gray-600 whitespace-nowrap">{t('table.show')}</span>
+            <Select
+              defaultValue={String(pageSize)}
+              onValueChange={(value) => {
+                setCurrentPage(0);
+                onPageSizeChange?.(Number(value));
+              }}
+            >
+              <SelectTrigger className="w-[80px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {[10, 15, 20, 30, 50].map((size) => (
+                  <SelectItem key={size} value={String(size)}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
+        {/* Table */}
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Requesting Entity</TableHead>
-              <TableHead>Target Entity</TableHead>
-              <TableHead>Start Date</TableHead>
-              <TableHead>End Date</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+            <TableRow className="bg-gray-50">
+              <TableHead>{t('common.id')}</TableHead>
+              <TableHead>{t('requests.fields.description')}</TableHead>
+              <TableHead>{t('requests.fields.requestingEntity')}</TableHead>
+              <TableHead>{t('requests.fields.targetEntity')}</TableHead>
+              <TableHead>{t('requests.fields.startDate')}</TableHead>
+              <TableHead>{t('requests.fields.endDate')}</TableHead>
+              <TableHead>{t('common.createdAt')}</TableHead>
+              <TableHead className="w-[40px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {requestsData?.data?.length === 0 ? (
+            {requests.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} className="text-center py-8 text-gray-500">
-                  No requests found
+                  {t('requests.noRequests')}
                 </TableCell>
               </TableRow>
             ) : (
-              requestsData?.data?.map((request: Request) => (
+              requests.map((request: Request) => (
                 <TableRow key={request.id}>
-                  <TableCell className="font-medium">#{request.id}</TableCell>
-                  <TableCell>
-                    {request.description || "No description"}
+                  <TableCell className="font-mono text-sm">#{request.id}</TableCell>
+                  <TableCell className="max-w-xs truncate">
+                    {request.description || t('requests.fields.description')}
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline">
@@ -151,10 +170,10 @@ export function RequestsTable() {
                   <TableCell>{formatDate(request.startDate)}</TableCell>
                   <TableCell>{formatDate(request.endDate)}</TableCell>
                   <TableCell>{formatDate(request.createdAt)}</TableCell>
-                  <TableCell className="text-right">
+                  <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
+                        <Button variant="ghost" size="icon">
                           <FiMoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -163,15 +182,15 @@ export function RequestsTable() {
                           onClick={() => handleEdit(request)}
                           className="cursor-pointer"
                         >
-                          <FiEdit3 className="mr-2 h-4 w-4" />
-                          Edit
+                          <FiEdit3 className="me-2 h-4 w-4" />
+                          {t('common.edit')}
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => handleDelete(request.id)}
-                          className="cursor-pointer text-red-600"
+                          className="cursor-pointer text-red-600 focus:text-red-600"
                         >
-                          <FiTrash2 className="mr-2 h-4 w-4" />
-                          Delete
+                          <FiTrash2 className="me-2 h-4 w-4" />
+                          {t('common.delete')}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -181,6 +200,39 @@ export function RequestsTable() {
             )}
           </TableBody>
         </Table>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between p-4 border-t">
+            <div className="text-sm text-gray-600">
+              {t('pagination.showing', {
+                start: currentPage * pageSize + 1,
+                end: Math.min((currentPage + 1) * pageSize, totalRequests),
+                total: totalRequests
+              })} {t('requests.title').toLowerCase()}
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((prev) => Math.max(0, prev - 1))}
+                disabled={currentPage === 0}
+              >
+                {t('pagination.previous')}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(totalPages - 1, prev + 1))
+                }
+                disabled={currentPage === totalPages - 1}
+              >
+                {t('pagination.next')}
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       {selectedRequest && (

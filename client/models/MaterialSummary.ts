@@ -2,7 +2,6 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-
 export type MaterialSummary = {
     materialId: number;
     materialName: string;
@@ -11,3 +10,4 @@ export type MaterialSummary = {
     expenseAmount: number;
     netAmount: number;
 };
+

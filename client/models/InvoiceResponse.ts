@@ -2,9 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-
 import type { MaterialSummary } from './MaterialSummary';
-
 export type InvoiceResponse = {
     id: number;
     startDate: string;
@@ -15,13 +13,5 @@ export type InvoiceResponse = {
     materialSummary: Array<MaterialSummary>;
     createdAt: string;
     updatedAt: string;
-    entity?: {
-        id: number;
-        name: string;
-    };
-    Contract?: {
-        id: number;
-        description?: string;
-    };
-    claims?: Array<any>;
 };
+

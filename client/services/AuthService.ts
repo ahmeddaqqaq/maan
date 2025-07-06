@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { ResetPasswordDto } from '../models/ResetPasswordDto';
 import type { SignInDto } from '../models/SignInDto';
 import type { TokensDto } from '../models/TokensDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -41,6 +42,23 @@ export class AuthService {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/auth/logout',
+        });
+    }
+    /**
+     * @param requestBody
+     * @returns any Password reset successfully
+     * @throws ApiError
+     */
+    public static authControllerResetPassword(
+        requestBody: ResetPasswordDto,
+    ): CancelablePromise<{
+        message?: string;
+    }> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/auth/admin/reset-password',
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
 }

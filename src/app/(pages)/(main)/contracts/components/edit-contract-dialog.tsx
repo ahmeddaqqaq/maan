@@ -43,7 +43,9 @@ interface Contract {
 const editContractSchema = z.object({
   description: z.string().min(10, "Description must be at least 10 characters"),
   ownerId: z.number().min(1, "Please select an owner entity"),
-  entityIds: z.array(z.number()).min(1, "Please select at least one participating entity"),
+  entityIds: z
+    .array(z.number())
+    .min(1, "Please select at least one participating entity"),
 });
 
 type EditContractFormData = z.infer<typeof editContractSchema>;
@@ -95,7 +97,10 @@ export default function EditContractDialog({
     if (checked) {
       form.setValue("entityIds", [...currentIds, entityId]);
     } else {
-      form.setValue("entityIds", currentIds.filter(id => id !== entityId));
+      form.setValue(
+        "entityIds",
+        currentIds.filter((id) => id !== entityId)
+      );
     }
   };
 
@@ -115,10 +120,10 @@ export default function EditContractDialog({
                 <FormItem>
                   <FormLabel>Contract Description *</FormLabel>
                   <FormControl>
-                    <Textarea 
+                    <Textarea
                       placeholder="Enter detailed contract description..."
                       className="min-h-[100px]"
-                      {...field} 
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -132,15 +137,18 @@ export default function EditContractDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Contract Owner *</FormLabel>
-                  <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
+                  <Select
+                    onValueChange={(value) => field.onChange(Number(value))}
+                    value={field.value ? field.value?.toString() : ""}
+                  >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select the contract owner entity" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {entities.map((entity) => (
-                        <SelectItem key={entity.id} value={entity.id}>
+                        <SelectItem key={entity.id} value={String(entity.id)}>
                           {entity.name}
                         </SelectItem>
                       ))}
@@ -161,9 +169,15 @@ export default function EditContractDialog({
                     {selectedEntityIds.length > 0 && (
                       <div className="flex flex-wrap gap-2">
                         {selectedEntityIds.map((entityId) => {
-                          const entity = entities.find(e => Number(e.id) === entityId);
+                          const entity = entities.find(
+                            (e) => Number(e.id) === entityId
+                          );
                           return entity ? (
-                            <Badge key={entityId} variant="secondary" className="text-sm">
+                            <Badge
+                              key={entityId}
+                              variant="secondary"
+                              className="text-sm"
+                            >
                               {entity.name}
                             </Badge>
                           ) : null;
@@ -173,15 +187,23 @@ export default function EditContractDialog({
                     <div className="border rounded-lg p-4 max-h-[200px] overflow-y-auto">
                       <div className="space-y-2">
                         {entities.map((entity) => (
-                          <div key={entity.id} className="flex items-center space-x-2">
+                          <div
+                            key={entity.id}
+                            className="flex items-center space-x-2"
+                          >
                             <Checkbox
                               id={`entity-${entity.id}`}
-                              checked={selectedEntityIds.includes(Number(entity.id))}
-                              onCheckedChange={(checked) => 
-                                handleEntityToggle(Number(entity.id), checked as boolean)
+                              checked={selectedEntityIds.includes(
+                                Number(entity.id)
+                              )}
+                              onCheckedChange={(checked) =>
+                                handleEntityToggle(
+                                  Number(entity.id),
+                                  checked as boolean
+                                )
                               }
                             />
-                            <label 
+                            <label
                               htmlFor={`entity-${entity.id}`}
                               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                             >
@@ -211,7 +233,9 @@ export default function EditContractDialog({
                 disabled={updateContractMutation.isPending}
                 className="bg-blue-600 hover:bg-blue-700"
               >
-                {updateContractMutation.isPending ? "Updating..." : "Update Contract"}
+                {updateContractMutation.isPending
+                  ? "Updating..."
+                  : "Update Contract"}
               </Button>
             </DialogFooter>
           </form>

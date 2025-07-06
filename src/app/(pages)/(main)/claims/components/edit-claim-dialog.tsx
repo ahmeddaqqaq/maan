@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -27,20 +28,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useUpdateClaim, useMines } from "@/hooks/useClaims";
+import { useUpdateClaim } from "@/hooks/useClaims";
 import { useEntities } from "@/hooks/useUsers";
 import { useContracts } from "@/hooks/useContracts";
-import { useRequests } from "@/hooks/useRequests";
+import { useMines } from "@/hooks/useClaims";
+import type { UpdateClaimDto } from "../../../../../../client";
 
-// Define proper types for the data objects
 interface Claim {
   id: number | string;
   startDate?: string;
   endDate?: string;
+  status?: "PENDING" | "APPROVED" | "REJECTED";
   mineId?: number;
   entityId?: number;
   contractId?: number;
   requestId?: number;
+}
+
+interface Entity {
+  id: number | string;
+  name: string;
 }
 
 interface Contract {
@@ -50,21 +57,17 @@ interface Contract {
   entityIds?: number[];
 }
 
-interface Request {
+interface Mine {
   id: number | string;
-  description?: string;
-  requestingEntityId?: number;
-  targetEntityId?: number;
-  contractId?: number;
-  mineId?: number;
-  materialId?: number;
-  startDate?: string;
-  endDate?: string;
+  name: string;
+  location: string;
+  isActive: boolean;
 }
 
 const editClaimSchema = z.object({
   startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().min(1, "End date is required"),
+  status: z.enum(["PENDING", "APPROVED", "REJECTED"]),
   mineId: z.number().min(1, "Please select a mine"),
   entityId: z.number().min(1, "Please select an entity"),
   contractId: z.number().optional(),
@@ -84,36 +87,52 @@ export default function EditClaimDialog({
   open,
   onOpenChange,
 }: EditClaimDialogProps) {
-  const { data: minesData } = useMines();
   const { data: entitiesData } = useEntities();
   const { data: contractsData } = useContracts();
-  const { data: requestsData } = useRequests();
+  const { data: minesData } = useMines();
   const updateClaimMutation = useUpdateClaim();
 
   const form = useForm<EditClaimFormData>({
     resolver: zodResolver(editClaimSchema),
     defaultValues: {
-      startDate: claim.startDate?.split('T')[0] || "",
-      endDate: claim.endDate?.split('T')[0] || "",
-      mineId: claim.mineId || 0,
-      entityId: claim.entityId || 0,
-      contractId: claim.contractId || undefined,
-      requestId: claim.requestId || undefined,
+      startDate: "",
+      endDate: "",
+      status: "PENDING",
+      mineId: 0,
+      entityId: 0,
+      contractId: undefined,
+      requestId: undefined,
     },
   });
 
+  useEffect(() => {
+    if (claim && open) {
+      form.reset({
+        startDate: claim.startDate?.split("T")[0] || "",
+        endDate: claim.endDate?.split("T")[0] || "",
+        status: claim.status || "PENDING",
+        mineId: claim.mineId || 0,
+        entityId: claim.entityId || 0,
+        contractId: claim.contractId,
+        requestId: claim.requestId,
+      });
+    }
+  }, [claim, open, form]);
+
   const onSubmit = async (data: EditClaimFormData) => {
     try {
+      const updateData: UpdateClaimDto = {
+        startDate: data.startDate,
+        endDate: data.endDate,
+        status: data.status as UpdateClaimDto.status,
+        mineId: data.mineId,
+        entityId: data.entityId,
+        contractId: data.contractId,
+        requestId: data.requestId,
+      };
       await updateClaimMutation.mutateAsync({
         id: Number(claim.id),
-        data: {
-          startDate: data.startDate,
-          endDate: data.endDate,
-          mineId: data.mineId,
-          entityId: data.entityId,
-          contractId: data.contractId,
-          requestId: data.requestId,
-        },
+        data: updateData,
       });
       onOpenChange(false);
     } catch {
@@ -123,9 +142,9 @@ export default function EditClaimDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Edit Claim</DialogTitle>
+          <DialogTitle>Edit Claim #{claim.id}</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -162,22 +181,23 @@ export default function EditClaimDialog({
 
             <FormField
               control={form.control}
-              name="mineId"
+              name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Mine *</FormLabel>
-                  <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
+                  <FormLabel>Status</FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(value as "PENDING" | "APPROVED" | "REJECTED")}
+                    value={field.value}
+                  >
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a mine" />
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select status" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {minesData?.data?.map((mine) => (
-                        <SelectItem key={mine.id} value={mine.id.toString()}>
-                          {mine.name} - {mine.location}
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="PENDING">Pending</SelectItem>
+                      <SelectItem value="APPROVED">Approved</SelectItem>
+                      <SelectItem value="REJECTED">Rejected</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -185,30 +205,63 @@ export default function EditClaimDialog({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="entityId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Entity *</FormLabel>
-                  <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select an entity" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {entitiesData?.data?.map((entity) => (
-                        <SelectItem key={entity.id} value={entity.id}>
-                          {entity.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="mineId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Mine *</FormLabel>
+                    <Select
+                      onValueChange={(value) => field.onChange(Number(value))}
+                      value={field.value ? field.value?.toString() : ""}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select mine" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {minesData?.data?.map((mine: Mine) => (
+                          <SelectItem key={mine.id} value={String(mine.id)}>
+                            {mine.name} - {mine.location}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="entityId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Entity *</FormLabel>
+                    <Select
+                      onValueChange={(value) => field.onChange(Number(value))}
+                      value={field.value ? field.value?.toString() : ""}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select entity" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {entitiesData?.data?.map((entity: Entity) => (
+                          <SelectItem key={entity.id} value={String(entity.id)}>
+                            {entity.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <FormField
               control={form.control}
@@ -216,43 +269,28 @@ export default function EditClaimDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Contract (Optional)</FormLabel>
-                  <Select onValueChange={(value) => field.onChange(value ? Number(value) : undefined)} value={field.value?.toString()}>
+                  <Select
+                    onValueChange={(value) =>
+                      field.onChange(
+                        value === "none" ? undefined : Number(value)
+                      )
+                    }
+                    value={field.value?.toString() || "none"}
+                  >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select a contract" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="none">No Contract</SelectItem>
                       {contractsData?.data?.map((contract: Contract) => (
-                        <SelectItem key={contract.id} value={contract.id?.toString() || ""}>
-                          Contract #{contract.id} - {contract.description || 'No description'}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="requestId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Request (Optional)</FormLabel>
-                  <Select onValueChange={(value) => field.onChange(value ? Number(value) : undefined)} value={field.value?.toString()}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a request" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="none">No Request</SelectItem>
-                      {requestsData?.data?.map((request: Request) => (
-                        <SelectItem key={request.id} value={request.id.toString()}>
-                          Request #{request.id} - {request.description || "No description"}
+                        <SelectItem
+                          key={contract.id}
+                          value={contract.id?.toString() || ""}
+                        >
+                          Contract #{contract.id} -{" "}
+                          {contract.description || "No description"}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -276,7 +314,7 @@ export default function EditClaimDialog({
                 disabled={updateClaimMutation.isPending}
                 className="bg-blue-600 hover:bg-blue-700"
               >
-                {updateClaimMutation.isPending ? "Updating..." : "Update Claim"}
+                {updateClaimMutation.isPending ? "Saving..." : "Save Changes"}
               </Button>
             </DialogFooter>
           </form>

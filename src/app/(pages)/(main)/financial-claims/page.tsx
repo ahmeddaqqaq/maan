@@ -28,7 +28,7 @@ export default function FinancialClaimsPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <TopBar />
+      {/* <TopBar /> */}
 
       <div className="flex-1 overflow-auto p-6">
         <div className="flex flex-col space-y-4 pb-6">
