@@ -9,5 +9,7 @@ export type MaterialSummary = {
     extractedAmount: number;
     expenseAmount: number;
     netAmount: number;
+    unitPrice: number;
+    totalValue: number;
 };
 

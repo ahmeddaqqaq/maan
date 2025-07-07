@@ -43,6 +43,7 @@
     "mines": "Mines",
     "materials": "Materials",
     "affiliatedCompanies": "Affiliated Companies",
+    "statistics": "Statistics",
     "financialClaims": "Financial Claims",
     "documentCenter": "Document Center",
     "settings": "Settings"
@@ -1396,5 +1397,31 @@
     "deleting": "Deleting...",
     "signingIn": "Signing in...",
     "exporting": "Exporting..."
+  },
+  "statistics": {
+    "title": "Statistics",
+    "filters": "Filters",
+    "period": "Period",
+    "monthly": "Monthly",
+    "quarterly": "Quarterly",
+    "yearly": "Yearly",
+    "entityId": "Entity ID",
+    "mineId": "Mine ID",
+    "contractId": "Contract ID",
+    "entityIdPlaceholder": "Optional",
+    "mineIdPlaceholder": "Optional",
+    "contractIdPlaceholder": "Optional",
+    "resetFilters": "Reset Filters",
+    "revenueByEntity": "Revenue by Entity",
+    "invoiceTrends": "Invoice Trends",
+    "topPerformingMines": "Top Performing Mines",
+    "claimsAnalytics": "Claims Analytics",
+    "mineStatistics": "Mine Statistics",
+    "revenue": "Revenue",
+    "count": "Count",
+    "claimVolume": "Claim Volume",
+    "extractionAmount": "Extraction Amount",
+    "noDataAvailable": "No data available",
+    "loadingData": "Loading data..."
   }
 }

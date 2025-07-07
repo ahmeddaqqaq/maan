@@ -39,7 +39,7 @@
     "dashboard": "لوحة التحكم",
     "claims": "المطالبات",
     "requests": "الطلبات",
-    "contracts": "العقود", 
+    "contracts": "العقود",
     "invoices": "الفواتير",
     "users": "المستخدمين",
     "entities": "الكيانات",
@@ -47,7 +47,8 @@
     "materials": "المواد",
     "affiliatedCompanies": "الشركات التابعة",
     "financialClaims": "المطالبات المالية",
-    "documentCenter": "مركز الوثائق"
+    "documentCenter": "مركز الوثائق",
+    "statistics": "الإحصائيات"
   },
   "claims": {
     "title": "المطالبات",
@@ -1389,5 +1390,31 @@
     "deleting": "جاري الحذف...",
     "signingIn": "جاري تسجيل الدخول...",
     "exporting": "جاري التصدير..."
+  },
+  "statistics": {
+    "title": "الإحصائيات",
+    "filters": "مرشحات",
+    "period": "الفترة",
+    "monthly": "شهري",
+    "quarterly": "ربع سنوي",
+    "yearly": "سنوي",
+    "entityId": "معرف الكيان",
+    "mineId": "معرف المنجم",
+    "contractId": "معرف العقد",
+    "entityIdPlaceholder": "اختياري",
+    "mineIdPlaceholder": "اختياري",
+    "contractIdPlaceholder": "اختياري",
+    "resetFilters": "إعادة تعيين المرشحات",
+    "revenueByEntity": "الإيرادات حسب الكيان",
+    "invoiceTrends": "اتجاهات الفواتير",
+    "topPerformingMines": "أفضل المناجم أداءً",
+    "claimsAnalytics": "تحليلات المطالبات",
+    "mineStatistics": "إحصائيات المناجم",
+    "revenue": "الإيرادات",
+    "count": "العدد",
+    "claimVolume": "حجم المطالبات",
+    "extractionAmount": "كمية الاستخراج",
+    "noDataAvailable": "لا توجد بيانات متاحة",
+    "loadingData": "جاري تحميل البيانات..."
   }
 }

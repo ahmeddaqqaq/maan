@@ -15,6 +15,7 @@ import {
   FiLogOut,
   FiSend,
   FiCreditCard,
+  FiBarChart2,
 } from "react-icons/fi";
 import { ReactNode, useState } from "react";
 import { useAuth } from "@/providers/auth-provider";
@@ -83,6 +84,11 @@ export default function MainLayout({
       name: t('navigation.invoices'),
       path: "/invoices",
       icon: <FiCreditCard className="h-5 w-5" />,
+    },
+    {
+      name: t('navigation.statistics'),
+      path: "/statistics",
+      icon: <FiBarChart2 className="h-5 w-5" />,
     },
   ];
 

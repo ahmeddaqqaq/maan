@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { MaterialSummary } from './MaterialSummary';
+import type { MoneyTotals } from './MoneyTotals';
 export type InvoiceResponse = {
     id: number;
     startDate: string;
@@ -11,6 +12,7 @@ export type InvoiceResponse = {
     entityId: number;
     contractId?: number;
     materialSummary: Array<MaterialSummary>;
+    moneyTotals: MoneyTotals;
     createdAt: string;
     updatedAt: string;
 };
