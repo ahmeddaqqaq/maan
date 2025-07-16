@@ -4,8 +4,7 @@
 /* eslint-disable */
 export type CreateMineDto = {
     name: string;
-    location: string;
-    isActive?: boolean;
-    entityId: number;
+    contractId: number;
+    location?: string;
 };
 

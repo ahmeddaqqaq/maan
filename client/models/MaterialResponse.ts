@@ -7,8 +7,7 @@ export type MaterialResponse = {
     name: string;
     unit: string;
     isActive: boolean;
-    mineId?: number;
-    entityId: number;
+    entity: Record<string, any>;
     createdAt: string;
     updatedAt: string;
 };

@@ -2,6 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { ContractManyResponse } from '../models/ContractManyResponse';
+import type { ContractResponse } from '../models/ContractResponse';
 import type { CreateContractDto } from '../models/CreateContractDto';
 import type { UpdateContractDto } from '../models/UpdateContractDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -9,13 +11,14 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class ContractService {
     /**
-     * @param requestBody
-     * @returns any
+     * @returns any Contract successfully created
      * @throws ApiError
      */
-    public static contractControllerCreate(
+    public static contractControllerCreate({
+        requestBody,
+    }: {
         requestBody: CreateContractDto,
-    ): CancelablePromise<any> {
+    }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/contract',
@@ -24,17 +27,20 @@ export class ContractService {
         });
     }
     /**
-     * @param skip
-     * @param take
-     * @param search
-     * @returns any
+     * @returns ContractManyResponse All contracts successfully fetched
      * @throws ApiError
      */
-    public static contractControllerFindMany(
+    public static contractControllerFindMany({
+        skip,
+        take,
+        search,
+        entityId,
+    }: {
         skip?: number,
         take?: number,
         search?: string,
-    ): CancelablePromise<any> {
+        entityId?: number,
+    }): CancelablePromise<ContractManyResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/contract/findMany',
@@ -42,17 +48,19 @@ export class ContractService {
                 'skip': skip,
                 'take': take,
                 'search': search,
+                'entityId': entityId,
             },
         });
     }
     /**
-     * @param id
-     * @returns any
+     * @returns ContractResponse Contract successfully fetched
      * @throws ApiError
      */
-    public static contractControllerFindOne(
+    public static contractControllerFindOne({
+        id,
+    }: {
         id: number,
-    ): CancelablePromise<any> {
+    }): CancelablePromise<ContractResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/contract/{id}',
@@ -62,15 +70,16 @@ export class ContractService {
         });
     }
     /**
-     * @param id
-     * @param requestBody
-     * @returns any
+     * @returns any Contract successfully updated
      * @throws ApiError
      */
-    public static contractControllerUpdate(
+    public static contractControllerUpdate({
+        id,
+        requestBody,
+    }: {
         id: number,
         requestBody: UpdateContractDto,
-    ): CancelablePromise<any> {
+    }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PATCH',
             url: '/api/contract/{id}',
@@ -82,13 +91,14 @@ export class ContractService {
         });
     }
     /**
-     * @param id
-     * @returns any
+     * @returns any Contract successfully deleted
      * @throws ApiError
      */
-    public static contractControllerDelete(
+    public static contractControllerDelete({
+        id,
+    }: {
         id: number,
-    ): CancelablePromise<any> {
+    }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/contract/{id}',

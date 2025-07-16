@@ -5,9 +5,9 @@
 export type MineResponse = {
     id: number;
     name: string;
-    location: string;
-    isActive: boolean;
-    entityId: number;
+    location?: string;
+    contract: Record<string, any>;
+    monthlyData: Array<Record<string, any>>;
     createdAt: string;
     updatedAt: string;
 };

@@ -3,8 +3,9 @@
 /* tslint:disable */
 /* eslint-disable */
 export type UpdateContractDto = {
+    name?: string;
     description?: string;
-    ownerId?: number;
-    entityIds?: Array<number>;
+    startDate?: string;
+    endDate?: string;
 };
 

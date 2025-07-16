@@ -10,13 +10,14 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class AuthService {
     /**
-     * @param requestBody
      * @returns TokensDto User authenticated successfully
      * @throws ApiError
      */
-    public static authControllerLogin(
+    public static authControllerLogin({
+        requestBody,
+    }: {
         requestBody: SignInDto,
-    ): CancelablePromise<TokensDto> {
+    }): CancelablePromise<TokensDto> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/auth/login',
@@ -45,13 +46,14 @@ export class AuthService {
         });
     }
     /**
-     * @param requestBody
      * @returns any Password reset successfully
      * @throws ApiError
      */
-    public static authControllerResetPassword(
+    public static authControllerResetPassword({
+        requestBody,
+    }: {
         requestBody: ResetPasswordDto,
-    ): CancelablePromise<{
+    }): CancelablePromise<{
         message?: string;
     }> {
         return __request(OpenAPI, {

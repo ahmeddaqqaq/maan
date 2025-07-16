@@ -6,7 +6,5 @@ export type UpdateMaterialDto = {
     name?: string;
     unit?: string;
     isActive?: boolean;
-    mineId?: number;
-    entityId?: number;
 };
 

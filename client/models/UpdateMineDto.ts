@@ -5,7 +5,5 @@
 export type UpdateMineDto = {
     name?: string;
     location?: string;
-    isActive?: boolean;
-    entityId?: number;
 };
 

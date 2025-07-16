@@ -21,11 +21,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { AuthService } from "../../../client";
-import type { SignInDto } from "../../../client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@/providers/auth-provider";
+import { AuthService, SignInDto } from "../../../client";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -55,13 +54,15 @@ export default function LoginPage() {
         password: data.password,
       };
 
-      const response = await AuthService.authControllerLogin(signInData);
-      
+      const response = await AuthService.authControllerLogin({
+        requestBody: signInData,
+      });
+
       login(response.access_token, response.refresh_token);
       toast.success("Login successful");
       router.push("/");
     } catch (error: unknown) {
-      const apiError = error as {message?: string; body?: {error?: string}};
+      const apiError = error as { message?: string; body?: { error?: string } };
       toast.error(apiError?.body?.error || apiError?.message || "Login failed");
     } finally {
       setIsLoading(false);
@@ -80,7 +81,10 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
                 <FormField
                   control={form.control}
                   name="username"
@@ -116,11 +120,7 @@ export default function LoginPage() {
                     </FormItem>
                   )}
                 />
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={isLoading}
-                >
+                <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "Signing in..." : "Sign in"}
                 </Button>
               </form>

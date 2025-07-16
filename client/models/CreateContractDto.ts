@@ -3,8 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 export type CreateContractDto = {
-    description?: string;
-    ownerId: number;
-    entityIds?: Array<number>;
+    name: string;
+    entityId: number;
+    description: string;
+    startDate: string;
+    endDate?: string;
 };
 

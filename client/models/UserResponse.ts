@@ -3,14 +3,14 @@
 /* tslint:disable */
 /* eslint-disable */
 export type UserResponse = {
-    id: string;
+    id: number;
     username: string;
-    email: string | null;
+    email?: string;
     isActive: boolean;
-    entityId: number | null;
     role: UserResponse.role;
-    updatedAt: string;
+    entity?: Record<string, any>;
     createdAt: string;
+    updatedAt: string;
 };
 export namespace UserResponse {
     export enum role {

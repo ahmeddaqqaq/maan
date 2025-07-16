@@ -5,8 +5,7 @@
 export type CreateMaterialDto = {
     name: string;
     unit: string;
-    isActive?: boolean;
-    mineId?: number;
+    isActive: boolean;
     entityId: number;
 };
 

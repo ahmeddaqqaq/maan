@@ -4,20 +4,21 @@
 /* eslint-disable */
 import type { CreateUserDto } from '../models/CreateUserDto';
 import type { UpdateUserDto } from '../models/UpdateUserDto';
-import type { UserFindManyResponse } from '../models/UserFindManyResponse';
+import type { UserManyResponse } from '../models/UserManyResponse';
 import type { UserResponse } from '../models/UserResponse';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class UserService {
     /**
-     * @param requestBody
      * @returns any User successfully created
      * @throws ApiError
      */
-    public static userControllerCreate(
+    public static userControllerCreate({
+        requestBody,
+    }: {
         requestBody: CreateUserDto,
-    ): CancelablePromise<any> {
+    }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/user',
@@ -26,17 +27,18 @@ export class UserService {
         });
     }
     /**
-     * @param skip
-     * @param take
-     * @param search
-     * @returns UserFindManyResponse All users successfully fetched
+     * @returns UserManyResponse All users successfully fetched
      * @throws ApiError
      */
-    public static userControllerFindMany(
+    public static userControllerFindMany({
+        skip,
+        take,
+        search,
+    }: {
         skip?: number,
         take?: number,
         search?: string,
-    ): CancelablePromise<UserFindManyResponse> {
+    }): CancelablePromise<UserManyResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/user/findMany',
@@ -48,13 +50,14 @@ export class UserService {
         });
     }
     /**
-     * @param id
      * @returns UserResponse User successfully fetched
      * @throws ApiError
      */
-    public static userControllerFindOne(
+    public static userControllerFindOne({
+        id,
+    }: {
         id: number,
-    ): CancelablePromise<UserResponse> {
+    }): CancelablePromise<UserResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/user/{id}',
@@ -64,15 +67,16 @@ export class UserService {
         });
     }
     /**
-     * @param id
-     * @param requestBody
      * @returns any User successfully updated
      * @throws ApiError
      */
-    public static userControllerUpdate(
+    public static userControllerUpdate({
+        id,
+        requestBody,
+    }: {
         id: number,
         requestBody: UpdateUserDto,
-    ): CancelablePromise<any> {
+    }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PATCH',
             url: '/api/user/{id}',
@@ -84,13 +88,14 @@ export class UserService {
         });
     }
     /**
-     * @param id
      * @returns any User successfully deleted
      * @throws ApiError
      */
-    public static userControllerDelete(
+    public static userControllerDelete({
+        id,
+    }: {
         id: number,
-    ): CancelablePromise<any> {
+    }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/user/{id}',

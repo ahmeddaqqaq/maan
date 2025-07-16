@@ -11,13 +11,14 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class EntityService {
     /**
-     * @param requestBody
      * @returns any Entity successfully created
      * @throws ApiError
      */
-    public static entityControllerCreate(
+    public static entityControllerCreate({
+        requestBody,
+    }: {
         requestBody: CreateEntityDto,
-    ): CancelablePromise<any> {
+    }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/entity',
@@ -26,17 +27,18 @@ export class EntityService {
         });
     }
     /**
-     * @param skip
-     * @param take
-     * @param search
      * @returns EntityFindManyResponse All entities successfully fetched
      * @throws ApiError
      */
-    public static entityControllerFindMany(
+    public static entityControllerFindMany({
+        skip,
+        take,
+        search,
+    }: {
         skip?: number,
         take?: number,
         search?: string,
-    ): CancelablePromise<EntityFindManyResponse> {
+    }): CancelablePromise<EntityFindManyResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/entity/findMany',
@@ -48,13 +50,14 @@ export class EntityService {
         });
     }
     /**
-     * @param id
      * @returns EntityResponse Entity successfully fetched
      * @throws ApiError
      */
-    public static entityControllerFindOne(
+    public static entityControllerFindOne({
+        id,
+    }: {
         id: number,
-    ): CancelablePromise<EntityResponse> {
+    }): CancelablePromise<EntityResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/entity/{id}',
@@ -64,15 +67,16 @@ export class EntityService {
         });
     }
     /**
-     * @param id
-     * @param requestBody
      * @returns any Entity successfully updated
      * @throws ApiError
      */
-    public static entityControllerUpdate(
+    public static entityControllerUpdate({
+        id,
+        requestBody,
+    }: {
         id: number,
         requestBody: UpdateEntityDto,
-    ): CancelablePromise<any> {
+    }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PATCH',
             url: '/api/entity/{id}',
@@ -84,13 +88,14 @@ export class EntityService {
         });
     }
     /**
-     * @param id
      * @returns any Entity successfully deleted
      * @throws ApiError
      */
-    public static entityControllerDelete(
+    public static entityControllerDelete({
+        id,
+    }: {
         id: number,
-    ): CancelablePromise<any> {
+    }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/entity/{id}',

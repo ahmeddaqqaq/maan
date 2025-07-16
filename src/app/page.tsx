@@ -10,7 +10,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.push("/affiliated-companies");
+      router.push("/dashboard");
     }
   }, [isAuthenticated, isLoading, router]);
 

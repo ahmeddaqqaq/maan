@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { CreateMineDto } from '../models/CreateMineDto';
-import type { MineFindManyResponse } from '../models/MineFindManyResponse';
+import type { MineManyResponse } from '../models/MineManyResponse';
 import type { MineResponse } from '../models/MineResponse';
 import type { UpdateMineDto } from '../models/UpdateMineDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -11,13 +11,14 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class MineService {
     /**
-     * @param requestBody
      * @returns any Mine successfully created
      * @throws ApiError
      */
-    public static mineControllerCreate(
+    public static mineControllerCreate({
+        requestBody,
+    }: {
         requestBody: CreateMineDto,
-    ): CancelablePromise<any> {
+    }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/mine',
@@ -26,17 +27,20 @@ export class MineService {
         });
     }
     /**
-     * @param skip
-     * @param take
-     * @param search
-     * @returns MineFindManyResponse All mines successfully fetched
+     * @returns MineManyResponse All mines successfully fetched
      * @throws ApiError
      */
-    public static mineControllerFindMany(
+    public static mineControllerFindMany({
+        skip,
+        take,
+        search,
+        contractId,
+    }: {
         skip?: number,
         take?: number,
         search?: string,
-    ): CancelablePromise<MineFindManyResponse> {
+        contractId?: number,
+    }): CancelablePromise<MineManyResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/mine/findMany',
@@ -44,17 +48,19 @@ export class MineService {
                 'skip': skip,
                 'take': take,
                 'search': search,
+                'contractId': contractId,
             },
         });
     }
     /**
-     * @param id
      * @returns MineResponse Mine successfully fetched
      * @throws ApiError
      */
-    public static mineControllerFindOne(
+    public static mineControllerFindOne({
+        id,
+    }: {
         id: number,
-    ): CancelablePromise<MineResponse> {
+    }): CancelablePromise<MineResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/mine/{id}',
@@ -64,15 +70,16 @@ export class MineService {
         });
     }
     /**
-     * @param id
-     * @param requestBody
      * @returns any Mine successfully updated
      * @throws ApiError
      */
-    public static mineControllerUpdate(
+    public static mineControllerUpdate({
+        id,
+        requestBody,
+    }: {
         id: number,
         requestBody: UpdateMineDto,
-    ): CancelablePromise<any> {
+    }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PATCH',
             url: '/api/mine/{id}',
@@ -84,13 +91,14 @@ export class MineService {
         });
     }
     /**
-     * @param id
      * @returns any Mine successfully deleted
      * @throws ApiError
      */
-    public static mineControllerDelete(
+    public static mineControllerDelete({
+        id,
+    }: {
         id: number,
-    ): CancelablePromise<any> {
+    }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/mine/{id}',

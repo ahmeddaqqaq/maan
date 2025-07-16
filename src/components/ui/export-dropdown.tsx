@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -20,7 +19,6 @@ interface ExportDropdownProps {
 }
 
 export function ExportDropdown({ data, columns, filename, disabled }: ExportDropdownProps) {
-  const t = useTranslations();
   const { exportData, isExporting } = useExport();
 
   const handleExport = (format: 'csv' | 'json' | 'excel') => {
@@ -36,19 +34,19 @@ export function ExportDropdown({ data, columns, filename, disabled }: ExportDrop
           disabled={disabled || isExporting || !data || data.length === 0}
         >
           <FiDownload className="mr-2 h-4 w-4" />
-          {isExporting ? t('export.exporting') : t('common.export')}
+          {isExporting ? 'Exporting...' : 'Export'}
           <FiChevronDown className="ml-2 h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => handleExport('csv')}>
-          {t('export.csv')}
+          Export as CSV
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleExport('excel')}>
-          {t('export.excel')}
+          Export as Excel
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleExport('json')}>
-          {t('export.json')}
+          Export as JSON
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
