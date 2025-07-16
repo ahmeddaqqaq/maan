@@ -17,11 +17,7 @@ export function useContracts(filters?: UseContractsFilters) {
   return useQuery({
     queryKey: ['contracts', filters],
     queryFn: async () => {
-      return await ContractService.contractControllerFindMany(
-        filters?.skip,
-        filters?.take,
-        filters?.search
-      );
+      return await ContractService.contractControllerFindMany({});
     },
   });
 }
@@ -30,7 +26,7 @@ export function useContract(id: number) {
   return useQuery({
     queryKey: ['contract', id],
     queryFn: async () => {
-      return await ContractService.contractControllerFindOne(id);
+      return await ContractService.contractControllerFindOne({ id });
     },
     enabled: !!id,
   });
@@ -41,7 +37,7 @@ export function useCreateContract() {
 
   return useMutation({
     mutationFn: async (data: CreateContractDto) => {
-      return await ContractService.contractControllerCreate(data);
+      return await ContractService.contractControllerCreate({ requestBody: data });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contracts'] });
@@ -58,7 +54,7 @@ export function useUpdateContract() {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: number; data: UpdateContractDto }) => {
-      return await ContractService.contractControllerUpdate(id, data);
+      return await ContractService.contractControllerUpdate({ id, requestBody: data });
     },
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['contracts'] });
@@ -76,7 +72,7 @@ export function useDeleteContract() {
 
   return useMutation({
     mutationFn: async (id: number) => {
-      return await ContractService.contractControllerDelete(id);
+      return await ContractService.contractControllerDelete({ id });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contracts'] });
@@ -93,7 +89,7 @@ export function useMaterials() {
   return useQuery({
     queryKey: ['materials'],
     queryFn: async () => {
-      return await MaterialService.materialControllerFindMany();
+      return await MaterialService.materialControllerFindMany({});
     },
   });
 }

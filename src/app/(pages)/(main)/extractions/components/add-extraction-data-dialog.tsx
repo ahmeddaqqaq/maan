@@ -152,7 +152,12 @@ export function AddExtractionDataDialog({
                 <h3 className="text-lg font-medium">
                   Extraction Data for {format(selectedDate, "MMMM yyyy")}
                 </h3>
-                <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${materials.length}, 1fr)` }}>
+                <div
+                  className="grid gap-4"
+                  style={{
+                    gridTemplateColumns: `repeat(${materials.length}, 1fr)`,
+                  }}
+                >
                   {materials.map((material) => (
                     <div key={material.id} className="space-y-2">
                       <Label htmlFor={`material-${material.id}`}>
@@ -163,6 +168,7 @@ export function AddExtractionDataDialog({
                         type="number"
                         min="0"
                         step="0.01"
+                        className="my-2"
                         value={extractionData[material.id.toString()] || ""}
                         onChange={(e) =>
                           updateExtractionData(

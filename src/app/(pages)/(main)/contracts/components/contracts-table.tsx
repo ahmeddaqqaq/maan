@@ -10,29 +10,49 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { ContractResponse, ContractService } from "../../../../../../client";
 
-export function ContractsTable() {
+interface ContractsTableProps {
+  retrigger: number;
+}
+
+export const ContractsTable = ({ retrigger }: ContractsTableProps) => {
   const [contracts, setContracts] = useState<ContractResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchContracts();
-  }, []);
+  }, [retrigger]);
 
-  const fetchContracts = async () => {
+  const fetchContracts = async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
       const response = await ContractService.contractControllerFindMany({});
       setContracts(response.data || []);
+      if (isRefresh) {
+        toast.success("Contracts refreshed successfully");
+      }
     } catch (error) {
       toast.error("Failed to fetch contracts");
       console.error(error);
     } finally {
-      setLoading(false);
+      if (isRefresh) {
+        setRefreshing(false);
+      } else {
+        setLoading(false);
+      }
     }
+  };
+
+  const handleRefresh = async () => {
+    await fetchContracts(true);
   };
 
   const handleDelete = async (id: number) => {
@@ -57,17 +77,30 @@ export function ContractsTable() {
   }
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Description</TableHead>
-            <TableHead>Start Date</TableHead>
-            <TableHead>End Date</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold">Contracts</h3>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRefresh}
+          disabled={refreshing}
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+          {refreshing ? 'Refreshing...' : 'Refresh'}
+        </Button>
+      </div>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>Start Date</TableHead>
+              <TableHead>End Date</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
         <TableBody>
           {contracts.length === 0 ? (
             <TableRow>
@@ -112,6 +145,7 @@ export function ContractsTable() {
           )}
         </TableBody>
       </Table>
+      </div>
     </div>
   );
-}
+};

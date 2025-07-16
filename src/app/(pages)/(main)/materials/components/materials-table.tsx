@@ -11,29 +11,49 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { MaterialResponse, MaterialService } from "../../../../../../client";
 
-export function MaterialsTable() {
+interface MaterialsTableProps {
+  retrigger: number;
+}
+
+export const MaterialsTable = ({ retrigger }: MaterialsTableProps) => {
   const [materials, setMaterials] = useState<MaterialResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchMaterials();
-  }, []);
+  }, [retrigger]);
 
-  const fetchMaterials = async () => {
+  const fetchMaterials = async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
       const response = await MaterialService.materialControllerFindMany({});
       setMaterials(response.data || []);
+      if (isRefresh) {
+        toast.success("Materials refreshed successfully");
+      }
     } catch (error) {
       toast.error("Failed to fetch materials");
       console.error(error);
     } finally {
-      setLoading(false);
+      if (isRefresh) {
+        setRefreshing(false);
+      } else {
+        setLoading(false);
+      }
     }
+  };
+
+  const handleRefresh = async () => {
+    await fetchMaterials(true);
   };
 
   const handleDelete = async (id: number) => {
@@ -54,17 +74,30 @@ export function MaterialsTable() {
   }
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Unit</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Entity ID</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold">Materials</h3>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRefresh}
+          disabled={refreshing}
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+          {refreshing ? 'Refreshing...' : 'Refresh'}
+        </Button>
+      </div>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Unit</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Entity ID</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
         <TableBody>
           {materials.length === 0 ? (
             <TableRow>
@@ -109,6 +142,7 @@ export function MaterialsTable() {
           )}
         </TableBody>
       </Table>
+      </div>
     </div>
   );
-}
+};

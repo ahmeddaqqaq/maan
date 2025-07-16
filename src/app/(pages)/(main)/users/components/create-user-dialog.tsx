@@ -29,7 +29,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { CreateUserDto, UserService } from "../../../../../client";
+import { CreateUserDto, UserService } from "../../../../../../client";
 
 const createUserSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -50,11 +50,13 @@ type CreateUserFormData = z.infer<typeof createUserSchema>;
 interface CreateUserDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onUserCreated?: () => void;
 }
 
 export function CreateUserDialog({
   open,
   onOpenChange,
+  onUserCreated,
 }: CreateUserDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -89,6 +91,7 @@ export function CreateUserDialog({
       toast.success("User created successfully");
       form.reset();
       onOpenChange(false);
+      onUserCreated?.();
     } catch (error) {
       toast.error("Failed to create user");
       console.error(error);

@@ -36,11 +36,13 @@ type CreateMaterialFormData = z.infer<typeof createMaterialSchema>;
 interface CreateMaterialDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onMaterialCreated?: () => void;
 }
 
 export function CreateMaterialDialog({
   open,
   onOpenChange,
+  onMaterialCreated,
 }: CreateMaterialDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -71,6 +73,7 @@ export function CreateMaterialDialog({
       toast.success("Material created successfully");
       form.reset();
       onOpenChange(false);
+      onMaterialCreated?.();
     } catch (error) {
       toast.error("Failed to create material");
       console.error(error);

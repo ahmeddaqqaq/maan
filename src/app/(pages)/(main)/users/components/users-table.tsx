@@ -11,29 +11,49 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
-import { UserResponse, UserService } from "../../../../../client";
+import { UserResponse, UserService } from "../../../../../../client";
 
-export function UsersTable() {
+interface UsersTableProps {
+  retrigger: number;
+}
+
+export const UsersTable = ({ retrigger }: UsersTableProps) => {
   const [users, setUsers] = useState<UserResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [retrigger]);
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
       const response = await UserService.userControllerFindMany({});
       setUsers(response.data || []);
+      if (isRefresh) {
+        toast.success("Users refreshed successfully");
+      }
     } catch (error) {
       toast.error("Failed to fetch users");
       console.error(error);
     } finally {
-      setLoading(false);
+      if (isRefresh) {
+        setRefreshing(false);
+      } else {
+        setLoading(false);
+      }
     }
+  };
+
+  const handleRefresh = async () => {
+    await fetchUsers(true);
   };
 
   const handleDelete = async (id: number) => {
@@ -67,17 +87,30 @@ export function UsersTable() {
   }
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Username</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold">Users</h3>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRefresh}
+          disabled={refreshing}
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+          {refreshing ? 'Refreshing...' : 'Refresh'}
+        </Button>
+      </div>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Username</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
         <TableBody>
           {users.length === 0 ? (
             <TableRow>
@@ -126,6 +159,7 @@ export function UsersTable() {
           )}
         </TableBody>
       </Table>
+      </div>
     </div>
   );
-}
+};

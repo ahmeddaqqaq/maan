@@ -37,11 +37,13 @@ type CreateContractFormData = z.infer<typeof createContractSchema>;
 interface CreateContractDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onContractCreated?: () => void;
 }
 
 export function CreateContractDialog({
   open,
   onOpenChange,
+  onContractCreated,
 }: CreateContractDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -74,6 +76,7 @@ export function CreateContractDialog({
       toast.success("Contract created successfully");
       form.reset();
       onOpenChange(false);
+      onContractCreated?.();
     } catch (error) {
       toast.error("Failed to create contract");
       console.error(error);

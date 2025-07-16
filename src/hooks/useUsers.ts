@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { UserService, EntityService, AuthService } from '../../client';
-import type { UserResponse, CreateUserDto, UpdateUserDto, UserFindManyResponse, ResetPasswordDto } from '../../client';
+import type { CreateUserDto, UpdateUserDto, ResetPasswordDto } from '../../client';
 import { toast } from 'sonner';
 
 interface UseUsersFilters {
@@ -17,14 +17,10 @@ interface UseUsersFilters {
 export function useUsers(filters?: UseUsersFilters) {
   return useQuery({
     queryKey: ['users', filters],
-    queryFn: async (): Promise<UserFindManyResponse> => {
+    queryFn: async () => {
       console.log('🚀 Calling UserService.userControllerFindMany with filters:', filters);
       try {
-        const result = await UserService.userControllerFindMany(
-          filters?.skip,
-          filters?.take,
-          filters?.search
-        );
+        const result = await UserService.userControllerFindMany({});
         console.log('✅ UserService response:', result);
         return result;
       } catch (error) {
@@ -38,8 +34,8 @@ export function useUsers(filters?: UseUsersFilters) {
 export function useUser(id: number) {
   return useQuery({
     queryKey: ['user', id],
-    queryFn: async (): Promise<UserResponse> => {
-      return await UserService.userControllerFindOne(id);
+    queryFn: async () => {
+      return await UserService.userControllerFindOne({ id });
     },
     enabled: !!id,
   });
@@ -50,7 +46,7 @@ export function useCreateUser() {
 
   return useMutation({
     mutationFn: async (data: CreateUserDto) => {
-      return await UserService.userControllerCreate(data);
+      return await UserService.userControllerCreate({ requestBody: data });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -67,7 +63,7 @@ export function useUpdateUser() {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: number; data: UpdateUserDto }) => {
-      return await UserService.userControllerUpdate(id, data);
+      return await UserService.userControllerUpdate({ id, requestBody: data });
     },
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -85,7 +81,7 @@ export function useDeleteUser() {
 
   return useMutation({
     mutationFn: async (id: number) => {
-      return await UserService.userControllerDelete(id);
+      return await UserService.userControllerDelete({ id });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -102,7 +98,7 @@ export function useResetPassword() {
 
   return useMutation({
     mutationFn: async (data: ResetPasswordDto) => {
-      return await AuthService.authControllerResetPassword(data);
+      return await AuthService.authControllerResetPassword({ requestBody: data });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -120,7 +116,7 @@ export function useEntities() {
   return useQuery({
     queryKey: ['entities'],
     queryFn: async () => {
-      return await EntityService.entityControllerFindMany();
+      return await EntityService.entityControllerFindMany({});
     },
   });
 }

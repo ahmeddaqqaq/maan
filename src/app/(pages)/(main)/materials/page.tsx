@@ -8,6 +8,7 @@ import { MaterialsTable } from "./components/materials-table";
 
 export default function MaterialsPage() {
   const [showCreateMaterial, setShowCreateMaterial] = useState(false);
+  const [retrigger, setRetrigger] = useState(0);
 
   return (
     <div className="space-y-6">
@@ -22,11 +23,12 @@ export default function MaterialsPage() {
         </Button>
       </div>
 
-      <MaterialsTable />
+      <MaterialsTable retrigger={retrigger} />
 
       <CreateMaterialDialog
         open={showCreateMaterial}
         onOpenChange={setShowCreateMaterial}
+        onMaterialCreated={() => setRetrigger(retrigger + 1)}
       />
     </div>
   );

@@ -8,6 +8,7 @@ import { MinesTable } from "./components/mines-table";
 
 export default function MinesPage() {
   const [showCreateMine, setShowCreateMine] = useState(false);
+  const [retrigger, setRetrigger] = useState(0);
 
   return (
     <div className="space-y-6">
@@ -22,11 +23,12 @@ export default function MinesPage() {
         </Button>
       </div>
 
-      <MinesTable />
+      <MinesTable retrigger={retrigger} />
 
       <CreateMineDialog
         open={showCreateMine}
         onOpenChange={setShowCreateMine}
+        onMineCreated={() => setRetrigger(retrigger + 1)}
       />
     </div>
   );

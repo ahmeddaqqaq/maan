@@ -46,11 +46,13 @@ type CreateMineFormData = z.infer<typeof createMineSchema>;
 interface CreateMineDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onMineCreated: () => void;
 }
 
 export function CreateMineDialog({
   open,
   onOpenChange,
+  onMineCreated,
 }: CreateMineDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [contracts, setContracts] = useState<ContractResponse[]>([]);
@@ -96,6 +98,7 @@ export function CreateMineDialog({
       toast.success("Mine created successfully");
       form.reset();
       onOpenChange(false);
+      onMineCreated();
     } catch (error) {
       toast.error("Failed to create mine");
       console.error(error);

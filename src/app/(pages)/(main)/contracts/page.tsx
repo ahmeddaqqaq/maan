@@ -8,6 +8,7 @@ import { ContractsTable } from "./components/contracts-table";
 
 export default function ContractsPage() {
   const [showCreateContract, setShowCreateContract] = useState(false);
+  const [retrigger, setRetrigger] = useState(0);
 
   return (
     <div className="space-y-6">
@@ -22,11 +23,12 @@ export default function ContractsPage() {
         </Button>
       </div>
 
-      <ContractsTable />
+      <ContractsTable retrigger={retrigger} />
 
       <CreateContractDialog
         open={showCreateContract}
         onOpenChange={setShowCreateContract}
+        onContractCreated={() => setRetrigger(retrigger + 1)}
       />
     </div>
   );
