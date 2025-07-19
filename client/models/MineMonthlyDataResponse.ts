@@ -9,10 +9,28 @@ export type MineMonthlyDataResponse = {
     month: number;
     year: number;
     quantity: number;
+    /**
+     * true for used material, false for overburden
+     */
+    isUsed: boolean;
+    /**
+     * Diesel price for this month (for used materials)
+     */
+    dieselPriceThisMonth?: number;
+    /**
+     * Quantity in cubic meters (for used materials)
+     */
+    quantityInCubicMeters?: number;
+    /**
+     * Calculated total price (for used materials)
+     */
+    totalPrice?: number;
     notes?: string;
     mineId: number;
+    entityId: number;
     materialId: number;
     mine: MineResponse;
+    entity: Record<string, any>;
     material: MaterialResponse;
     createdAt: string;
     updatedAt: string;

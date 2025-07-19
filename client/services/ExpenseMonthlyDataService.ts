@@ -2,45 +2,44 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { BulkCreateMineMonthlyDataDto } from '../models/BulkCreateMineMonthlyDataDto';
-import type { CreateMineMonthlyDataDto } from '../models/CreateMineMonthlyDataDto';
-import type { MineMonthlyDataManyResponse } from '../models/MineMonthlyDataManyResponse';
-import type { MineMonthlyDataResponse } from '../models/MineMonthlyDataResponse';
-import type { UpdateMineMonthlyDataDto } from '../models/UpdateMineMonthlyDataDto';
+import type { BulkCreateExpenseMonthlyDataDto } from '../models/BulkCreateExpenseMonthlyDataDto';
+import type { CreateExpenseMonthlyDataDto } from '../models/CreateExpenseMonthlyDataDto';
+import type { ExpenseMonthlyDataManyResponse } from '../models/ExpenseMonthlyDataManyResponse';
+import type { ExpenseMonthlyDataResponse } from '../models/ExpenseMonthlyDataResponse';
+import type { UpdateExpenseMonthlyDataDto } from '../models/UpdateExpenseMonthlyDataDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
-export class MineMonthlyDataService {
+export class ExpenseMonthlyDataService {
     /**
-     * @returns any Mine monthly data successfully created
+     * @returns any Expense monthly data successfully created
      * @throws ApiError
      */
-    public static mineMonthlyDataControllerCreate({
+    public static expenseMonthlyDataControllerCreate({
         requestBody,
     }: {
-        requestBody: CreateMineMonthlyDataDto,
+        requestBody: CreateExpenseMonthlyDataDto,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/mine-monthly-data',
+            url: '/api/expense-monthly-data',
             body: requestBody,
             mediaType: 'application/json',
         });
     }
     /**
-     * @returns MineMonthlyDataManyResponse All mine monthly data successfully fetched
+     * @returns ExpenseMonthlyDataManyResponse All expense monthly data successfully fetched
      * @throws ApiError
      */
-    public static mineMonthlyDataControllerFindMany({
+    public static expenseMonthlyDataControllerFindMany({
         skip,
         take,
         mineId,
         entityId,
         contractId,
-        materialId,
+        expenseId,
         month,
         year,
-        isUsed,
     }: {
         skip?: number,
         take?: number,
@@ -57,9 +56,9 @@ export class MineMonthlyDataService {
          */
         contractId?: number,
         /**
-         * Filter by material ID
+         * Filter by expense ID
          */
-        materialId?: number,
+        expenseId?: number,
         /**
          * Filter by month (1-12)
          */
@@ -68,58 +67,53 @@ export class MineMonthlyDataService {
          * Filter by year
          */
         year?: number,
-        /**
-         * Filter by used/overburden materials
-         */
-        isUsed?: boolean,
-    }): CancelablePromise<MineMonthlyDataManyResponse> {
+    }): CancelablePromise<ExpenseMonthlyDataManyResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/mine-monthly-data/findMany',
+            url: '/api/expense-monthly-data/findMany',
             query: {
                 'skip': skip,
                 'take': take,
                 'mineId': mineId,
                 'entityId': entityId,
                 'contractId': contractId,
-                'materialId': materialId,
+                'expenseId': expenseId,
                 'month': month,
                 'year': year,
-                'isUsed': isUsed,
             },
         });
     }
     /**
-     * @returns MineMonthlyDataResponse Mine monthly data successfully fetched
+     * @returns ExpenseMonthlyDataResponse Expense monthly data successfully fetched
      * @throws ApiError
      */
-    public static mineMonthlyDataControllerFindOne({
+    public static expenseMonthlyDataControllerFindOne({
         id,
     }: {
         id: number,
-    }): CancelablePromise<MineMonthlyDataResponse> {
+    }): CancelablePromise<ExpenseMonthlyDataResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/mine-monthly-data/{id}',
+            url: '/api/expense-monthly-data/{id}',
             path: {
                 'id': id,
             },
         });
     }
     /**
-     * @returns any Mine monthly data successfully updated
+     * @returns any Expense monthly data successfully updated
      * @throws ApiError
      */
-    public static mineMonthlyDataControllerUpdate({
+    public static expenseMonthlyDataControllerUpdate({
         id,
         requestBody,
     }: {
         id: number,
-        requestBody: UpdateMineMonthlyDataDto,
+        requestBody: UpdateExpenseMonthlyDataDto,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PATCH',
-            url: '/api/mine-monthly-data/{id}',
+            url: '/api/expense-monthly-data/{id}',
             path: {
                 'id': id,
             },
@@ -128,50 +122,50 @@ export class MineMonthlyDataService {
         });
     }
     /**
-     * @returns any Mine monthly data successfully deleted
+     * @returns any Expense monthly data successfully deleted
      * @throws ApiError
      */
-    public static mineMonthlyDataControllerDelete({
+    public static expenseMonthlyDataControllerDelete({
         id,
     }: {
         id: number,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: '/api/mine-monthly-data/{id}',
+            url: '/api/expense-monthly-data/{id}',
             path: {
                 'id': id,
             },
         });
     }
     /**
-     * @returns any Mine monthly data bulk created successfully
+     * @returns any Expense monthly data bulk created successfully
      * @throws ApiError
      */
-    public static mineMonthlyDataControllerBulkCreate({
+    public static expenseMonthlyDataControllerBulkCreate({
         requestBody,
     }: {
-        requestBody: BulkCreateMineMonthlyDataDto,
+        requestBody: BulkCreateExpenseMonthlyDataDto,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/mine-monthly-data/bulk',
+            url: '/api/expense-monthly-data/bulk',
             body: requestBody,
             mediaType: 'application/json',
         });
     }
     /**
-     * @returns any Materials for mine successfully fetched
+     * @returns any Expenses for mine successfully fetched
      * @throws ApiError
      */
-    public static mineMonthlyDataControllerGetMaterialsForEntity({
+    public static expenseMonthlyDataControllerGetExpensesForEntity({
         entityId,
     }: {
         entityId: number,
     }): CancelablePromise<Array<Record<string, any>>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/mine-monthly-data/materials/{entityId}',
+            url: '/api/expense-monthly-data/expenses/{entityId}',
             path: {
                 'entityId': entityId,
             },

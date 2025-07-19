@@ -14,6 +14,14 @@ import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { UserResponse, UserService } from "../../../../../../client";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface UsersTableProps {
   retrigger: number;
@@ -23,10 +31,14 @@ export const UsersTable = ({ retrigger }: UsersTableProps) => {
   const [users, setUsers] = useState<UserResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRows, setTotalRows] = useState(0);
+  const pageSize = 7;
 
   useEffect(() => {
     fetchUsers();
-  }, [retrigger]);
+  }, [retrigger, currentPage]);
 
   const fetchUsers = async (isRefresh = false) => {
     try {
@@ -35,8 +47,14 @@ export const UsersTable = ({ retrigger }: UsersTableProps) => {
       } else {
         setLoading(true);
       }
-      const response = await UserService.userControllerFindMany({});
+      const skip = (currentPage - 1) * pageSize;
+      const response = await UserService.userControllerFindMany({
+        skip,
+        take: pageSize,
+      });
       setUsers(response.data || []);
+      setTotalRows(response.rows || 0);
+      setTotalPages(Math.ceil((response.rows || 0) / pageSize));
       if (isRefresh) {
         toast.success("Users refreshed successfully");
       }
@@ -54,6 +72,10 @@ export const UsersTable = ({ retrigger }: UsersTableProps) => {
 
   const handleRefresh = async () => {
     await fetchUsers(true);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   const handleDelete = async (id: number) => {
@@ -160,6 +182,54 @@ export const UsersTable = ({ retrigger }: UsersTableProps) => {
         </TableBody>
       </Table>
       </div>
+      
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-2">
+          <div className="text-sm text-muted-foreground">
+            Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalRows)} of {totalRows} entries
+          </div>
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (currentPage > 1) handlePageChange(currentPage - 1);
+                  }}
+                  className={currentPage <= 1 ? "pointer-events-none opacity-50" : ""}
+                />
+              </PaginationItem>
+              
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <PaginationItem key={page}>
+                  <PaginationLink
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handlePageChange(page);
+                    }}
+                    isActive={currentPage === page}
+                  >
+                    {page}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+              
+              <PaginationItem>
+                <PaginationNext 
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (currentPage < totalPages) handlePageChange(currentPage + 1);
+                  }}
+                  className={currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
     </div>
   );
 };

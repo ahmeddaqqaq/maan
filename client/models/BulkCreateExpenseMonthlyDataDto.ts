@@ -2,12 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { MaterialDataDto } from './MaterialDataDto';
-export type BulkCreateMineMonthlyDataDto = {
+import type { ExpenseDataDto } from './ExpenseDataDto';
+export type BulkCreateExpenseMonthlyDataDto = {
     month: number;
     year: number;
     mineId: number;
     entityId: number;
-    materials: Array<MaterialDataDto>;
+    expenses: Array<ExpenseDataDto>;
 };
 

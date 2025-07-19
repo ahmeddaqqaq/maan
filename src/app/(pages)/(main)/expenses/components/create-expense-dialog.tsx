@@ -16,7 +16,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -24,51 +23,43 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { CreateUserDto, UserService, EntityService, EntityResponse } from "../../../../../../client";
+import { CreateExpenseDto, ExpenseService, EntityService, EntityResponse } from "../../../../../../client";
 
-const createUserSchema = z.object({
-  username: z.string().min(1, "Username is required"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  email: z.string().email("Invalid email").optional().or(z.literal("")),
+const createExpenseSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  unit: z.string().min(1, "Unit is required"),
   isActive: z.boolean(),
-  role: z.enum([
-    "ADMIN",
-    "PRODUCTION_MANAGER",
-    "FINANCIAL_MANAGER",
-    "STANDARD_USER",
-  ]),
   entityId: z.number().min(1, "Entity is required"),
 });
 
-type CreateUserFormData = z.infer<typeof createUserSchema>;
+type CreateExpenseFormData = z.infer<typeof createExpenseSchema>;
 
-interface CreateUserDialogProps {
+interface CreateExpenseDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onUserCreated?: () => void;
+  onExpenseCreated?: () => void;
 }
 
-export function CreateUserDialog({
+export function CreateExpenseDialog({
   open,
   onOpenChange,
-  onUserCreated,
-}: CreateUserDialogProps) {
+  onExpenseCreated,
+}: CreateExpenseDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [entities, setEntities] = useState<EntityResponse[]>([]);
 
-  const form = useForm<CreateUserFormData>({
-    resolver: zodResolver(createUserSchema),
+  const form = useForm<CreateExpenseFormData>({
+    resolver: zodResolver(createExpenseSchema),
     defaultValues: {
-      username: "",
-      password: "",
-      email: "",
+      name: "",
+      unit: "",
       isActive: true,
-      role: "STANDARD_USER",
       entityId: 0,
     },
   });
@@ -89,28 +80,26 @@ export function CreateUserDialog({
     }
   }, [open]);
 
-  const onSubmit = async (data: CreateUserFormData) => {
+  const onSubmit = async (data: CreateExpenseFormData) => {
     setIsLoading(true);
     try {
-      const createUserDto: CreateUserDto = {
-        username: data.username,
-        password: data.password,
-        email: data.email || undefined,
+      const createExpenseDto: CreateExpenseDto = {
+        name: data.name,
+        unit: data.unit,
         isActive: data.isActive,
-        role: data.role as CreateUserDto.role,
         entityId: data.entityId,
       };
 
-      await UserService.userControllerCreate({
-        requestBody: createUserDto,
+      await ExpenseService.expenseControllerCreate({
+        requestBody: createExpenseDto,
       });
 
-      toast.success("User created successfully");
+      toast.success("Expense created successfully");
       form.reset();
       onOpenChange(false);
-      onUserCreated?.();
+      onExpenseCreated?.();
     } catch (error) {
-      toast.error("Failed to create user");
+      toast.error("Failed to create expense");
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -121,18 +110,18 @@ export function CreateUserDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New User</DialogTitle>
+          <DialogTitle>Create New Expense</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="username"
+              name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Username</FormLabel>
+                  <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Enter username" />
+                    <Input {...field} placeholder="Enter expense name" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -141,64 +130,16 @@ export function CreateUserDialog({
 
             <FormField
               control={form.control}
-              name="password"
+              name="unit"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>Unit</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
-                      type="password"
-                      placeholder="Enter password"
+                      placeholder="Enter unit (e.g., each, kg, hours)"
                     />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email (Optional)</FormLabel>
-                  <FormControl>
-                    <Input {...field} type="email" placeholder="Enter email" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="role"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Role</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select role" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="ADMIN">Admin</SelectItem>
-                      <SelectItem value="PRODUCTION_MANAGER">
-                        Production Manager
-                      </SelectItem>
-                      <SelectItem value="FINANCIAL_MANAGER">
-                        Financial Manager
-                      </SelectItem>
-                      <SelectItem value="STANDARD_USER">
-                        Standard User
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -240,7 +181,7 @@ export function CreateUserDialog({
                   <div className="space-y-0.5">
                     <FormLabel className="text-base">Active</FormLabel>
                     <p className="text-sm text-muted-foreground">
-                      Enable or disable this user account
+                      Enable or disable this expense type
                     </p>
                   </div>
                   <FormControl>
@@ -262,7 +203,7 @@ export function CreateUserDialog({
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Creating..." : "Create User"}
+                {isLoading ? "Creating..." : "Create Expense"}
               </Button>
             </div>
           </form>

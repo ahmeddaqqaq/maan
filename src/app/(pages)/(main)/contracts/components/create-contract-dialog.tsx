@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,20 +16,30 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { ContractService, CreateContractDto } from "../../../../../../client";
+import { ContractService, CreateContractDto, EntityService, EntityResponse } from "../../../../../../client";
 
 const createContractSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  entityId: z.number().min(1, "Entity ID is required"),
+  entityId: z.number().min(1, "Entity is required"),
   description: z.string().min(1, "Description is required"),
   startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().optional(),
+  dieselPrice: z.number().optional(),
+  extractionPrice: z.number().optional(),
+  phosphatePrice: z.number().optional(),
 });
 
 type CreateContractFormData = z.infer<typeof createContractSchema>;
@@ -46,17 +56,37 @@ export function CreateContractDialog({
   onContractCreated,
 }: CreateContractDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [entities, setEntities] = useState<EntityResponse[]>([]);
 
   const form = useForm<CreateContractFormData>({
     resolver: zodResolver(createContractSchema),
     defaultValues: {
       name: "",
-      entityId: 1,
+      entityId: 0,
       description: "",
       startDate: "",
       endDate: "",
+      dieselPrice: undefined,
+      extractionPrice: undefined,
+      phosphatePrice: undefined,
     },
   });
+
+  // Load entities
+  useEffect(() => {
+    const loadEntities = async () => {
+      try {
+        const response = await EntityService.entityControllerFindMany({});
+        setEntities(response.data || []);
+      } catch (error) {
+        console.error("Failed to load entities:", error);
+      }
+    };
+
+    if (open) {
+      loadEntities();
+    }
+  }, [open]);
 
   const onSubmit = async (data: CreateContractFormData) => {
     setIsLoading(true);
@@ -67,6 +97,9 @@ export function CreateContractDialog({
         description: data.description,
         startDate: data.startDate,
         endDate: data.endDate || undefined,
+        dieselPrice: data.dieselPrice,
+        extractionPrice: data.extractionPrice,
+        phosphatePrice: data.phosphatePrice,
       };
 
       await ContractService.contractControllerCreate({
@@ -87,7 +120,7 @@ export function CreateContractDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create New Contract</DialogTitle>
         </DialogHeader>
@@ -129,15 +162,24 @@ export function CreateContractDialog({
               name="entityId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Entity ID</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="number"
-                      placeholder="Enter entity ID"
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
+                  <FormLabel>Entity</FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(Number(value))}
+                    value={field.value ? field.value.toString() : ""}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select an entity" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {entities.map((entity) => (
+                        <SelectItem key={entity.id} value={entity.id.toString()}>
+                          {entity.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -178,6 +220,79 @@ export function CreateContractDialog({
                 </FormItem>
               )}
             />
+
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Pricing Information</h3>
+              
+              <FormField
+                control={form.control}
+                name="dieselPrice"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Diesel Price (Optional)</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="number"
+                        step="0.01"
+                        placeholder="Enter diesel price"
+                        onChange={(e) => 
+                          field.onChange(e.target.value ? Number(e.target.value) : undefined)
+                        }
+                        value={field.value || ''}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="extractionPrice"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Extraction Price (Optional)</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="number"
+                        step="0.01"
+                        placeholder="Enter extraction price"
+                        onChange={(e) => 
+                          field.onChange(e.target.value ? Number(e.target.value) : undefined)
+                        }
+                        value={field.value || ''}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="phosphatePrice"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phosphate Price (Optional)</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="number"
+                        step="0.01"
+                        placeholder="Enter phosphate price"
+                        onChange={(e) => 
+                          field.onChange(e.target.value ? Number(e.target.value) : undefined)
+                        }
+                        value={field.value || ''}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <div className="flex justify-end space-x-2">
               <Button

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,19 +16,26 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { CreateMaterialDto, MaterialService } from "../../../../../../client";
+import { CreateMaterialDto, MaterialService, EntityService, EntityResponse } from "../../../../../../client";
 
 const createMaterialSchema = z.object({
   name: z.string().min(1, "Name is required"),
   unit: z.string().min(1, "Unit is required"),
   isActive: z.boolean(),
-  entityId: z.number().min(1, "Entity ID is required"),
+  entityId: z.number().min(1, "Entity is required"),
 });
 
 type CreateMaterialFormData = z.infer<typeof createMaterialSchema>;
@@ -45,6 +52,7 @@ export function CreateMaterialDialog({
   onMaterialCreated,
 }: CreateMaterialDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [entities, setEntities] = useState<EntityResponse[]>([]);
 
   const form = useForm<CreateMaterialFormData>({
     resolver: zodResolver(createMaterialSchema),
@@ -52,9 +60,25 @@ export function CreateMaterialDialog({
       name: "",
       unit: "",
       isActive: true,
-      entityId: 1,
+      entityId: 0,
     },
   });
+
+  // Load entities
+  useEffect(() => {
+    const loadEntities = async () => {
+      try {
+        const response = await EntityService.entityControllerFindMany({});
+        setEntities(response.data || []);
+      } catch (error) {
+        console.error("Failed to load entities:", error);
+      }
+    };
+
+    if (open) {
+      loadEntities();
+    }
+  }, [open]);
 
   const onSubmit = async (data: CreateMaterialFormData) => {
     setIsLoading(true);
@@ -126,15 +150,24 @@ export function CreateMaterialDialog({
               name="entityId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Entity ID</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="number"
-                      placeholder="Enter entity ID"
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
+                  <FormLabel>Entity</FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(Number(value))}
+                    value={field.value ? field.value.toString() : ""}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select an entity" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {entities.map((entity) => (
+                        <SelectItem key={entity.id} value={entity.id.toString()}>
+                          {entity.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,9 @@ import {
   FileText,
   TrendingUp,
   Users,
+  Receipt,
+  Building2,
+  Calculator,
 } from "lucide-react";
 
 interface NavItem {
@@ -25,7 +29,10 @@ const navigation: NavItem[] = [
   { name: "Users", href: "/users", icon: Users },
   { name: "Mines", href: "/mines", icon: Mountain },
   { name: "Materials", href: "/materials", icon: Package },
+  { name: "Expenses", href: "/expenses", icon: Receipt },
+  { name: "Entities", href: "/entities", icon: Building2 },
   { name: "Contracts", href: "/contracts", icon: FileText },
+  { name: "Invoices", href: "/invoices", icon: Calculator },
 ];
 
 interface MainLayoutProps {
@@ -43,7 +50,13 @@ export default function MainLayout({ children }: MainLayoutProps) {
         <div className="flex flex-col h-full">
           {/* Logo/Brand */}
           <div className="flex items-center h-16 px-4 border-b border-gray-100">
-            <h1 className="text-xl font-semibold text-gray-800">Ma&apos;an</h1>
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              width={120}
+              height={40}
+              className="h-8 w-auto"
+            />
           </div>
 
           {/* Navigation */}
