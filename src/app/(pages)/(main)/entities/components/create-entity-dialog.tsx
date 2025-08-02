@@ -24,7 +24,7 @@ import { toast } from "sonner";
 import { CreateEntityDto, EntityService } from "../../../../../../client";
 
 const createEntitySchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "الاسم مطلوب"),
 });
 
 type CreateEntityFormData = z.infer<typeof createEntitySchema>;
@@ -60,12 +60,12 @@ export function CreateEntityDialog({
         requestBody: createEntityDto,
       });
 
-      toast.success("Entity created successfully");
+      toast.success("تم إنشاء الجهة بنجاح");
       form.reset();
       onOpenChange(false);
       onEntityCreated?.();
     } catch (error) {
-      toast.error("Failed to create entity");
+      toast.error("فشل في إنشاء الجهة");
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -76,7 +76,7 @@ export function CreateEntityDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Entity</DialogTitle>
+          <DialogTitle>إنشاء جهة جديدة</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -85,15 +85,14 @@ export function CreateEntityDialog({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>الاسم</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Enter entity name" />
+                    <Input {...field} placeholder="أدخل اسم الجهة" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
 
             <div className="flex justify-end space-x-2">
               <Button
@@ -101,10 +100,10 @@ export function CreateEntityDialog({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
               >
-                Cancel
+                إلغاء
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Creating..." : "Create Entity"}
+                {isLoading ? "جارٍ الإنشاء..." : "إنشاء الجهة"}
               </Button>
             </div>
           </form>

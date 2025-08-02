@@ -56,10 +56,10 @@ export const UsersTable = ({ retrigger }: UsersTableProps) => {
       setTotalRows(response.rows || 0);
       setTotalPages(Math.ceil((response.rows || 0) / pageSize));
       if (isRefresh) {
-        toast.success("Users refreshed successfully");
+        toast.success("تم تحديث المستخدمين بنجاح");
       }
     } catch (error) {
-      toast.error("Failed to fetch users");
+      toast.error("فشل في جلب المستخدمين");
       console.error(error);
     } finally {
       if (isRefresh) {
@@ -79,14 +79,14 @@ export const UsersTable = ({ retrigger }: UsersTableProps) => {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this user?")) return;
+    if (!confirm("هل أنت متأكد من أنك تريد حذف هذا المستخدم؟")) return;
 
     try {
       await UserService.userControllerDelete({ id });
-      toast.success("User deleted successfully");
+      toast.success("تم حذف المستخدم بنجاح");
       fetchUsers();
     } catch (error) {
-      toast.error("Failed to delete user");
+      toast.error("فشل في حذف المستخدم");
       console.error(error);
     }
   };
@@ -105,125 +105,150 @@ export const UsersTable = ({ retrigger }: UsersTableProps) => {
   };
 
   if (loading) {
-    return <div className="text-center py-8">Loading users...</div>;
+    return <div className="text-center py-8">جاري تحميل المستخدمين...</div>;
   }
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Users</h3>
+        <h3 className="text-lg font-semibold">المستخدمون</h3>
         <Button
           variant="outline"
           size="sm"
           onClick={handleRefresh}
           disabled={refreshing}
         >
-          <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-          {refreshing ? 'Refreshing...' : 'Refresh'}
+          <RefreshCw
+            className={`h-4 w-4 me-2 ${refreshing ? "animate-spin" : ""}`}
+          />
+          {refreshing ? "جاري التحديث..." : "تحديث"}
         </Button>
       </div>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Username</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="text-right">اسم المستخدم</TableHead>
+              <TableHead className="text-right">البريد الإلكتروني</TableHead>
+              <TableHead className="text-right">الدور</TableHead>
+              <TableHead className="text-right">الحالة</TableHead>
+              <TableHead className="text-left"></TableHead>
             </TableRow>
           </TableHeader>
-        <TableBody>
-          {users.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={6} className="text-center py-8 text-gray-500">
-                No users found
-              </TableCell>
-            </TableRow>
-          ) : (
-            users.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell className="font-medium">{user.username}</TableCell>
-                <TableCell>{user.email || "N/A"}</TableCell>
-                <TableCell>
-                  <Badge variant={getRoleBadgeVariant(user.role)}>
-                    {user.role.replace("_", " ")}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge variant={user.isActive ? "default" : "secondary"}>
-                    {user.isActive ? "Active" : "Inactive"}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex items-center justify-end space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        // TODO: Implement edit functionality
-                        toast.info("Edit functionality coming soon");
-                      }}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(user.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+          <TableBody>
+            {users.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={6}
+                  className="text-center py-8 text-gray-500"
+                >
+                  لا توجد مستخدمون
                 </TableCell>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+            ) : (
+              users.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell className="font-medium text-right">
+                    {user.username}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {user.email || "غير متاح"}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Badge variant={getRoleBadgeVariant(user.role)}>
+                      {user.role === "ADMIN"
+                        ? "مدير"
+                        : user.role === "PRODUCTION_MANAGER"
+                        ? "مدير إنتاج"
+                        : user.role === "FINANCIAL_MANAGER"
+                        ? "مدير مالي"
+                        : "مستخدم عادي"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Badge variant={user.isActive ? "default" : "secondary"}>
+                      {user.isActive ? "نشط" : "غير نشط"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-left">
+                    <div className="flex items-center justify-start space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          // TODO: Implement edit functionality
+                          toast.info("ميزة التعديل قريباً");
+                        }}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(user.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </div>
-      
+
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-2">
           <div className="text-sm text-muted-foreground">
-            Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalRows)} of {totalRows} entries
+            عرض {(currentPage - 1) * pageSize + 1} إلى{" "}
+            {Math.min(currentPage * pageSize, totalRows)} من {totalRows} إدخال
           </div>
           <Pagination>
             <PaginationContent>
               <PaginationItem>
-                <PaginationPrevious 
+                <PaginationPrevious
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();
                     if (currentPage > 1) handlePageChange(currentPage - 1);
                   }}
-                  className={currentPage <= 1 ? "pointer-events-none opacity-50" : ""}
+                  className={
+                    currentPage <= 1 ? "pointer-events-none opacity-50" : ""
+                  }
                 />
               </PaginationItem>
-              
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <PaginationItem key={page}>
-                  <PaginationLink
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handlePageChange(page);
-                    }}
-                    isActive={currentPage === page}
-                  >
-                    {page}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handlePageChange(page);
+                      }}
+                      isActive={currentPage === page}
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                )
+              )}
+
               <PaginationItem>
-                <PaginationNext 
+                <PaginationNext
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();
-                    if (currentPage < totalPages) handlePageChange(currentPage + 1);
+                    if (currentPage < totalPages)
+                      handlePageChange(currentPage + 1);
                   }}
-                  className={currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}
+                  className={
+                    currentPage >= totalPages
+                      ? "pointer-events-none opacity-50"
+                      : ""
+                  }
                 />
               </PaginationItem>
             </PaginationContent>

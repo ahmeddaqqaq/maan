@@ -176,18 +176,18 @@ export function AddExtractionDataDialog({
 
   // Get available months
   const months = [
-    { value: 1, label: "January" },
-    { value: 2, label: "February" },
-    { value: 3, label: "March" },
-    { value: 4, label: "April" },
-    { value: 5, label: "May" },
-    { value: 6, label: "June" },
-    { value: 7, label: "July" },
-    { value: 8, label: "August" },
-    { value: 9, label: "September" },
-    { value: 10, label: "October" },
-    { value: 11, label: "November" },
-    { value: 12, label: "December" },
+    { value: 1, label: "01" },
+    { value: 2, label: "02" },
+    { value: 3, label: "03" },
+    { value: 4, label: "04" },
+    { value: 5, label: "05" },
+    { value: 6, label: "06" },
+    { value: 7, label: "07" },
+    { value: 8, label: "08" },
+    { value: 9, label: "09" },
+    { value: 10, label: "10" },
+    { value: 11, label: "11" },
+    { value: 12, label: "12" },
   ];
 
   // Get available years (current year +/- 5 years)
@@ -200,20 +200,20 @@ export function AddExtractionDataDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="min-w-6xl w-full max-h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Add Extraction Data</DialogTitle>
+          <DialogTitle>إضافة بيانات الاستخراج</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* Entity, Month and Year Selectors */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label>Entity</Label>
+              <Label>الشركة</Label>
               <Select
                 value={selectedEntityId ? selectedEntityId.toString() : ""}
                 onValueChange={(value) => setSelectedEntityId(Number(value))}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select entity" />
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="اختر الشركة" />
                 </SelectTrigger>
                 <SelectContent>
                   {entities.map((entity) => (
@@ -226,17 +226,20 @@ export function AddExtractionDataDialog({
             </div>
 
             <div className="space-y-2">
-              <Label>Month</Label>
+              <Label>الشهر</Label>
               <Select
                 value={selectedMonth ? selectedMonth.toString() : ""}
                 onValueChange={(value) => setSelectedMonth(Number(value))}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select month" />
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="اختر الشهر" />
                 </SelectTrigger>
                 <SelectContent>
                   {months.map((month) => (
-                    <SelectItem key={month.value} value={month.value.toString()}>
+                    <SelectItem
+                      key={month.value}
+                      value={month.value.toString()}
+                    >
                       {month.label}
                     </SelectItem>
                   ))}
@@ -245,13 +248,13 @@ export function AddExtractionDataDialog({
             </div>
 
             <div className="space-y-2">
-              <Label>Year</Label>
+              <Label>السنة</Label>
               <Select
                 value={selectedYear ? selectedYear.toString() : ""}
                 onValueChange={(value) => setSelectedYear(Number(value))}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select year" />
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="اختر السنة" />
                 </SelectTrigger>
                 <SelectContent>
                   {years.map((year) => (
@@ -269,26 +272,32 @@ export function AddExtractionDataDialog({
             <div className="flex-1 overflow-auto">
               <div className="space-y-4">
                 <h3 className="text-lg font-medium mb-4">
-                  Extraction Data for {months.find(m => m.value === selectedMonth)?.label} {selectedYear}
+                  بيانات الاستخراج لشهر{" "}
+                  {months.find((m) => m.value === selectedMonth)?.label}{" "}
+                  {selectedYear}
                 </h3>
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="min-w-[150px]">
-                          Material
+                        <TableHead className="min-w-[150px] text-right">
+                          المادة
                         </TableHead>
-                        <TableHead className="min-w-[100px]">
-                          Quantity
+                        <TableHead className="min-w-[100px] text-right">
+                          الكمية
                         </TableHead>
-                        <TableHead className="min-w-[100px]">Is Used</TableHead>
-                        <TableHead className="min-w-[120px]">
-                          Cubic Meters
+                        <TableHead className="min-w-[100px] text-right">
+                          هل تم الاستخدام
                         </TableHead>
-                        <TableHead className="min-w-[120px]">
-                          Diesel Price
+                        <TableHead className="min-w-[120px] text-right">
+                          الأمتار المكعبة
                         </TableHead>
-                        <TableHead className="min-w-[200px]">Notes</TableHead>
+                        <TableHead className="min-w-[120px] text-right">
+                          سعر الديزل
+                        </TableHead>
+                        <TableHead className="min-w-[200px] text-right">
+                          ملاحظات
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -301,7 +310,7 @@ export function AddExtractionDataDialog({
 
                         return (
                           <TableRow key={material.id}>
-                            <TableCell className="font-medium">
+                            <TableCell className="font-medium text-right">
                               {material.name} ({material.unit})
                             </TableCell>
                             <TableCell>
@@ -310,12 +319,10 @@ export function AddExtractionDataDialog({
                                 min="0"
                                 step="0.01"
                                 className="w-full"
-                                value={
-                                  (getExtractionValue(
-                                    materialId,
-                                    "quantity"
-                                  ) as number) || ""
-                                }
+                                value={String(
+                                  getExtractionValue(materialId, "quantity") ||
+                                    ""
+                                )}
                                 onChange={(e) =>
                                   updateExtractionData(
                                     materialId,
@@ -349,10 +356,12 @@ export function AddExtractionDataDialog({
                                 disabled={!isUsed}
                                 value={
                                   isUsed
-                                    ? (getExtractionValue(
-                                        materialId,
-                                        "quantityInCubicMeters"
-                                      ) as number) || ""
+                                    ? String(
+                                        getExtractionValue(
+                                          materialId,
+                                          "quantityInCubicMeters"
+                                        ) || ""
+                                      )
                                     : ""
                                 }
                                 onChange={(e) =>
@@ -362,7 +371,7 @@ export function AddExtractionDataDialog({
                                     e.target.value
                                   )
                                 }
-                                placeholder={isUsed ? "0" : "N/A"}
+                                placeholder={isUsed ? "0" : "غير متاح"}
                               />
                             </TableCell>
                             <TableCell>
@@ -374,10 +383,12 @@ export function AddExtractionDataDialog({
                                 disabled={!isUsed}
                                 value={
                                   isUsed
-                                    ? (getExtractionValue(
-                                        materialId,
-                                        "dieselPriceThisMonth"
-                                      ) as number) || ""
+                                    ? String(
+                                        getExtractionValue(
+                                          materialId,
+                                          "dieselPriceThisMonth"
+                                        ) || ""
+                                      )
                                     : ""
                                 }
                                 onChange={(e) =>
@@ -387,7 +398,7 @@ export function AddExtractionDataDialog({
                                     e.target.value
                                   )
                                 }
-                                placeholder={isUsed ? "0.00" : "N/A"}
+                                placeholder={isUsed ? "0.00" : "غير متاح"}
                               />
                             </TableCell>
                             <TableCell>
@@ -406,7 +417,7 @@ export function AddExtractionDataDialog({
                                     e.target.value
                                   )
                                 }
-                                placeholder="Optional notes..."
+                                placeholder="ملاحظات اختيارية..."
                                 rows={2}
                               />
                             </TableCell>
@@ -423,21 +434,23 @@ export function AddExtractionDataDialog({
 
         <div className="flex justify-end space-x-2 pt-4 border-t">
           <Button variant="outline" onClick={handleClose} disabled={saving}>
-            Cancel
+            إلغاء
           </Button>
           <Button
             onClick={saveExtractionData}
-            disabled={saving || !selectedEntityId || !selectedMonth || !selectedYear}
+            disabled={
+              saving || !selectedEntityId || !selectedMonth || !selectedYear
+            }
           >
             {saving ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Saving...
+                جاري الحفظ...
               </>
             ) : (
               <>
                 <Save className="h-4 w-4 mr-2" />
-                Save Data
+                حفظ البيانات
               </>
             )}
           </Button>

@@ -239,30 +239,56 @@ export function MonthlyExtractionTable() {
       mines.find((m) => m.id.toString() === selectedMine)?.name ||
       "منجم غير معروف";
 
-    // Get data for the specific month
+    // Get data for the specific month - only used materials
     const monthData = monthlyData.filter(
-      (item) => item.year === year && item.month === month
+      (item) =>
+        item.year === year && item.month === month && item.isUsed === true
     );
 
     // Calculate totals based on business requirements
-    const totalQuantity = monthData.reduce((sum, item) => sum + item.quantity, 0); // All materials quantity (tons)
-    const usedMaterials = monthData.filter(item => item.isUsed === true);
-    const totalUsedQuantity = usedMaterials.reduce((sum, item) => sum + item.quantity, 0); // Used materials quantity (tons)
-    const totalCubicMeters = usedMaterials.reduce((sum, item) => sum + (item.quantityInCubicMeters || 0), 0); // Used materials cubic meters
-    const totalDieselCost = usedMaterials.reduce((sum, item) => sum + (item.dieselPriceThisMonth || 0), 0); // Total diesel cost
-    const totalValue = usedMaterials.reduce((sum, item) => sum + (item.totalPrice || 0), 0); // Use calculated totalPrice field
+    const totalQuantity = monthData.reduce(
+      (sum, item) => sum + item.quantity,
+      0
+    ); // All materials quantity (tons)
+    const usedMaterials = monthData.filter((item) => item.isUsed === true);
+    const totalUsedQuantity = usedMaterials.reduce(
+      (sum, item) => sum + item.quantity,
+      0
+    ); // Used materials quantity (tons)
+    const totalCubicMeters = usedMaterials.reduce(
+      (sum, item) => sum + (item.quantityInCubicMeters || 0),
+      0
+    ); // Used materials cubic meters
+    // const totalDieselCost = usedMaterials.reduce(
+    //   (sum, item) => sum + (item.dieselPriceThisMonth || 0),
+    //   0
+    // ); // Total diesel cost
+    const totalValue = usedMaterials.reduce(
+      (sum, item) => sum + (item.totalPrice || 0),
+      0
+    ); // Use calculated totalPrice field
 
     // Get Arabic month names
     const arabicMonths = [
-      "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
-      "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
+      "يناير",
+      "فبراير",
+      "مارس",
+      "أبريل",
+      "مايو",
+      "يونيو",
+      "يوليو",
+      "أغسطس",
+      "سبتمبر",
+      "أكتوبر",
+      "نوفمبر",
+      "ديسمبر",
     ];
-    
+
     const arabicDate = `${arabicMonths[month - 1]} ${year}`;
-    const currentDate = new Date().toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: '2-digit', 
-      day: '2-digit' 
+    const currentDate = new Date().toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
     });
 
     // Create HTML content with proper Arabic text and fixed colors
@@ -292,12 +318,9 @@ export function MonthlyExtractionTable() {
           <div style="width: 48%;">
             <h3 style="margin: 0 0 10px 0; color: #34495e; border-bottom: 1px solid #bdc3c7; padding-bottom: 5px; font-size: 14px;">تفاصيل التقرير</h3>
             <p style="margin: 5px 0; font-size: 12px; color: #333333;">تاريخ الإنشاء: ${currentDate}</p>
-            <p style="margin: 5px 0; font-size: 12px; color: #333333;">إجمالي المواد: ${monthData.length}</p>
-            <p style="margin: 5px 0; font-size: 12px; color: #333333;">المواد المستخدمة: ${usedMaterials.length}</p>
-            <p style="margin: 5px 0; font-size: 12px; color: #333333; font-weight: bold;">إجمالي الكمية: ${totalQuantity.toFixed(2)}</p>
-            <p style="margin: 5px 0; font-size: 12px; color: #333333; font-weight: bold;">إجمالي الأمتار المكعبة: ${totalCubicMeters.toFixed(2)} م³</p>
-            <p style="margin: 5px 0; font-size: 12px; color: #333333; font-weight: bold;">إجمالي تكلفة الديزل: $${totalDieselCost.toFixed(2)}</p>
-            <p style="margin: 5px 0; font-size: 12px; color: #333333; font-weight: bold;">القيمة الإجمالية: $${totalValue.toFixed(2)}</p>
+            <p style="margin: 5px 0; font-size: 12px; color: #333333; font-weight: bold;">إجمالي الكمية: ${totalQuantity.toFixed(
+              2
+            )}</p>
           </div>
         </div>
 
@@ -305,41 +328,65 @@ export function MonthlyExtractionTable() {
           <thead>
             <tr style="background-color: #f8f9fa;">
               <th style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-weight: bold; color: #333333; font-size: 11px;">اسم المادة</th>
-              <th style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-weight: bold; color: #333333; font-size: 11px;">الوحدة</th>
-              <th style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-weight: bold; color: #333333; font-size: 11px;">الكمية</th>
-              <th style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-weight: bold; color: #333333; font-size: 11px;">أمتار مكعبة</th>
-              <th style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-weight: bold; color: #333333; font-size: 11px;">سعر الديزل</th>
+              <th style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-weight: bold; color: #333333; font-size: 11px;">الكمية (طن)</th>
+              <th style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-weight: bold; color: #333333; font-size: 11px;">الكمية (متر مكعب)</th>
               <th style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-weight: bold; color: #333333; font-size: 11px;">القيمة الإجمالية</th>
               <th style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-weight: bold; color: #333333; font-size: 11px;">ملاحظات</th>
             </tr>
           </thead>
           <tbody>
-            ${monthData.length > 0 ? monthData.map((item, index) => {
-              return `
-              <tr style="background-color: ${index % 2 === 0 ? '#f9f9f9' : '#ffffff'};">
-                <td style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px; color: #333333;">${item.material.name}</td>
-                <td style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px; color: #333333;">${item.material.unit}</td>
-                <td style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px; color: #333333;">${item.quantity.toFixed(2)}</td>
+            ${
+              monthData.length > 0
+                ? monthData
+                    .map((item, index) => {
+                      return `
+              <tr style="background-color: ${
+                index % 2 === 0 ? "#f9f9f9" : "#ffffff"
+              };">
+                <td style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px; color: #333333;">${
+                  item.material.name
+                }</td>
+                <td style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px; color: #333333;">${item.quantity.toFixed(
+                  2
+                )} طن</td>
                 <td style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px; color: #333333;">
-                  ${item.isUsed && item.quantityInCubicMeters ? item.quantityInCubicMeters.toFixed(2) + ' م³' : '-'}
-                </td>
-                <td style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px; color: #333333;">
-                  ${item.isUsed && item.dieselPriceThisMonth ? '$' + item.dieselPriceThisMonth.toFixed(2) : '-'}
+                  ${
+                    item.quantityInCubicMeters
+                      ? item.quantityInCubicMeters.toFixed(2) + " م³"
+                      : "-"
+                  }
                 </td>
                 <td style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px; color: #333333; font-weight: bold;">
-                  ${item.isUsed && item.totalPrice ? '$' + item.totalPrice.toFixed(2) : '-'}
+                  ${item.totalPrice ? "$" + item.totalPrice.toFixed(2) : "-"}
                 </td>
                 <td style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px; color: #333333;">
-                  ${item.notes || '-'}
+                  ${item.notes || "-"}
                 </td>
               </tr>`;
-            }).join('') : `
+                    })
+                    .join("") +
+                  `
+              <tr style="background-color: #e8f4f8; border-top: 2px solid #2c3e50;">
+                <td style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-size: 11px; color: #2c3e50; font-weight: bold;">الإجمالي للمواد المستخدمة</td>
+                <td style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-size: 11px; color: #2c3e50; font-weight: bold;">${totalQuantity.toFixed(
+                  2
+                )} طن</td>
+                <td style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-size: 11px; color: #2c3e50; font-weight: bold;">${totalCubicMeters.toFixed(
+                  2
+                )} م³</td>
+                <td style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-size: 11px; color: #27ae60; font-weight: bold;">$${totalValue.toFixed(
+                  2
+                )}</td>
+                <td style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-size: 11px; color: #2c3e50;">-</td>
+              </tr>`
+                : `
               <tr>
-                <td colspan="7" style="border: 1px solid #dddddd; padding: 20px; text-align: center; color: #7f8c8d; font-size: 12px;">
-                  لا توجد بيانات استخراج لهذا الشهر
+                <td colspan="5" style="border: 1px solid #dddddd; padding: 20px; text-align: center; color: #7f8c8d; font-size: 12px;">
+                  لا توجد مواد مستخدمة لهذا الشهر
                 </td>
               </tr>
-            `}
+            `
+            }
           </tbody>
         </table>
 
@@ -349,47 +396,57 @@ export function MonthlyExtractionTable() {
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
             <div style="text-align: center;">
               <h4 style="margin: 0 0 10px 0; color: #34495e; font-size: 14px;">المواد الكلية</h4>
-              <p style="margin: 5px 0; font-size: 12px; color: #333333;">العدد الكلي: <span style="font-weight: bold;">${monthData.length}</span></p>
-              <p style="margin: 5px 0; font-size: 12px; color: #333333;">الكمية الإجمالية: <span style="font-weight: bold;">${totalQuantity.toFixed(2)}</span></p>
+              <p style="margin: 5px 0; font-size: 12px; color: #333333;">العدد الكلي: <span style="font-weight: bold;">${
+                monthData.length
+              }</span></p>
+              <p style="margin: 5px 0; font-size: 12px; color: #333333;">الكمية الإجمالية: <span style="font-weight: bold;">${totalQuantity.toFixed(
+                2
+              )}</span></p>
             </div>
             <div style="text-align: center;">
               <h4 style="margin: 0 0 10px 0; color: #34495e; font-size: 14px;">التفاصيل المالية</h4>
-              <p style="margin: 5px 0; font-size: 12px; color: #333333;">المواد المستخدمة: <span style="font-weight: bold;">${usedMaterials.length}</span></p>
-              <p style="margin: 5px 0; font-size: 12px; color: #333333;">الكمية المستخدمة: <span style="font-weight: bold;">${totalUsedQuantity.toFixed(2)}</span></p>
-              <p style="margin: 5px 0; font-size: 12px; color: #333333;">الأمتار المكعبة: <span style="font-weight: bold; color: #e74c3c;">${totalCubicMeters.toFixed(2)} م³</span></p>
-              <p style="margin: 5px 0; font-size: 12px; color: #333333;">تكلفة الديزل: <span style="font-weight: bold; color: #f39c12;">$${totalDieselCost.toFixed(2)}</span></p>
-              <p style="margin: 5px 0; font-size: 12px; color: #333333;">القيمة الإجمالية: <span style="font-weight: bold; color: #27ae60;">$${totalValue.toFixed(2)}</span></p>
+              <p style="margin: 5px 0; font-size: 12px; color: #333333;">المواد المستخدمة: <span style="font-weight: bold;">${
+                usedMaterials.length
+              }</span></p>
+              <p style="margin: 5px 0; font-size: 12px; color: #333333;">الكمية المستخدمة: <span style="font-weight: bold;">${totalUsedQuantity.toFixed(
+                2
+              )}</span></p>
+              <p style="margin: 5px 0; font-size: 12px; color: #333333;">الأمتار المكعبة: <span style="font-weight: bold; color: #e74c3c;">${totalCubicMeters.toFixed(
+                2
+              )} م³</span></p>
+              <p style="margin: 5px 0; font-size: 12px; color: #333333;">القيمة الإجمالية: <span style="font-weight: bold; color: #27ae60;">$${totalValue.toFixed(
+                2
+              )}</span></p>
             </div>
           </div>
         </div>
 
         <div style="margin-top: 40px; text-align: center; font-size: 10px; color: #7f8c8d; border-top: 1px solid #bdc3c7; padding-top: 20px;">
-          <p style="margin: 5px 0;">تم إنشاء هذه الفاتورة تلقائياً من نظام إدارة الاستخراج</p>
           <p style="margin: 5px 0;">تم الإنشاء في ${currentDate}</p>
         </div>
       </div>
     `;
 
     // Create a completely isolated iframe to avoid CSS inheritance
-    const iframe = document.createElement('iframe');
-    iframe.style.position = 'absolute';
-    iframe.style.top = '-9999px';
-    iframe.style.left = '-9999px';
-    iframe.style.width = '800px';
-    iframe.style.height = '600px';
-    iframe.style.border = 'none';
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "absolute";
+    iframe.style.top = "-9999px";
+    iframe.style.left = "-9999px";
+    iframe.style.width = "800px";
+    iframe.style.height = "600px";
+    iframe.style.border = "none";
     document.body.appendChild(iframe);
 
     // Wait for iframe to load
     await new Promise<void>((resolve) => {
       iframe.onload = () => resolve();
-      iframe.src = 'about:blank';
+      iframe.src = "about:blank";
     });
 
     const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
     if (!iframeDoc) {
       document.body.removeChild(iframe);
-      throw new Error('Could not access iframe document');
+      throw new Error("Could not access iframe document");
     }
 
     // Write the HTML content to the iframe
@@ -421,24 +478,24 @@ export function MonthlyExtractionTable() {
 
     try {
       // Wait a bit for fonts to load
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
       // Get the content element from iframe
       const contentElement = iframeDoc.body.firstElementChild as HTMLElement;
-      
+
       // Convert HTML to canvas with better options
       const canvas = await html2canvas(contentElement, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#ffffff',
+        backgroundColor: "#ffffff",
         width: 800,
         height: contentElement.scrollHeight || 600,
         scrollX: 0,
         scrollY: 0,
         windowWidth: 800,
         windowHeight: 600,
-        foreignObjectRendering: true
+        foreignObjectRendering: true,
       });
 
       // Remove iframe
@@ -446,30 +503,32 @@ export function MonthlyExtractionTable() {
 
       // Create PDF with better sizing
       const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
       });
-      
-      const imgData = canvas.toDataURL('image/png', 1.0);
+
+      const imgData = canvas.toDataURL("image/png", 1.0);
       const imgWidth = 210; // A4 width in mm
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
+
       // Add image to PDF
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-      
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+
       // Save with proper filename
-      const filename = `فاتورة-${mineName.replace(/\s+/g, "-")}-${arabicDate.replace(/\s+/g, "-")}.pdf`;
+      const filename = `فاتورة-${mineName.replace(
+        /\s+/g,
+        "-"
+      )}-${arabicDate.replace(/\s+/g, "-")}.pdf`;
       pdf.save(filename);
-      
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      console.error("Error generating PDF:", error);
       // Remove iframe in case of error
       if (document.body.contains(iframe)) {
         document.body.removeChild(iframe);
       }
       // Show user-friendly error
-      alert('حدث خطأ أثناء إنشاء ملف PDF. يرجى المحاولة مرة أخرى.');
+      alert("حدث خطأ أثناء إنشاء ملف PDF. يرجى المحاولة مرة أخرى.");
     }
   };
 
@@ -477,8 +536,8 @@ export function MonthlyExtractionTable() {
     return (
       <Card>
         <CardContent className="flex items-center justify-center p-8">
-          <Loader2 className="h-6 w-6 animate-spin mr-2" />
-          Loading...
+          <Loader2 className="h-6 w-6 animate-spin me-2" />
+          جاري التحميل...
         </CardContent>
       </Card>
     );
@@ -489,15 +548,15 @@ export function MonthlyExtractionTable() {
       {/* Controls */}
       <Card>
         <CardHeader>
-          <CardTitle>Monthly Extraction Data</CardTitle>
+          <CardTitle>بيانات الاستخراج الشهرية</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="mine-select">Select Mine</Label>
+              <Label htmlFor="mine-select">اختر المنجم</Label>
               <Select value={selectedMine} onValueChange={handleMineChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a mine" />
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="اختر منجم" />
                 </SelectTrigger>
                 <SelectContent>
                   {mines.map((mine) => (
@@ -510,10 +569,10 @@ export function MonthlyExtractionTable() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="year-select">Select Year</Label>
+              <Label htmlFor="year-select">اختر السنة</Label>
               <Select value={selectedYear} onValueChange={handleYearChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a year" />
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="اختر سنة" />
                 </SelectTrigger>
                 <SelectContent>
                   {Array.from({ length: 10 }, (_, i) => {
@@ -534,8 +593,8 @@ export function MonthlyExtractionTable() {
                 disabled={!selectedMine || !selectedYear}
                 className="w-full"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Data
+                <Plus className="h-4 w-4 me-2" />
+                إضافة بيانات
               </Button>
             </div>
 
@@ -548,8 +607,8 @@ export function MonthlyExtractionTable() {
                 variant="outline"
                 className="w-full"
               >
-                <Download className="h-4 w-4 mr-2" />
-                Export CSV
+                <Download className="h-4 w-4 me-2" />
+                تصدير CSV
               </Button>
             </div>
           </div>
@@ -562,7 +621,7 @@ export function MonthlyExtractionTable() {
           <CardHeader>
             <CardTitle>
               {mines.find((m) => m.id.toString() === selectedMine)?.name} -{" "}
-              {selectedYear} Extraction Data
+              بيانات الاستخراج {selectedYear}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -571,11 +630,11 @@ export function MonthlyExtractionTable() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-24">Date</TableHead>
+                      <TableHead className="w-24 text-right">التاريخ</TableHead>
                       {materials.map((material) => (
                         <TableHead
                           key={material.id}
-                          className="text-center min-w-32"
+                          className="text-right min-w-32"
                         >
                           <div className="space-y-1">
                             <div className="font-medium">{material.name}</div>
@@ -585,7 +644,7 @@ export function MonthlyExtractionTable() {
                           </div>
                         </TableHead>
                       ))}
-                      <TableHead className="w-16">Actions</TableHead>
+                      <TableHead className="w-16 text-left"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -597,7 +656,7 @@ export function MonthlyExtractionTable() {
 
                       return (
                         <TableRow key={monthKey}>
-                          <TableCell className="font-medium">
+                          <TableCell className="font-medium text-right">
                             {monthDate}
                           </TableCell>
                           {materials.map((material) => {
@@ -610,13 +669,13 @@ export function MonthlyExtractionTable() {
                             return (
                               <TableCell
                                 key={material.id}
-                                className="text-center"
+                                className="text-right"
                               >
                                 {data ? data.quantity : "-"}
                               </TableCell>
                             );
                           })}
-                          <TableCell className="text-center">
+                          <TableCell className="text-left">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="h-8 w-8 p-0">
@@ -630,8 +689,8 @@ export function MonthlyExtractionTable() {
                                     exportMonthlyInvoice(year, month)
                                   }
                                 >
-                                  <FileText className="mr-2 h-4 w-4" />
-                                  Export Invoice
+                                  <FileText className="me-2 h-4 w-4" />
+                                  تصدير الفاتورة
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
@@ -643,52 +702,66 @@ export function MonthlyExtractionTable() {
                 </Table>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
-                  No extraction data found for this mine and year.
+                  لا توجد بيانات استخراج لهذا المنجم والسنة.
                 </div>
               )}
             </div>
-            
+
             {totalPages > 1 && (
               <div className="flex items-center justify-between px-2 pt-4">
                 <div className="text-sm text-muted-foreground">
-                  Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalRows)} of {totalRows} entries
+                  عرض {(currentPage - 1) * pageSize + 1} إلى{" "}
+                  {Math.min(currentPage * pageSize, totalRows)} من {totalRows}{" "}
+                  إدخال
                 </div>
                 <Pagination>
                   <PaginationContent>
                     <PaginationItem>
-                      <PaginationPrevious 
+                      <PaginationPrevious
                         href="#"
                         onClick={(e) => {
                           e.preventDefault();
-                          if (currentPage > 1) handlePageChange(currentPage - 1);
+                          if (currentPage > 1)
+                            handlePageChange(currentPage - 1);
                         }}
-                        className={currentPage <= 1 ? "pointer-events-none opacity-50" : ""}
+                        className={
+                          currentPage <= 1
+                            ? "pointer-events-none opacity-50"
+                            : ""
+                        }
                       />
                     </PaginationItem>
-                    
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                      <PaginationItem key={page}>
-                        <PaginationLink
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handlePageChange(page);
-                          }}
-                          isActive={currentPage === page}
-                        >
-                          {page}
-                        </PaginationLink>
-                      </PaginationItem>
-                    ))}
-                    
+
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (page) => (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handlePageChange(page);
+                            }}
+                            isActive={currentPage === page}
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      )
+                    )}
+
                     <PaginationItem>
-                      <PaginationNext 
+                      <PaginationNext
                         href="#"
                         onClick={(e) => {
                           e.preventDefault();
-                          if (currentPage < totalPages) handlePageChange(currentPage + 1);
+                          if (currentPage < totalPages)
+                            handlePageChange(currentPage + 1);
                         }}
-                        className={currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}
+                        className={
+                          currentPage >= totalPages
+                            ? "pointer-events-none opacity-50"
+                            : ""
+                        }
                       />
                     </PaginationItem>
                   </PaginationContent>

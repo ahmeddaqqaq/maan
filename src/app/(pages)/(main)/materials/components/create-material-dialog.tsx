@@ -29,13 +29,18 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { CreateMaterialDto, MaterialService, EntityService, EntityResponse } from "../../../../../../client";
+import {
+  CreateMaterialDto,
+  MaterialService,
+  EntityService,
+  EntityResponse,
+} from "../../../../../../client";
 
 const createMaterialSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  unit: z.string().min(1, "Unit is required"),
+  name: z.string().min(1, "الاسم مطلوب"),
+  unit: z.string().min(1, "الوحدة مطلوبة"),
   isActive: z.boolean(),
-  entityId: z.number().min(1, "Entity is required"),
+  entityId: z.number().min(1, "الجهة مطلوبة"),
 });
 
 type CreateMaterialFormData = z.infer<typeof createMaterialSchema>;
@@ -64,14 +69,13 @@ export function CreateMaterialDialog({
     },
   });
 
-  // Load entities
   useEffect(() => {
     const loadEntities = async () => {
       try {
         const response = await EntityService.entityControllerFindMany({});
         setEntities(response.data || []);
       } catch (error) {
-        console.error("Failed to load entities:", error);
+        console.error("فشل تحميل الجهات:", error);
       }
     };
 
@@ -94,12 +98,12 @@ export function CreateMaterialDialog({
         requestBody: createMaterialDto,
       });
 
-      toast.success("Material created successfully");
+      toast.success("تم إنشاء المادة بنجاح");
       form.reset();
       onOpenChange(false);
       onMaterialCreated?.();
     } catch (error) {
-      toast.error("Failed to create material");
+      toast.error("فشل إنشاء المادة");
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -110,7 +114,7 @@ export function CreateMaterialDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Material</DialogTitle>
+          <DialogTitle>إنشاء مادة جديدة</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -119,9 +123,9 @@ export function CreateMaterialDialog({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>الاسم</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Enter material name" />
+                    <Input {...field} placeholder="أدخل اسم المادة" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -133,11 +137,11 @@ export function CreateMaterialDialog({
               name="unit"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Unit</FormLabel>
+                  <FormLabel>الوحدة</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
-                      placeholder="Enter unit (e.g., kg, tons, m3)"
+                      placeholder="أدخل الوحدة (مثال: كغ، طن، م³)"
                     />
                   </FormControl>
                   <FormMessage />
@@ -150,19 +154,22 @@ export function CreateMaterialDialog({
               name="entityId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Entity</FormLabel>
+                  <FormLabel>الجهة</FormLabel>
                   <Select
                     onValueChange={(value) => field.onChange(Number(value))}
                     value={field.value ? field.value.toString() : ""}
                   >
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select an entity" />
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="اختر جهة" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {entities.map((entity) => (
-                        <SelectItem key={entity.id} value={entity.id.toString()}>
+                        <SelectItem
+                          key={entity.id}
+                          value={entity.id.toString()}
+                        >
                           {entity.name}
                         </SelectItem>
                       ))}
@@ -179,13 +186,14 @@ export function CreateMaterialDialog({
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
-                    <FormLabel className="text-base">Active</FormLabel>
+                    <FormLabel className="text-base">نشط</FormLabel>
                     <p className="text-sm text-muted-foreground">
-                      Enable or disable this material
+                      تفعيل أو تعطيل هذه المادة
                     </p>
                   </div>
                   <FormControl>
                     <Switch
+                      dir="ltr"
                       checked={field.value}
                       onCheckedChange={field.onChange}
                     />
@@ -200,10 +208,10 @@ export function CreateMaterialDialog({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
               >
-                Cancel
+                إلغاء
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Creating..." : "Create Material"}
+                {isLoading ? "جارٍ الإنشاء..." : "إنشاء المادة"}
               </Button>
             </div>
           </form>

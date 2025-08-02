@@ -14,12 +14,12 @@ export default function ContractsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Contract Settings</h2>
-          <p className="text-gray-600">Manage contracts and their details</p>
+          <h2 className="text-2xl font-bold">إعدادات العقود</h2>
+          <p className="text-gray-600">إدارة العقود وتفاصيلها</p>
         </div>
         <Button onClick={() => setShowCreateContract(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Contract
+          إضافة عقد
         </Button>
       </div>
 

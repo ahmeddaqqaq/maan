@@ -29,13 +29,18 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { CreateExpenseDto, ExpenseService, EntityService, EntityResponse } from "../../../../../../client";
+import {
+  CreateExpenseDto,
+  ExpenseService,
+  EntityService,
+  EntityResponse,
+} from "../../../../../../client";
 
 const createExpenseSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  unit: z.string().min(1, "Unit is required"),
+  name: z.string().min(1, "مطلوب اسم المصروف"),
+  unit: z.string().min(1, "مطلوب وحدة القياس"),
   isActive: z.boolean(),
-  entityId: z.number().min(1, "Entity is required"),
+  entityId: z.number().min(1, "مطلوب اختيار الشركة"),
 });
 
 type CreateExpenseFormData = z.infer<typeof createExpenseSchema>;
@@ -71,7 +76,7 @@ export function CreateExpenseDialog({
         const response = await EntityService.entityControllerFindMany({});
         setEntities(response.data || []);
       } catch (error) {
-        console.error("Failed to load entities:", error);
+        console.error("فشل تحميل الشركات:", error);
       }
     };
 
@@ -94,12 +99,12 @@ export function CreateExpenseDialog({
         requestBody: createExpenseDto,
       });
 
-      toast.success("Expense created successfully");
+      toast.success("تم إنشاء المصروف بنجاح");
       form.reset();
       onOpenChange(false);
       onExpenseCreated?.();
     } catch (error) {
-      toast.error("Failed to create expense");
+      toast.error("فشل إنشاء المصروف");
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -110,7 +115,7 @@ export function CreateExpenseDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Expense</DialogTitle>
+          <DialogTitle>إنشاء مصروف جديد</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -119,9 +124,9 @@ export function CreateExpenseDialog({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>الاسم</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Enter expense name" />
+                    <Input {...field} placeholder="أدخل اسم المصروف" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -133,11 +138,11 @@ export function CreateExpenseDialog({
               name="unit"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Unit</FormLabel>
+                  <FormLabel>وحدة القياس</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
-                      placeholder="Enter unit (e.g., each, kg, hours)"
+                      placeholder="أدخل الوحدة (مثل: قطعة، كجم، ساعات)"
                     />
                   </FormControl>
                   <FormMessage />
@@ -150,19 +155,22 @@ export function CreateExpenseDialog({
               name="entityId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Entity</FormLabel>
+                  <FormLabel>الشركة</FormLabel>
                   <Select
                     onValueChange={(value) => field.onChange(Number(value))}
                     value={field.value ? field.value.toString() : ""}
                   >
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select an entity" />
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="اختر الشركة" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {entities.map((entity) => (
-                        <SelectItem key={entity.id} value={entity.id.toString()}>
+                        <SelectItem
+                          key={entity.id}
+                          value={entity.id.toString()}
+                        >
                           {entity.name}
                         </SelectItem>
                       ))}
@@ -179,13 +187,14 @@ export function CreateExpenseDialog({
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
-                    <FormLabel className="text-base">Active</FormLabel>
+                    <FormLabel className="text-base">مفعل</FormLabel>
                     <p className="text-sm text-muted-foreground">
-                      Enable or disable this expense type
+                      تفعيل أو تعطيل هذا النوع من المصروفات
                     </p>
                   </div>
                   <FormControl>
                     <Switch
+                      lang="ar"
                       checked={field.value}
                       onCheckedChange={field.onChange}
                     />
@@ -200,10 +209,10 @@ export function CreateExpenseDialog({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
               >
-                Cancel
+                إلغاء
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Creating..." : "Create Expense"}
+                {isLoading ? "جاري الإنشاء..." : "إنشاء مصروف"}
               </Button>
             </div>
           </form>

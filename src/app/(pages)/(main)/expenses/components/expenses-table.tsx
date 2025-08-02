@@ -10,7 +10,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { ExpenseService, ExpenseResponse } from "../../../../../../client";
@@ -55,12 +54,12 @@ export const ExpensesTable = ({ retrigger }: ExpensesTableProps) => {
       setExpenses(response.data || []);
       setTotalRows(response.rows || 0);
       setTotalPages(Math.ceil((response.rows || 0) / pageSize));
-      
+
       if (isRefresh) {
-        toast.success("Expenses refreshed successfully");
+        toast.success("تم تحديث المصاريف بنجاح");
       }
     } catch (error) {
-      toast.error("Failed to fetch expenses");
+      toast.error("فشل في جلب المصاريف");
       console.error(error);
     } finally {
       if (isRefresh) {
@@ -80,128 +79,147 @@ export const ExpensesTable = ({ retrigger }: ExpensesTableProps) => {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this expense?")) return;
+    if (!confirm("هل أنت متأكد من حذف هذا المصروف؟")) return;
 
     try {
       await ExpenseService.expenseControllerDelete({ id });
-      toast.success("Expense deleted successfully");
+      toast.success("تم حذف المصروف بنجاح");
       fetchExpenses();
     } catch (error) {
-      toast.error("Failed to delete expense");
+      toast.error("فشل في حذف المصروف");
       console.error(error);
     }
   };
 
   if (loading) {
-    return <div className="text-center py-8">Loading expenses...</div>;
+    return <div className="text-center py-8">جارٍ تحميل المصاريف...</div>;
   }
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Expenses</h3>
+        <h3 className="text-lg font-semibold">المصاريف</h3>
         <Button
           variant="outline"
           size="sm"
           onClick={handleRefresh}
           disabled={refreshing}
         >
-          <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-          {refreshing ? 'Refreshing...' : 'Refresh'}
+          <RefreshCw
+            className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
+          />
+          {refreshing ? "جارٍ التحديث..." : "تحديث"}
         </Button>
       </div>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Unit</TableHead>
-              <TableHead>Entity ID</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="text-right">الاسم</TableHead>
+              <TableHead className="text-right">الوحدة</TableHead>
+              <TableHead className="text-right">معرف الشركة</TableHead>
+              <TableHead className="text-left"></TableHead>
             </TableRow>
           </TableHeader>
-        <TableBody>
-          {expenses.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={4} className="text-center py-8 text-gray-500">
-                No expenses found
-              </TableCell>
-            </TableRow>
-          ) : (
-            expenses.map((expense) => (
-              <TableRow key={expense.id}>
-                <TableCell className="font-medium">{expense.name}</TableCell>
-                <TableCell>{expense.unit}</TableCell>
-                <TableCell>{expense.entity?.id || "N/A"}</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex items-center justify-end space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        // TODO: Implement edit functionality
-                        toast.info("Edit functionality coming soon");
-                      }}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(expense.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+          <TableBody>
+            {expenses.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={4}
+                  className="text-center py-8 text-gray-500"
+                >
+                  لا توجد مصاريف
                 </TableCell>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+            ) : (
+              expenses.map((expense) => (
+                <TableRow key={expense.id}>
+                  <TableCell className="font-medium text-right">
+                    {expense.name}
+                  </TableCell>
+                  <TableCell className="text-right">{expense.unit}</TableCell>
+                  <TableCell className="text-right">
+                    {expense.entity?.id || "غير متوفر"}
+                  </TableCell>
+                  <TableCell className="text-left">
+                    <div className="flex items-center justify-start space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          // TODO: Implement edit functionality
+                          toast.info("وظيفة التعديل قادمة قريبًا");
+                        }}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(expense.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </div>
-      
+
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-2">
           <div className="text-sm text-muted-foreground">
-            Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalRows)} of {totalRows} entries
+            عرض {(currentPage - 1) * pageSize + 1} إلى{" "}
+            {Math.min(currentPage * pageSize, totalRows)} من {totalRows} مدخلات
           </div>
           <Pagination>
             <PaginationContent>
               <PaginationItem>
-                <PaginationPrevious 
+                <PaginationPrevious
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();
                     if (currentPage > 1) handlePageChange(currentPage - 1);
                   }}
-                  className={currentPage <= 1 ? "pointer-events-none opacity-50" : ""}
+                  className={
+                    currentPage <= 1 ? "pointer-events-none opacity-50" : ""
+                  }
                 />
               </PaginationItem>
-              
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <PaginationItem key={page}>
-                  <PaginationLink
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handlePageChange(page);
-                    }}
-                    isActive={currentPage === page}
-                  >
-                    {page}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handlePageChange(page);
+                      }}
+                      isActive={currentPage === page}
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                )
+              )}
+
               <PaginationItem>
-                <PaginationNext 
+                <PaginationNext
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();
-                    if (currentPage < totalPages) handlePageChange(currentPage + 1);
+                    if (currentPage < totalPages)
+                      handlePageChange(currentPage + 1);
                   }}
-                  className={currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}
+                  className={
+                    currentPage >= totalPages
+                      ? "pointer-events-none opacity-50"
+                      : ""
+                  }
                 />
               </PaginationItem>
             </PaginationContent>

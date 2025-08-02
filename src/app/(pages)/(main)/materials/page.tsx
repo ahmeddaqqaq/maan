@@ -14,12 +14,12 @@ export default function MaterialsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Material Settings</h2>
-          <p className="text-gray-600">Manage materials and their properties</p>
+          <h2 className="text-2xl font-bold">إعدادات المواد</h2>
+          <p className="text-gray-600">إدارة المواد وخصائصها</p>
         </div>
         <Button onClick={() => setShowCreateMaterial(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Material
+          إضافة مادة
         </Button>
       </div>
 

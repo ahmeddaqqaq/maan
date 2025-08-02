@@ -36,8 +36,8 @@ import {
 } from "../../../../../../client";
 
 const createMineSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  contractId: z.number().min(1, "Contract ID is required"),
+  name: z.string().min(1, "الاسم مطلوب"),
+  contractId: z.number().min(1, "معرف العقد مطلوب"),
   location: z.string().optional(),
 });
 
@@ -77,7 +77,7 @@ export function CreateMineDialog({
       const response = await ContractService.contractControllerFindMany({});
       setContracts(response.data || []);
     } catch (error) {
-      toast.error("Failed to fetch contracts");
+      toast.error("فشل في جلب العقود");
       console.error(error);
     }
   };
@@ -95,12 +95,12 @@ export function CreateMineDialog({
         requestBody: createMineDto,
       });
 
-      toast.success("Mine created successfully");
+      toast.success("تم إنشاء المنجم بنجاح");
       form.reset();
       onOpenChange(false);
       onMineCreated();
     } catch (error) {
-      toast.error("Failed to create mine");
+      toast.error("فشل في إنشاء المنجم");
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -111,7 +111,7 @@ export function CreateMineDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Mine</DialogTitle>
+          <DialogTitle>إنشاء منجم جديد</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -120,9 +120,9 @@ export function CreateMineDialog({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>الاسم</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Enter mine name" />
+                    <Input {...field} placeholder="أدخل اسم المنجم" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -134,13 +134,13 @@ export function CreateMineDialog({
               name="contractId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Contract</FormLabel>
+                  <FormLabel>العقد</FormLabel>
                   <Select
                     onValueChange={(value) => field.onChange(Number(value))}
                   >
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select contract" />
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="اختر عقد" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -164,9 +164,9 @@ export function CreateMineDialog({
               name="location"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Location (Optional)</FormLabel>
+                  <FormLabel>الموقع (اختياري)</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Enter mine location" />
+                    <Input {...field} placeholder="أدخل موقع المنجم" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -179,10 +179,10 @@ export function CreateMineDialog({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
               >
-                Cancel
+                إلغاء
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Creating..." : "Create Mine"}
+                {isLoading ? "جاري الإنشاء..." : "إنشاء منجم"}
               </Button>
             </div>
           </form>

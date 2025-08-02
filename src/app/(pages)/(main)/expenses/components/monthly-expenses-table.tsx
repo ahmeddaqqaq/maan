@@ -40,14 +40,6 @@ import { MineResponse } from "../../../../../../client/models/MineResponse";
 import { AddExpenseDataDialog } from "./add-expense-data-dialog";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 
 interface MonthlyExpenseData {
   id: number;
@@ -71,12 +63,8 @@ export function MonthlyExpensesTable() {
   const [monthlyData, setMonthlyData] = useState<MonthlyExpenseData[]>([]);
   const [loading, setLoading] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalRows, setTotalRows] = useState(0);
-  const pageSize = 7;
 
-  // Load mines and expenses on component mount
+  // تحميل المناجم والمصروفات عند تحميل المكون
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
@@ -89,7 +77,7 @@ export function MonthlyExpensesTable() {
         setMines(minesResponse.data || []);
         setExpenses(expensesResponse.data || []);
       } catch (error) {
-        console.error("Failed to load data:", error);
+        console.error("فشل في تحميل البيانات:", error);
       } finally {
         setLoading(false);
       }
@@ -98,53 +86,49 @@ export function MonthlyExpensesTable() {
     loadData();
   }, []);
 
-  // Load expense data when mine, year, or page changes
+  // تحميل بيانات المصروفات عندما يتغير المنجم أو السنة
   useEffect(() => {
     if (!selectedMine || !selectedYear) return;
 
     const loadExpenseData = async () => {
       setLoading(true);
       try {
-        const skip = (currentPage - 1) * pageSize;
         const response =
           await ExpenseMonthlyDataService.expenseMonthlyDataControllerFindMany({
             mineId: parseInt(selectedMine),
             year: parseInt(selectedYear),
-            skip,
-            take: pageSize,
+            skip: 0,
+            take: 1000, // Load all data for the year
           });
 
         setMonthlyData(response.data || []);
-        setTotalRows(response.rows || 0);
-        setTotalPages(Math.ceil((response.rows || 0) / pageSize));
       } catch (error) {
-        console.error("Failed to load expense data:", error);
+        console.error("فشل في تحميل بيانات المصروفات:", error);
       } finally {
         setLoading(false);
       }
     };
 
     loadExpenseData();
-  }, [selectedMine, selectedYear, currentPage]);
+  }, [selectedMine, selectedYear]);
 
   const refreshData = () => {
     if (selectedMine && selectedYear) {
       const loadExpenseData = async () => {
         setLoading(true);
         try {
-          const skip = (currentPage - 1) * pageSize;
           const response =
-            await ExpenseMonthlyDataService.expenseMonthlyDataControllerFindMany({
-              mineId: parseInt(selectedMine),
-              year: parseInt(selectedYear),
-              skip,
-              take: pageSize,
-            });
+            await ExpenseMonthlyDataService.expenseMonthlyDataControllerFindMany(
+              {
+                mineId: parseInt(selectedMine),
+                year: parseInt(selectedYear),
+                skip: 0,
+                take: 1000, // Load all data for the year
+              }
+            );
           setMonthlyData(response.data || []);
-          setTotalRows(response.rows || 0);
-          setTotalPages(Math.ceil((response.rows || 0) / pageSize));
         } catch (error) {
-          console.error("Failed to load expense data:", error);
+          console.error("فشل في تحميل بيانات المصروفات:", error);
         } finally {
           setLoading(false);
         }
@@ -153,18 +137,12 @@ export function MonthlyExpensesTable() {
     }
   };
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
   const handleMineChange = (value: string) => {
     setSelectedMine(value);
-    setCurrentPage(1);
   };
 
   const handleYearChange = (value: string) => {
     setSelectedYear(value);
-    setCurrentPage(1);
   };
 
   const getUniqueMonths = () => {
@@ -179,7 +157,7 @@ export function MonthlyExpensesTable() {
     if (!selectedMine || !selectedYear || monthlyData.length === 0) return;
 
     const headers = [
-      "Date",
+      "التاريخ",
       ...expenses.map((expense) => `${expense.name} (${expense.unit})`),
     ];
 
@@ -211,7 +189,7 @@ export function MonthlyExpensesTable() {
     link.setAttribute("href", url);
     link.setAttribute(
       "download",
-      `expense-data-${
+      `بيانات-المصروفات-${
         mines.find((m) => m.id.toString() === selectedMine)?.name
       }-${selectedYear}.csv`
     );
@@ -233,14 +211,32 @@ export function MonthlyExpensesTable() {
     );
 
     const arabicMonths = [
-      "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
-      "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
+      "يناير",
+      "فبراير",
+      "مارس",
+      "أبريل",
+      "مايو",
+      "يونيو",
+      "يوليو",
+      "أغسطس",
+      "سبتمبر",
+      "أكتوبر",
+      "نوفمبر",
+      "ديسمبر",
     ];
-    
-    const arabicDate = `${arabicMonths[month - 1]} ${year}`;
-    const currentDate = new Date().toLocaleDateString('ar-SA');
-    const totalExpenses = monthData.reduce((sum, item) => sum + item.price, 0);
 
+    // Calculate totals
+    const totalExpenses = monthData.reduce((sum, item) => sum + item.price, 0);
+    const expenseCount = monthData.length;
+
+    const arabicDate = `${arabicMonths[month - 1]} ${year}`;
+    const currentDate = new Date().toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+
+    // Create HTML content with proper Arabic text and styling matching extractions
     const htmlContent = `
       <div style="
         font-family: 'Arial', 'Tahoma', sans-serif;
@@ -267,35 +263,76 @@ export function MonthlyExpensesTable() {
           <div style="width: 48%;">
             <h3 style="margin: 0 0 10px 0; color: #34495e; border-bottom: 1px solid #bdc3c7; padding-bottom: 5px; font-size: 14px;">تفاصيل التقرير</h3>
             <p style="margin: 5px 0; font-size: 12px; color: #333333;">تاريخ الإنشاء: ${currentDate}</p>
-            <p style="margin: 5px 0; font-size: 12px; color: #333333;">إجمالي المصروفات: ${monthData.length}</p>
-            <p style="margin: 5px 0; font-size: 12px; color: #333333; font-weight: bold;">المجموع الكلي: $${totalExpenses.toFixed(2)}</p>
+            <p style="margin: 5px 0; font-size: 12px; color: #333333; font-weight: bold;">إجمالي المصروفات: $${totalExpenses.toFixed(2)}</p>
           </div>
         </div>
 
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; border: 1px solid #dddddd;">
           <thead>
             <tr style="background-color: #f8f9fa;">
-              <th style="border: 1px solid #dddddd; padding: 12px; text-align: center; font-weight: bold; color: #333333; font-size: 12px;">السعر</th>
-              <th style="border: 1px solid #dddddd; padding: 12px; text-align: center; font-weight: bold; color: #333333; font-size: 12px;">الوحدة</th>
-              <th style="border: 1px solid #dddddd; padding: 12px; text-align: center; font-weight: bold; color: #333333; font-size: 12px;">نوع المصروف</th>
+              <th style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-weight: bold; color: #333333; font-size: 11px;">اسم المصروف</th>
+              <th style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-weight: bold; color: #333333; font-size: 11px;">الوحدة</th>
+              <th style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-weight: bold; color: #333333; font-size: 11px;">المبلغ</th>
             </tr>
           </thead>
           <tbody>
-            ${monthData.length > 0 ? monthData.map((item, index) => `
-              <tr style="background-color: ${index % 2 === 0 ? '#f9f9f9' : '#ffffff'};">
-                <td style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 11px; color: #333333;">$${item.price.toFixed(2)}</td>
-                <td style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 11px; color: #333333;">${item.expense.unit}</td>
-                <td style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 11px; color: #333333;">${item.expense.name}</td>
-              </tr>
-            `).join('') : `
+            ${
+              monthData.length > 0
+                ? monthData
+                    .map((item, index) => {
+                      return `
+              <tr style="background-color: ${
+                index % 2 === 0 ? "#f9f9f9" : "#ffffff"
+              };">
+                <td style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px; color: #333333;">${
+                  item.expense.name
+                }</td>
+                <td style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px; color: #333333;">${
+                  item.expense.unit
+                }</td>
+                <td style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px; color: #333333; font-weight: bold;">$${item.price.toFixed(
+                  2
+                )}</td>
+              </tr>`;
+                    })
+                    .join("") +
+                  `
+              <tr style="background-color: #e8f4f8; border-top: 2px solid #2c3e50;">
+                <td style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-size: 11px; color: #2c3e50; font-weight: bold;">إجمالي المصروفات</td>
+                <td style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-size: 11px; color: #2c3e50; font-weight: bold;">-</td>
+                <td style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-size: 11px; color: #e74c3c; font-weight: bold;">$${totalExpenses.toFixed(
+                  2
+                )}</td>
+              </tr>`
+                : `
               <tr>
                 <td colspan="3" style="border: 1px solid #dddddd; padding: 20px; text-align: center; color: #7f8c8d; font-size: 12px;">
-                  لا توجد بيانات مصروفات لهذا الشهر
+                  لا توجد مصروفات لهذا الشهر
                 </td>
               </tr>
-            `}
+            `
+            }
           </tbody>
         </table>
+
+        <!-- Summary Section -->
+        <div style="margin-top: 30px; padding: 20px; background-color: #f8f9fa; border-radius: 8px; border: 2px solid #dee2e6;">
+          <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 16px; text-align: center; font-weight: bold;">ملخص المصروفات الشهرية</h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div style="text-align: center;">
+              <h4 style="margin: 0 0 10px 0; color: #34495e; font-size: 14px;">تفاصيل عامة</h4>
+              <p style="margin: 5px 0; font-size: 12px; color: #333333;">عدد المصروفات: <span style="font-weight: bold;">${expenseCount}</span></p>
+              <p style="margin: 5px 0; font-size: 12px; color: #333333;">الشهر: <span style="font-weight: bold;">${arabicDate}</span></p>
+            </div>
+            <div style="text-align: center;">
+              <h4 style="margin: 0 0 10px 0; color: #34495e; font-size: 14px;">التفاصيل المالية</h4>
+              <p style="margin: 5px 0; font-size: 12px; color: #333333;">المنجم: <span style="font-weight: bold;">${mineName}</span></p>
+              <p style="margin: 5px 0; font-size: 12px; color: #333333;">إجمالي المصروفات: <span style="font-weight: bold; color: #e74c3c;">$${totalExpenses.toFixed(
+                2
+              )}</span></p>
+            </div>
+          </div>
+        </div>
 
         <div style="margin-top: 40px; text-align: center; font-size: 10px; color: #7f8c8d; border-top: 1px solid #bdc3c7; padding-top: 20px;">
           <p style="margin: 5px 0;">تم إنشاء هذه الفاتورة تلقائياً من نظام إدارة المصروفات</p>
@@ -304,25 +341,25 @@ export function MonthlyExpensesTable() {
       </div>
     `;
 
-    // Create isolated iframe for PDF generation
-    const iframe = document.createElement('iframe');
-    iframe.style.position = 'absolute';
-    iframe.style.top = '-9999px';
-    iframe.style.left = '-9999px';
-    iframe.style.width = '800px';
-    iframe.style.height = '600px';
-    iframe.style.border = 'none';
+    // Generate PDF using the same method as extractions
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "absolute";
+    iframe.style.top = "-9999px";
+    iframe.style.left = "-9999px";
+    iframe.style.width = "800px";
+    iframe.style.height = "600px";
+    iframe.style.border = "none";
     document.body.appendChild(iframe);
 
     await new Promise<void>((resolve) => {
       iframe.onload = () => resolve();
-      iframe.src = 'about:blank';
+      iframe.src = "about:blank";
     });
 
     const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
     if (!iframeDoc) {
       document.body.removeChild(iframe);
-      throw new Error('Could not access iframe document');
+      throw new Error("Could not access iframe document");
     }
 
     iframeDoc.open();
@@ -352,46 +389,48 @@ export function MonthlyExpensesTable() {
     iframeDoc.close();
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 300));
       const contentElement = iframeDoc.body.firstElementChild as HTMLElement;
-      
+
       const canvas = await html2canvas(contentElement, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#ffffff',
+        backgroundColor: "#ffffff",
         width: 800,
         height: contentElement.scrollHeight || 600,
         scrollX: 0,
         scrollY: 0,
         windowWidth: 800,
         windowHeight: 600,
-        foreignObjectRendering: true
+        foreignObjectRendering: true,
       });
 
       document.body.removeChild(iframe);
 
       const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
       });
-      
-      const imgData = canvas.toDataURL('image/png', 1.0);
+
+      const imgData = canvas.toDataURL("image/png", 1.0);
       const imgWidth = 210;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-      
-      const filename = `فاتورة-مصروفات-${mineName.replace(/\s+/g, "-")}-${arabicDate.replace(/\s+/g, "-")}.pdf`;
+
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+
+      const filename = `فاتورة-المصروفات-${mineName.replace(
+        /\s+/g,
+        "-"
+      )}-${arabicDate.replace(/\s+/g, "-")}.pdf`;
       pdf.save(filename);
-      
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      console.error("Error generating PDF:", error);
       if (document.body.contains(iframe)) {
         document.body.removeChild(iframe);
       }
-      alert('حدث خطأ أثناء إنشاء ملف PDF. يرجى المحاولة مرة أخرى.');
+      alert("حدث خطأ أثناء إنشاء ملف PDF. يرجى المحاولة مرة أخرى.");
     }
   };
 
@@ -399,8 +438,8 @@ export function MonthlyExpensesTable() {
     return (
       <Card>
         <CardContent className="flex items-center justify-center p-8">
-          <Loader2 className="h-6 w-6 animate-spin mr-2" />
-          Loading...
+          <Loader2 className="h-6 w-6 animate-spin me-2" />
+          جاري التحميل...
         </CardContent>
       </Card>
     );
@@ -411,15 +450,15 @@ export function MonthlyExpensesTable() {
       {/* Controls */}
       <Card>
         <CardHeader>
-          <CardTitle>Monthly Expenses Data</CardTitle>
+          <CardTitle>بيانات المصروفات الشهرية</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="mine-select">Select Mine</Label>
+              <Label htmlFor="mine-select">اختر المنجم</Label>
               <Select value={selectedMine} onValueChange={handleMineChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a mine" />
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="اختر منجم" />
                 </SelectTrigger>
                 <SelectContent>
                   {mines.map((mine) => (
@@ -432,10 +471,10 @@ export function MonthlyExpensesTable() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="year-select">Select Year</Label>
+              <Label htmlFor="year-select">اختر السنة</Label>
               <Select value={selectedYear} onValueChange={handleYearChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a year" />
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="اختر سنة" />
                 </SelectTrigger>
                 <SelectContent>
                   {Array.from({ length: 10 }, (_, i) => {
@@ -456,8 +495,8 @@ export function MonthlyExpensesTable() {
                 disabled={!selectedMine || !selectedYear}
                 className="w-full"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Data
+                <Plus className="h-4 w-4 me-2" />
+                إضافة بيانات
               </Button>
             </div>
 
@@ -470,8 +509,8 @@ export function MonthlyExpensesTable() {
                 variant="outline"
                 className="w-full"
               >
-                <Download className="h-4 w-4 mr-2" />
-                Export CSV
+                <Download className="h-4 w-4 me-2" />
+                تصدير CSV
               </Button>
             </div>
           </div>
@@ -484,7 +523,7 @@ export function MonthlyExpensesTable() {
           <CardHeader>
             <CardTitle>
               {mines.find((m) => m.id.toString() === selectedMine)?.name} -{" "}
-              {selectedYear} Expenses Data
+              بيانات المصروفات {selectedYear}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -493,11 +532,11 @@ export function MonthlyExpensesTable() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-24">Date</TableHead>
+                      <TableHead className="w-24 text-right">التاريخ</TableHead>
                       {expenses.map((expense) => (
                         <TableHead
                           key={expense.id}
-                          className="text-center min-w-32"
+                          className="text-right min-w-32"
                         >
                           <div className="space-y-1">
                             <div className="font-medium">{expense.name}</div>
@@ -507,7 +546,7 @@ export function MonthlyExpensesTable() {
                           </div>
                         </TableHead>
                       ))}
-                      <TableHead className="w-16">Actions</TableHead>
+                      <TableHead className="w-16 text-left"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -519,7 +558,7 @@ export function MonthlyExpensesTable() {
 
                       return (
                         <TableRow key={monthKey}>
-                          <TableCell className="font-medium">
+                          <TableCell className="font-medium text-right">
                             {monthDate}
                           </TableCell>
                           {expenses.map((expense) => {
@@ -532,13 +571,13 @@ export function MonthlyExpensesTable() {
                             return (
                               <TableCell
                                 key={expense.id}
-                                className="text-center"
+                                className="text-right"
                               >
-                                {data ? `$${data.price.toFixed(2)}` : "-"}
+                                {data ? data.price.toFixed(2) : "-"}
                               </TableCell>
                             );
                           })}
-                          <TableCell className="text-center">
+                          <TableCell className="text-left">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="h-8 w-8 p-0">
@@ -552,8 +591,8 @@ export function MonthlyExpensesTable() {
                                     exportMonthlyInvoice(year, month)
                                   }
                                 >
-                                  <FileText className="mr-2 h-4 w-4" />
-                                  Export Invoice
+                                  <FileText className="me-2 h-4 w-4" />
+                                  تصدير الفاتورة
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
@@ -565,58 +604,10 @@ export function MonthlyExpensesTable() {
                 </Table>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
-                  No expense data found for this mine and year.
+                  لا توجد بيانات مصروفات لهذا المنجم والسنة.
                 </div>
               )}
             </div>
-            
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between px-2 pt-4">
-                <div className="text-sm text-muted-foreground">
-                  Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalRows)} of {totalRows} entries
-                </div>
-                <Pagination>
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious 
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          if (currentPage > 1) handlePageChange(currentPage - 1);
-                        }}
-                        className={currentPage <= 1 ? "pointer-events-none opacity-50" : ""}
-                      />
-                    </PaginationItem>
-                    
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                      <PaginationItem key={page}>
-                        <PaginationLink
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handlePageChange(page);
-                          }}
-                          isActive={currentPage === page}
-                        >
-                          {page}
-                        </PaginationLink>
-                      </PaginationItem>
-                    ))}
-                    
-                    <PaginationItem>
-                      <PaginationNext 
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          if (currentPage < totalPages) handlePageChange(currentPage + 1);
-                        }}
-                        className={currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
-              </div>
-            )}
           </CardContent>
         </Card>
       )}

@@ -29,12 +29,21 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { CreateUserDto, UserService, EntityService, EntityResponse } from "../../../../../../client";
+import {
+  CreateUserDto,
+  UserService,
+  EntityService,
+  EntityResponse,
+} from "../../../../../../client";
 
 const createUserSchema = z.object({
-  username: z.string().min(1, "Username is required"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  email: z.string().email("Invalid email").optional().or(z.literal("")),
+  username: z.string().min(1, "اسم المستخدم مطلوب"),
+  password: z.string().min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),
+  email: z
+    .string()
+    .email("بريد إلكتروني غير صحيح")
+    .optional()
+    .or(z.literal("")),
   isActive: z.boolean(),
   role: z.enum([
     "ADMIN",
@@ -42,7 +51,7 @@ const createUserSchema = z.object({
     "FINANCIAL_MANAGER",
     "STANDARD_USER",
   ]),
-  entityId: z.number().min(1, "Entity is required"),
+  entityId: z.number().min(1, "الشركة مطلوب"),
 });
 
 type CreateUserFormData = z.infer<typeof createUserSchema>;
@@ -105,12 +114,12 @@ export function CreateUserDialog({
         requestBody: createUserDto,
       });
 
-      toast.success("User created successfully");
+      toast.success("تم إنشاء المستخدم بنجاح");
       form.reset();
       onOpenChange(false);
       onUserCreated?.();
     } catch (error) {
-      toast.error("Failed to create user");
+      toast.error("فشل في إنشاء المستخدم");
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -121,7 +130,7 @@ export function CreateUserDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New User</DialogTitle>
+          <DialogTitle>إنشاء مستخدم جديد</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -130,9 +139,9 @@ export function CreateUserDialog({
               name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Username</FormLabel>
+                  <FormLabel>اسم المستخدم</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Enter username" />
+                    <Input {...field} placeholder="أدخل اسم المستخدم" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -144,12 +153,12 @@ export function CreateUserDialog({
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>كلمة المرور</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
                       type="password"
-                      placeholder="Enter password"
+                      placeholder="أدخل كلمة المرور"
                     />
                   </FormControl>
                   <FormMessage />
@@ -162,9 +171,13 @@ export function CreateUserDialog({
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email (Optional)</FormLabel>
+                  <FormLabel>البريد الإلكتروني (اختياري)</FormLabel>
                   <FormControl>
-                    <Input {...field} type="email" placeholder="Enter email" />
+                    <Input
+                      {...field}
+                      type="email"
+                      placeholder="أدخل البريد الإلكتروني"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -176,27 +189,25 @@ export function CreateUserDialog({
               name="role"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Role</FormLabel>
+                  <FormLabel>الدور</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select role" />
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="اختر الدور" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="ADMIN">Admin</SelectItem>
+                      <SelectItem value="ADMIN">مدير</SelectItem>
                       <SelectItem value="PRODUCTION_MANAGER">
-                        Production Manager
+                        مدير إنتاج
                       </SelectItem>
                       <SelectItem value="FINANCIAL_MANAGER">
-                        Financial Manager
+                        مدير مالي
                       </SelectItem>
-                      <SelectItem value="STANDARD_USER">
-                        Standard User
-                      </SelectItem>
+                      <SelectItem value="STANDARD_USER">مستخدم عادي</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -209,19 +220,22 @@ export function CreateUserDialog({
               name="entityId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Entity</FormLabel>
+                  <FormLabel>الشركة</FormLabel>
                   <Select
                     onValueChange={(value) => field.onChange(Number(value))}
                     value={field.value ? field.value.toString() : ""}
                   >
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select an entity" />
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="اختر الشركة" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {entities.map((entity) => (
-                        <SelectItem key={entity.id} value={entity.id.toString()}>
+                        <SelectItem
+                          key={entity.id}
+                          value={entity.id.toString()}
+                        >
                           {entity.name}
                         </SelectItem>
                       ))}
@@ -238,13 +252,14 @@ export function CreateUserDialog({
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
-                    <FormLabel className="text-base">Active</FormLabel>
+                    <FormLabel className="text-base">نشط</FormLabel>
                     <p className="text-sm text-muted-foreground">
-                      Enable or disable this user account
+                      تفعيل أو تعطيل حساب المستخدم
                     </p>
                   </div>
                   <FormControl>
                     <Switch
+                      lang="ar"
                       checked={field.value}
                       onCheckedChange={field.onChange}
                     />
@@ -259,10 +274,10 @@ export function CreateUserDialog({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
               >
-                Cancel
+                إلغاء
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Creating..." : "Create User"}
+                {isLoading ? "جاري الإنشاء..." : "إنشاء مستخدم"}
               </Button>
             </div>
           </form>

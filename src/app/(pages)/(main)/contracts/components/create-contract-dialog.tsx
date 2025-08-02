@@ -29,13 +29,18 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { ContractService, CreateContractDto, EntityService, EntityResponse } from "../../../../../../client";
+import {
+  ContractService,
+  CreateContractDto,
+  EntityService,
+  EntityResponse,
+} from "../../../../../../client";
 
 const createContractSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  entityId: z.number().min(1, "Entity is required"),
-  description: z.string().min(1, "Description is required"),
-  startDate: z.string().min(1, "Start date is required"),
+  name: z.string().min(1, "الاسم مطلوب"),
+  entityId: z.number().min(1, "الجهة مطلوبة"),
+  description: z.string().min(1, "الوصف مطلوب"),
+  startDate: z.string().min(1, "تاريخ البدء مطلوب"),
   endDate: z.string().optional(),
   dieselPrice: z.number().optional(),
   extractionPrice: z.number().optional(),
@@ -72,14 +77,13 @@ export function CreateContractDialog({
     },
   });
 
-  // Load entities
   useEffect(() => {
     const loadEntities = async () => {
       try {
         const response = await EntityService.entityControllerFindMany({});
         setEntities(response.data || []);
       } catch (error) {
-        console.error("Failed to load entities:", error);
+        console.error("فشل في تحميل الجهات:", error);
       }
     };
 
@@ -106,12 +110,12 @@ export function CreateContractDialog({
         requestBody: createContractDto,
       });
 
-      toast.success("Contract created successfully");
+      toast.success("تم إنشاء العقد بنجاح");
       form.reset();
       onOpenChange(false);
       onContractCreated?.();
     } catch (error) {
-      toast.error("Failed to create contract");
+      toast.error("فشل في إنشاء العقد");
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -122,7 +126,7 @@ export function CreateContractDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create New Contract</DialogTitle>
+          <DialogTitle>إنشاء عقد جديد</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -131,9 +135,9 @@ export function CreateContractDialog({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>الاسم</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Enter contract name" />
+                    <Input {...field} placeholder="أدخل اسم العقد" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -145,12 +149,9 @@ export function CreateContractDialog({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>الوصف</FormLabel>
                   <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder="Enter contract description"
-                    />
+                    <Textarea {...field} placeholder="أدخل وصف العقد" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -162,19 +163,22 @@ export function CreateContractDialog({
               name="entityId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Entity</FormLabel>
+                  <FormLabel>الجهة</FormLabel>
                   <Select
                     onValueChange={(value) => field.onChange(Number(value))}
                     value={field.value ? field.value.toString() : ""}
                   >
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select an entity" />
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="اختر جهة" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {entities.map((entity) => (
-                        <SelectItem key={entity.id} value={entity.id.toString()}>
+                        <SelectItem
+                          key={entity.id}
+                          value={entity.id.toString()}
+                        >
                           {entity.name}
                         </SelectItem>
                       ))}
@@ -190,13 +194,9 @@ export function CreateContractDialog({
               name="startDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Start Date</FormLabel>
+                  <FormLabel>تاريخ البدء</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      type="date"
-                      placeholder="Select start date"
-                    />
+                    <Input {...field} type="date" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -208,13 +208,9 @@ export function CreateContractDialog({
               name="endDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>End Date (Optional)</FormLabel>
+                  <FormLabel>تاريخ الانتهاء (اختياري)</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      type="date"
-                      placeholder="Select end date"
-                    />
+                    <Input {...field} type="date" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -222,24 +218,26 @@ export function CreateContractDialog({
             />
 
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Pricing Information</h3>
-              
+              <h3 className="text-lg font-semibold">معلومات التسعير</h3>
+
               <FormField
                 control={form.control}
                 name="dieselPrice"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Diesel Price (Optional)</FormLabel>
+                    <FormLabel>سعر الديزل (اختياري)</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="number"
                         step="0.01"
-                        placeholder="Enter diesel price"
-                        onChange={(e) => 
-                          field.onChange(e.target.value ? Number(e.target.value) : undefined)
+                        placeholder="أدخل سعر الديزل"
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value ? Number(e.target.value) : undefined
+                          )
                         }
-                        value={field.value || ''}
+                        value={field.value || ""}
                       />
                     </FormControl>
                     <FormMessage />
@@ -252,17 +250,19 @@ export function CreateContractDialog({
                 name="extractionPrice"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Extraction Price (Optional)</FormLabel>
+                    <FormLabel>سعر الاستخراج (اختياري)</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="number"
                         step="0.01"
-                        placeholder="Enter extraction price"
-                        onChange={(e) => 
-                          field.onChange(e.target.value ? Number(e.target.value) : undefined)
+                        placeholder="أدخل سعر الاستخراج"
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value ? Number(e.target.value) : undefined
+                          )
                         }
-                        value={field.value || ''}
+                        value={field.value || ""}
                       />
                     </FormControl>
                     <FormMessage />
@@ -275,17 +275,19 @@ export function CreateContractDialog({
                 name="phosphatePrice"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phosphate Price (Optional)</FormLabel>
+                    <FormLabel>سعر الفوسفات (اختياري)</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="number"
                         step="0.01"
-                        placeholder="Enter phosphate price"
-                        onChange={(e) => 
-                          field.onChange(e.target.value ? Number(e.target.value) : undefined)
+                        placeholder="أدخل سعر الفوسفات"
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value ? Number(e.target.value) : undefined
+                          )
                         }
-                        value={field.value || ''}
+                        value={field.value || ""}
                       />
                     </FormControl>
                     <FormMessage />
@@ -300,10 +302,10 @@ export function CreateContractDialog({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
               >
-                Cancel
+                إلغاء
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Creating..." : "Create Contract"}
+                {isLoading ? "جاري الإنشاء..." : "إنشاء العقد"}
               </Button>
             </div>
           </form>

@@ -25,14 +25,14 @@ interface NavItem {
 }
 
 const navigation: NavItem[] = [
-  { name: "Monthly Extractions", href: "/extractions", icon: TrendingUp },
-  { name: "Users", href: "/users", icon: Users },
-  { name: "Mines", href: "/mines", icon: Mountain },
-  { name: "Materials", href: "/materials", icon: Package },
-  { name: "Expenses", href: "/expenses", icon: Receipt },
-  { name: "Entities", href: "/entities", icon: Building2 },
-  { name: "Contracts", href: "/contracts", icon: FileText },
-  { name: "Invoices", href: "/invoices", icon: Calculator },
+  { name: "الاستخراجات الشهرية", href: "/extractions", icon: TrendingUp },
+  { name: "المستخدمون", href: "/users", icon: Users },
+  { name: "المعادن", href: "/mines", icon: Mountain },
+  { name: "المواد", href: "/materials", icon: Package },
+  { name: "المصروفات", href: "/expenses", icon: Receipt },
+  { name: "الشركات", href: "/entities", icon: Building2 },
+  { name: "العقود", href: "/contracts", icon: FileText },
+  { name: "الفواتير", href: "/invoices", icon: Calculator },
 ];
 
 interface MainLayoutProps {
@@ -46,7 +46,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <aside className="hidden md:flex md:w-64 md:flex-col border-r border-gray-100 bg-white">
+      <aside className="hidden md:flex md:w-64 md:flex-col border-e border-gray-100 bg-white">
         <div className="flex flex-col h-full">
           {/* Logo/Brand */}
           <div className="flex items-center h-16 px-4 border-b border-gray-100">
@@ -80,7 +80,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                 >
                   <Icon
                     className={cn(
-                      "mr-3 flex-shrink-0 h-5 w-5",
+                      "me-3 flex-shrink-0 h-5 w-5",
                       isActive ? "text-blue-500" : "text-gray-400"
                     )}
                   />

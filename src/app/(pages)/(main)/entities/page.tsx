@@ -14,12 +14,12 @@ export default function EntitiesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Entity Settings</h2>
-          <p className="text-gray-600">Manage entities and their properties</p>
+          <h2 className="text-2xl font-bold">إعدادات الجهات</h2>
+          <p className="text-gray-600">إدارة الجهات وخصائصها</p>
         </div>
         <Button onClick={() => setShowCreateEntity(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Entity
+          إضافة جهة
         </Button>
       </div>
 

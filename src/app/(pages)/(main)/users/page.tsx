@@ -14,12 +14,12 @@ export default function UsersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Users</h2>
-          <p className="text-gray-600">Manage user accounts and permissions</p>
+          <h2 className="text-2xl font-bold">المستخدمون</h2>
+          <p className="text-gray-600">إدارة حسابات المستخدمين والصلاحيات</p>
         </div>
         <Button onClick={() => setShowCreateUser(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Add User
+          إضافة مستخدم
         </Button>
       </div>
 
