@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { MaterialResponse, MaterialService } from "../../../../../../client";
+import { EditMaterialDialog } from "./edit-material-dialog";
 import {
   Pagination,
   PaginationContent,
@@ -34,6 +35,8 @@ export const MaterialsTable = ({ retrigger }: MaterialsTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRows, setTotalRows] = useState(0);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedMaterial, setSelectedMaterial] = useState<MaterialResponse | null>(null);
   const pageSize = 7;
 
   useEffect(() => {
@@ -89,6 +92,15 @@ export const MaterialsTable = ({ retrigger }: MaterialsTableProps) => {
       toast.error("فشل في حذف المادة");
       console.error(error);
     }
+  };
+
+  const handleEdit = (material: MaterialResponse) => {
+    setSelectedMaterial(material);
+    setEditDialogOpen(true);
+  };
+
+  const handleMaterialUpdated = () => {
+    fetchMaterials();
   };
 
   if (loading) {
@@ -154,9 +166,7 @@ export const MaterialsTable = ({ retrigger }: MaterialsTableProps) => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          toast.info("سيتم تنفيذ ميزة التعديل قريبًا");
-                        }}
+                        onClick={() => handleEdit(material)}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -233,6 +243,13 @@ export const MaterialsTable = ({ retrigger }: MaterialsTableProps) => {
           </Pagination>
         </div>
       )}
+
+      <EditMaterialDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        material={selectedMaterial}
+        onMaterialUpdated={handleMaterialUpdated}
+      />
     </div>
   );
 };

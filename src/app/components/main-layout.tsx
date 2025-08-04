@@ -9,7 +9,6 @@ import { useAuth } from "@/providers/auth-provider";
 import {
   LogOut,
   Package,
-  Mountain,
   FileText,
   TrendingUp,
   Users,
@@ -27,7 +26,6 @@ interface NavItem {
 const navigation: NavItem[] = [
   { name: "الاستخراجات الشهرية", href: "/extractions", icon: TrendingUp },
   { name: "المستخدمون", href: "/users", icon: Users },
-  { name: "المعادن", href: "/mines", icon: Mountain },
   { name: "المواد", href: "/materials", icon: Package },
   { name: "المصروفات", href: "/expenses", icon: Receipt },
   { name: "الشركات", href: "/entities", icon: Building2 },

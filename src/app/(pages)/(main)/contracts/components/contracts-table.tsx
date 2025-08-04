@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Edit, Trash2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { ContractResponse, ContractService } from "../../../../../../client";
+import { EditContractDialog } from "./edit-contract-dialog";
 import {
   Pagination,
   PaginationContent,
@@ -33,6 +34,8 @@ export const ContractsTable = ({ retrigger }: ContractsTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRows, setTotalRows] = useState(0);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedContract, setSelectedContract] = useState<ContractResponse | null>(null);
   const pageSize = 7;
 
   useEffect(() => {
@@ -88,6 +91,15 @@ export const ContractsTable = ({ retrigger }: ContractsTableProps) => {
       toast.error("فشل في حذف العقد");
       console.error(error);
     }
+  };
+
+  const handleEdit = (contract: ContractResponse) => {
+    setSelectedContract(contract);
+    setEditDialogOpen(true);
+  };
+
+  const handleContractUpdated = () => {
+    fetchContracts();
   };
 
   const formatDate = (dateString: string) => {
@@ -175,9 +187,7 @@ export const ContractsTable = ({ retrigger }: ContractsTableProps) => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          toast.info("ميزة التعديل قادمة قريبًا");
-                        }}
+                        onClick={() => handleEdit(contract)}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -254,6 +264,13 @@ export const ContractsTable = ({ retrigger }: ContractsTableProps) => {
           </Pagination>
         </div>
       )}
+
+      <EditContractDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        contract={selectedContract}
+        onContractUpdated={handleContractUpdated}
+      />
     </div>
   );
 };

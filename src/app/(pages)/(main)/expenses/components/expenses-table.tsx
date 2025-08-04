@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Edit, Trash2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { ExpenseService, ExpenseResponse } from "../../../../../../client";
+import { EditExpenseDialog } from "./edit-expense-dialog";
 import {
   Pagination,
   PaginationContent,
@@ -33,6 +34,8 @@ export const ExpensesTable = ({ retrigger }: ExpensesTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRows, setTotalRows] = useState(0);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState<ExpenseResponse | null>(null);
   const pageSize = 7;
 
   useEffect(() => {
@@ -91,6 +94,15 @@ export const ExpensesTable = ({ retrigger }: ExpensesTableProps) => {
     }
   };
 
+  const handleEdit = (expense: ExpenseResponse) => {
+    setSelectedExpense(expense);
+    setEditDialogOpen(true);
+  };
+
+  const handleExpenseUpdated = () => {
+    fetchExpenses();
+  };
+
   if (loading) {
     return <div className="text-center py-8">جارٍ تحميل المصاريف...</div>;
   }
@@ -146,10 +158,7 @@ export const ExpensesTable = ({ retrigger }: ExpensesTableProps) => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          // TODO: Implement edit functionality
-                          toast.info("وظيفة التعديل قادمة قريبًا");
-                        }}
+                        onClick={() => handleEdit(expense)}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -226,6 +235,13 @@ export const ExpensesTable = ({ retrigger }: ExpensesTableProps) => {
           </Pagination>
         </div>
       )}
+
+      <EditExpenseDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        expense={selectedExpense}
+        onExpenseUpdated={handleExpenseUpdated}
+      />
     </div>
   );
 };

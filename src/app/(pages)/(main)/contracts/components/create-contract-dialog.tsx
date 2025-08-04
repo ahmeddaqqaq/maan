@@ -34,6 +34,8 @@ import {
   CreateContractDto,
   EntityService,
   EntityResponse,
+  MineService,
+  CreateMineDto,
 } from "../../../../../../client";
 
 const createContractSchema = z.object({
@@ -45,6 +47,9 @@ const createContractSchema = z.object({
   dieselPrice: z.number().optional(),
   extractionPrice: z.number().optional(),
   phosphatePrice: z.number().optional(),
+  // Mine fields
+  mineName: z.string().min(1, "اسم المنجم مطلوب"),
+  mineLocation: z.string().optional(),
 });
 
 type CreateContractFormData = z.infer<typeof createContractSchema>;
@@ -74,6 +79,8 @@ export function CreateContractDialog({
       dieselPrice: undefined,
       extractionPrice: undefined,
       phosphatePrice: undefined,
+      mineName: "",
+      mineLocation: "",
     },
   });
 
@@ -95,6 +102,7 @@ export function CreateContractDialog({
   const onSubmit = async (data: CreateContractFormData) => {
     setIsLoading(true);
     try {
+      // First, create the contract
       const createContractDto: CreateContractDto = {
         name: data.name,
         entityId: data.entityId,
@@ -106,16 +114,35 @@ export function CreateContractDialog({
         phosphatePrice: data.phosphatePrice,
       };
 
-      await ContractService.contractControllerCreate({
+      const contractResponse = await ContractService.contractControllerCreate({
         requestBody: createContractDto,
       });
 
-      toast.success("تم إنشاء العقد بنجاح");
+      // Extract contract ID from response - handle different response structures
+      const contractId = contractResponse.data?.id || contractResponse.id || contractResponse;
+      
+      if (!contractId || typeof contractId !== 'number') {
+        console.error('Invalid contract response:', contractResponse);
+        throw new Error('Failed to get contract ID from response');
+      }
+
+      // Then, create the mine with reference to the new contract
+      const createMineDto: CreateMineDto = {
+        name: data.mineName,
+        contractId: contractId,
+        location: data.mineLocation || undefined,
+      };
+
+      await MineService.mineControllerCreate({
+        requestBody: createMineDto,
+      });
+
+      toast.success("تم إنشاء العقد والمنجم بنجاح");
       form.reset();
       onOpenChange(false);
       onContractCreated?.();
     } catch (error) {
-      toast.error("فشل في إنشاء العقد");
+      toast.error("فشل في إنشاء العقد والمنجم");
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -124,176 +151,226 @@ export function CreateContractDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[900px]">
         <DialogHeader>
-          <DialogTitle>إنشاء عقد جديد</DialogTitle>
+          <DialogTitle>إنشاء عقد ومنجم جديد</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>الاسم</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="أدخل اسم العقد" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+              {/* Contract Section - Left Side */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-center">
+                  معلومات العقد
+                </h3>
 
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>الوصف</FormLabel>
-                  <FormControl>
-                    <Textarea {...field} placeholder="أدخل وصف العقد" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>الاسم</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="أدخل اسم العقد" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="entityId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>الجهة</FormLabel>
-                  <Select
-                    onValueChange={(value) => field.onChange(Number(value))}
-                    value={field.value ? field.value.toString() : ""}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="اختر جهة" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {entities.map((entity) => (
-                        <SelectItem
-                          key={entity.id}
-                          value={entity.id.toString()}
-                        >
-                          {entity.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>الوصف</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} placeholder="أدخل وصف العقد" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="startDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>تاريخ البدء</FormLabel>
-                  <FormControl>
-                    <Input {...field} type="date" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  control={form.control}
+                  name="entityId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>الجهة</FormLabel>
+                      <Select
+                        onValueChange={(value) => field.onChange(Number(value))}
+                        value={field.value ? field.value.toString() : ""}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="اختر جهة" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {entities.map((entity) => (
+                            <SelectItem
+                              key={entity.id}
+                              value={entity.id.toString()}
+                            >
+                              {entity.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="endDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>تاريخ الانتهاء (اختياري)</FormLabel>
-                  <FormControl>
-                    <Input {...field} type="date" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <div className="flex items-center gap-2">
+                  <FormField
+                    control={form.control}
+                    name="startDate"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel>تاريخ البدء</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="date" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">معلومات التسعير</h3>
+                  <FormField
+                    control={form.control}
+                    name="endDate"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel>تاريخ الانتهاء (اختياري)</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="date" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-              <FormField
-                control={form.control}
-                name="dieselPrice"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>سعر الديزل (اختياري)</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="number"
-                        step="0.01"
-                        placeholder="أدخل سعر الديزل"
-                        onChange={(e) =>
-                          field.onChange(
-                            e.target.value ? Number(e.target.value) : undefined
-                          )
-                        }
-                        value={field.value || ""}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <div className="flex items-center gap-2">
+                  <FormField
+                    control={form.control}
+                    name="dieselPrice"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel>سعر الديزل (اختياري)</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="number"
+                            step="0.01"
+                            placeholder="أدخل سعر الديزل"
+                            onChange={(e) =>
+                              field.onChange(
+                                e.target.value
+                                  ? Number(e.target.value)
+                                  : undefined
+                              )
+                            }
+                            value={field.value || ""}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="extractionPrice"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>سعر الاستخراج (اختياري)</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="number"
-                        step="0.01"
-                        placeholder="أدخل سعر الاستخراج"
-                        onChange={(e) =>
-                          field.onChange(
-                            e.target.value ? Number(e.target.value) : undefined
-                          )
-                        }
-                        value={field.value || ""}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  <FormField
+                    control={form.control}
+                    name="extractionPrice"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel>سعر الاستخراج (اختياري)</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="number"
+                            step="0.01"
+                            placeholder="أدخل سعر الاستخراج"
+                            onChange={(e) =>
+                              field.onChange(
+                                e.target.value
+                                  ? Number(e.target.value)
+                                  : undefined
+                              )
+                            }
+                            value={field.value || ""}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-              <FormField
-                control={form.control}
-                name="phosphatePrice"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>سعر الفوسفات (اختياري)</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="number"
-                        step="0.01"
-                        placeholder="أدخل سعر الفوسفات"
-                        onChange={(e) =>
-                          field.onChange(
-                            e.target.value ? Number(e.target.value) : undefined
-                          )
-                        }
-                        value={field.value || ""}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="phosphatePrice"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>سعر الفوسفات (اختياري)</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="number"
+                          step="0.01"
+                          placeholder="أدخل سعر الفوسفات"
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? Number(e.target.value)
+                                : undefined
+                            )
+                          }
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Mine Section - Right Side */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-center">
+                  معلومات المنجم
+                </h3>
+
+                <FormField
+                  control={form.control}
+                  name="mineName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>اسم المنجم</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="أدخل اسم المنجم" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="mineLocation"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>موقع المنجم (اختياري)</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="أدخل موقع المنجم" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
             <div className="flex justify-end space-x-2">
@@ -305,7 +382,7 @@ export function CreateContractDialog({
                 إلغاء
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "جاري الإنشاء..." : "إنشاء العقد"}
+                {isLoading ? "جاري الإنشاء..." : "إنشاء العقد والمنجم"}
               </Button>
             </div>
           </form>

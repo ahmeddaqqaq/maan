@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { UserResponse, UserService } from "../../../../../../client";
+import { EditUserDialog } from "./edit-user-dialog";
 import {
   Pagination,
   PaginationContent,
@@ -34,6 +35,8 @@ export const UsersTable = ({ retrigger }: UsersTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRows, setTotalRows] = useState(0);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<UserResponse | null>(null);
   const pageSize = 7;
 
   useEffect(() => {
@@ -89,6 +92,15 @@ export const UsersTable = ({ retrigger }: UsersTableProps) => {
       toast.error("فشل في حذف المستخدم");
       console.error(error);
     }
+  };
+
+  const handleEdit = (user: UserResponse) => {
+    setSelectedUser(user);
+    setEditDialogOpen(true);
+  };
+
+  const handleUserUpdated = () => {
+    fetchUsers();
   };
 
   const getRoleBadgeVariant = (role: string) => {
@@ -175,10 +187,7 @@ export const UsersTable = ({ retrigger }: UsersTableProps) => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          // TODO: Implement edit functionality
-                          toast.info("ميزة التعديل قريباً");
-                        }}
+                        onClick={() => handleEdit(user)}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -255,6 +264,13 @@ export const UsersTable = ({ retrigger }: UsersTableProps) => {
           </Pagination>
         </div>
       )}
+
+      <EditUserDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        user={selectedUser}
+        onUserUpdated={handleUserUpdated}
+      />
     </div>
   );
 };

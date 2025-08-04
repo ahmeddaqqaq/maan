@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Edit, Trash2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { EntityResponse, EntityService } from "../../../../../../client";
+import { EditEntityDialog } from "./edit-entity-dialog";
 import {
   Pagination,
   PaginationContent,
@@ -33,6 +34,8 @@ export const EntitiesTable = ({ retrigger }: EntitiesTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRows, setTotalRows] = useState(0);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedEntity, setSelectedEntity] = useState<EntityResponse | null>(null);
   const pageSize = 7;
 
   useEffect(() => {
@@ -91,6 +94,15 @@ export const EntitiesTable = ({ retrigger }: EntitiesTableProps) => {
     }
   };
 
+  const handleEdit = (entity: EntityResponse) => {
+    setSelectedEntity(entity);
+    setEditDialogOpen(true);
+  };
+
+  const handleEntityUpdated = () => {
+    fetchEntities();
+  };
+
   if (loading) {
     return <div className="text-center py-8">جارٍ تحميل الجهات...</div>;
   }
@@ -141,9 +153,7 @@ export const EntitiesTable = ({ retrigger }: EntitiesTableProps) => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          toast.info("ميزة التعديل ستتوفر قريباً");
-                        }}
+                        onClick={() => handleEdit(entity)}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -220,6 +230,13 @@ export const EntitiesTable = ({ retrigger }: EntitiesTableProps) => {
           </Pagination>
         </div>
       )}
+
+      <EditEntityDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        entity={selectedEntity}
+        onEntityUpdated={handleEntityUpdated}
+      />
     </div>
   );
 };
