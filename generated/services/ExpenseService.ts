@@ -35,12 +35,15 @@ export class ExpenseService {
         take,
         search,
         entityId,
-        isActive,
+        isActive = true,
     }: {
         skip?: number,
         take?: number,
         search?: string,
         entityId?: number,
+        /**
+         * Filter by active status. Default is true (returns only active records). Set to false to get inactive records, or omit to get active records.
+         */
         isActive?: boolean,
     }): CancelablePromise<ExpenseManyResponse> {
         return __request(OpenAPI, {
@@ -94,7 +97,7 @@ export class ExpenseService {
         });
     }
     /**
-     * @returns any Expense successfully deleted
+     * @returns any Expense successfully soft deleted (marked as inactive)
      * @throws ApiError
      */
     public static expenseControllerDelete({

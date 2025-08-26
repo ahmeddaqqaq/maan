@@ -40,6 +40,7 @@ export class ExpenseMonthlyDataService {
         expenseId,
         month,
         year,
+        isActive = true,
     }: {
         skip?: number,
         take?: number,
@@ -67,6 +68,10 @@ export class ExpenseMonthlyDataService {
          * Filter by year
          */
         year?: number,
+        /**
+         * Filter by active status. Default is true (returns only active records). Set to false to get inactive records, or omit to get active records.
+         */
+        isActive?: boolean,
     }): CancelablePromise<ExpenseMonthlyDataManyResponse> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -80,6 +85,7 @@ export class ExpenseMonthlyDataService {
                 'expenseId': expenseId,
                 'month': month,
                 'year': year,
+                'isActive': isActive,
             },
         });
     }
@@ -122,7 +128,7 @@ export class ExpenseMonthlyDataService {
         });
     }
     /**
-     * @returns any Expense monthly data successfully deleted
+     * @returns any Expense monthly data successfully soft deleted (marked as inactive)
      * @throws ApiError
      */
     public static expenseMonthlyDataControllerDelete({

@@ -35,11 +35,16 @@ export class ContractService {
         take,
         search,
         entityId,
+        isActive = true,
     }: {
         skip?: number,
         take?: number,
         search?: string,
         entityId?: number,
+        /**
+         * Filter by active status. Default is true (returns only active records). Set to false to get inactive records, or omit to get active records.
+         */
+        isActive?: boolean,
     }): CancelablePromise<ContractManyResponse> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -49,6 +54,7 @@ export class ContractService {
                 'take': take,
                 'search': search,
                 'entityId': entityId,
+                'isActive': isActive,
             },
         });
     }
@@ -91,7 +97,7 @@ export class ContractService {
         });
     }
     /**
-     * @returns any Contract successfully deleted
+     * @returns any Contract successfully soft deleted (marked as inactive)
      * @throws ApiError
      */
     public static contractControllerDelete({

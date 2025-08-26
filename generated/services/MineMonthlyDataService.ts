@@ -41,6 +41,7 @@ export class MineMonthlyDataService {
         month,
         year,
         isUsed,
+        isActive = true,
     }: {
         skip?: number,
         take?: number,
@@ -72,6 +73,10 @@ export class MineMonthlyDataService {
          * Filter by used/overburden materials
          */
         isUsed?: boolean,
+        /**
+         * Filter by active status. Default is true (returns only active records). Set to false to get inactive records, or omit to get active records.
+         */
+        isActive?: boolean,
     }): CancelablePromise<MineMonthlyDataManyResponse> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -86,6 +91,7 @@ export class MineMonthlyDataService {
                 'month': month,
                 'year': year,
                 'isUsed': isUsed,
+                'isActive': isActive,
             },
         });
     }
@@ -128,7 +134,7 @@ export class MineMonthlyDataService {
         });
     }
     /**
-     * @returns any Mine monthly data successfully deleted
+     * @returns any Mine monthly data successfully soft deleted (marked as inactive)
      * @throws ApiError
      */
     public static mineMonthlyDataControllerDelete({
