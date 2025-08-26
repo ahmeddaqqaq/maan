@@ -118,7 +118,7 @@ export const MaterialsTable = ({ retrigger }: MaterialsTableProps) => {
           disabled={refreshing}
         >
           <RefreshCw
-            className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
+            className={`h-4 w-4 me-2 ${refreshing ? "animate-spin" : ""}`}
           />
           {refreshing ? "جارٍ التحديث..." : "تحديث"}
         </Button>
@@ -127,11 +127,11 @@ export const MaterialsTable = ({ retrigger }: MaterialsTableProps) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-right">الاسم</TableHead>
-              <TableHead className="text-right">الوحدة</TableHead>
-              <TableHead className="text-right">الحالة</TableHead>
-              <TableHead className="text-right">معرّف الجهة</TableHead>
-              <TableHead className="text-left"></TableHead>
+              <TableHead className="text-start">الاسم</TableHead>
+              <TableHead className="text-start">الوحدة</TableHead>
+              <TableHead className="text-start">الحالة</TableHead>
+              <TableHead className="text-start">معرّف الجهة</TableHead>
+              <TableHead className="text-end"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -147,22 +147,22 @@ export const MaterialsTable = ({ retrigger }: MaterialsTableProps) => {
             ) : (
               materials.map((material) => (
                 <TableRow key={material.id}>
-                  <TableCell className="font-medium text-right">
+                  <TableCell className="font-medium text-start">
                     {material.name}
                   </TableCell>
-                  <TableCell className="text-right">{material.unit}</TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-start">{material.unit}</TableCell>
+                  <TableCell className="text-start">
                     <Badge
                       variant={material.isActive ? "default" : "secondary"}
                     >
                       {material.isActive ? "نشط" : "غير نشط"}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-start">
                     {material.entity?.id || "غير متوفر"}
                   </TableCell>
-                  <TableCell className="text-left">
-                    <div className="flex items-center justify-start space-x-2">
+                  <TableCell className="text-end">
+                    <div className="flex items-center justify-end space-x-reverse space-x-2">
                       <Button
                         variant="outline"
                         size="sm"

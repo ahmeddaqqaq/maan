@@ -119,11 +119,12 @@ export function CreateContractDialog({
       });
 
       // Extract contract ID from response - handle different response structures
-      const contractId = contractResponse.data?.id || contractResponse.id || contractResponse;
-      
-      if (!contractId || typeof contractId !== 'number') {
-        console.error('Invalid contract response:', contractResponse);
-        throw new Error('Failed to get contract ID from response');
+      const contractId =
+        contractResponse.data?.id || contractResponse.id || contractResponse;
+
+      if (!contractId || typeof contractId !== "number") {
+        console.error("Invalid contract response:", contractResponse);
+        throw new Error("Failed to get contract ID from response");
       }
 
       // Then, create the mine with reference to the new contract
@@ -259,13 +260,13 @@ export function CreateContractDialog({
                     name="dieselPrice"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel>سعر الديزل (اختياري)</FormLabel>
+                        <FormLabel>سعر الديزل الاساسي (اختياري)</FormLabel>
                         <FormControl>
                           <Input
                             {...field}
                             type="number"
                             step="0.01"
-                            placeholder="أدخل سعر الديزل"
+                            placeholder="أدخل سعر الديزل الاساسي"
                             onChange={(e) =>
                               field.onChange(
                                 e.target.value
@@ -286,13 +287,13 @@ export function CreateContractDialog({
                     name="extractionPrice"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel>سعر الاستخراج (اختياري)</FormLabel>
+                        <FormLabel>معامل التعديل (اختياري)</FormLabel>
                         <FormControl>
                           <Input
                             {...field}
                             type="number"
                             step="0.01"
-                            placeholder="أدخل سعر الاستخراج"
+                            placeholder="أدخل معامل التعديل"
                             onChange={(e) =>
                               field.onChange(
                                 e.target.value
@@ -314,13 +315,13 @@ export function CreateContractDialog({
                   name="phosphatePrice"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>سعر الفوسفات (اختياري)</FormLabel>
+                      <FormLabel>سعر الفوسفات الاساسي (اختياري)</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
                           type="number"
                           step="0.01"
-                          placeholder="أدخل سعر الفوسفات"
+                          placeholder="أدخل سعر الفوسفات الاساسي"
                           onChange={(e) =>
                             field.onChange(
                               e.target.value
@@ -373,7 +374,7 @@ export function CreateContractDialog({
               </div>
             </div>
 
-            <div className="flex justify-end space-x-2">
+            <div className="flex justify-end space-x-2 space-x-reverse">
               <Button
                 type="button"
                 variant="outline"

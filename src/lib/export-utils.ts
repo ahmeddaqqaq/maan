@@ -7,25 +7,29 @@ export interface ExportColumn {
 }
 
 export function exportToCSV(data: Record<string, unknown>[], columns: ExportColumn[], filename: string) {
-  // Create CSV headers
-  const headers = columns.map(col => col.label).join(',');
+  // Create CSV headers with quotes for Arabic support
+  const headers = columns.map(col => `"${col.label}"`).join(',');
   
   // Create CSV rows
   const rows = data.map(item => {
     return columns.map(col => {
       const value = item[col.key];
       const formattedValue = col.formatter ? col.formatter(value) : value;
-      // Escape quotes and wrap in quotes if contains comma
+      // Escape quotes and wrap in quotes for all values to ensure proper Arabic handling
       const escaped = String(formattedValue || '').replace(/"/g, '""');
-      return escaped.includes(',') ? `"${escaped}"` : escaped;
+      return `"${escaped}"`; // Always wrap in quotes for Arabic support
     }).join(',');
   });
   
   // Combine headers and rows
   const csvContent = [headers, ...rows].join('\n');
   
-  // Create and trigger download
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  // Add BOM for proper UTF-8 encoding in Excel and other applications
+  const BOM = '\uFEFF';
+  const csvWithBOM = BOM + csvContent;
+  
+  // Create and trigger download with proper UTF-8 encoding
+  const blob = new Blob([csvWithBOM], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
   const url = URL.createObjectURL(blob);
   link.setAttribute('href', url);
@@ -87,9 +91,6 @@ export function exportToExcel(data: Record<string, unknown>[], columns: ExportCo
 // Format helper functions
 export const formatters = {
   date: (value: unknown) => {
-    if (typeof value === 'string' && value) {
-      return new Date(value).toLocaleDateString();
-    }
     return '';
   },
   currency: (value: unknown) => {

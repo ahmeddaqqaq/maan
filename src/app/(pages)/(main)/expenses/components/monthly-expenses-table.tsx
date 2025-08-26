@@ -532,11 +532,11 @@ export function MonthlyExpensesTable() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-24 text-right">التاريخ</TableHead>
+                      <TableHead className="w-24 text-end">التاريخ</TableHead>
                       {expenses.map((expense) => (
                         <TableHead
                           key={expense.id}
-                          className="text-right min-w-32"
+                          className="text-end min-w-32"
                         >
                           <div className="space-y-1">
                             <div className="font-medium">{expense.name}</div>
@@ -546,7 +546,7 @@ export function MonthlyExpensesTable() {
                           </div>
                         </TableHead>
                       ))}
-                      <TableHead className="w-16 text-left"></TableHead>
+                      <TableHead className="w-16 text-start"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -558,7 +558,7 @@ export function MonthlyExpensesTable() {
 
                       return (
                         <TableRow key={monthKey}>
-                          <TableCell className="font-medium text-right">
+                          <TableCell className="font-medium text-end">
                             {monthDate}
                           </TableCell>
                           {expenses.map((expense) => {
@@ -571,13 +571,13 @@ export function MonthlyExpensesTable() {
                             return (
                               <TableCell
                                 key={expense.id}
-                                className="text-right"
+                                className="text-end"
                               >
                                 {data ? data.price.toFixed(2) : "-"}
                               </TableCell>
                             );
                           })}
-                          <TableCell className="text-left">
+                          <TableCell className="text-start">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="h-8 w-8 p-0">

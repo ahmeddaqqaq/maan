@@ -18,7 +18,7 @@ export default function UsersPage() {
           <p className="text-gray-600">إدارة حسابات المستخدمين والصلاحيات</p>
         </div>
         <Button onClick={() => setShowCreateUser(true)}>
-          <Plus className="mr-2 h-4 w-4" />
+          <Plus className="me-2 h-4 w-4" />
           إضافة مستخدم
         </Button>
       </div>

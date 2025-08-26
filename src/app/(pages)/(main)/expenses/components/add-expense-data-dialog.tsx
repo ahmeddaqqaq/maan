@@ -237,7 +237,7 @@ export function AddExpenseDataDialog({
           )}
         </div>
 
-        <div className="flex justify-end space-x-2 pt-4 border-t">
+        <div className="flex justify-end space-x-2 space-x-reverse pt-4 border-t">
           <Button variant="outline" onClick={handleClose} disabled={saving}>
             إلغاء
           </Button>

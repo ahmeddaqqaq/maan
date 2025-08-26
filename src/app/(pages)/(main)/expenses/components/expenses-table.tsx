@@ -118,7 +118,7 @@ export const ExpensesTable = ({ retrigger }: ExpensesTableProps) => {
           disabled={refreshing}
         >
           <RefreshCw
-            className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
+            className={`h-4 w-4 me-2 ${refreshing ? "animate-spin" : ""}`}
           />
           {refreshing ? "جارٍ التحديث..." : "تحديث"}
         </Button>
@@ -127,10 +127,10 @@ export const ExpensesTable = ({ retrigger }: ExpensesTableProps) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-right">الاسم</TableHead>
-              <TableHead className="text-right">الوحدة</TableHead>
-              <TableHead className="text-right">معرف الشركة</TableHead>
-              <TableHead className="text-left"></TableHead>
+              <TableHead className="text-start">الاسم</TableHead>
+              <TableHead className="text-start">الوحدة</TableHead>
+              <TableHead className="text-start">معرف الشركة</TableHead>
+              <TableHead className="text-end"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -146,15 +146,15 @@ export const ExpensesTable = ({ retrigger }: ExpensesTableProps) => {
             ) : (
               expenses.map((expense) => (
                 <TableRow key={expense.id}>
-                  <TableCell className="font-medium text-right">
+                  <TableCell className="font-medium text-start">
                     {expense.name}
                   </TableCell>
-                  <TableCell className="text-right">{expense.unit}</TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-start">{expense.unit}</TableCell>
+                  <TableCell className="text-start">
                     {expense.entity?.id || "غير متوفر"}
                   </TableCell>
-                  <TableCell className="text-left">
-                    <div className="flex items-center justify-start space-x-2">
+                  <TableCell className="text-end">
+                    <div className="flex items-center justify-end space-x-reverse space-x-2">
                       <Button
                         variant="outline"
                         size="sm"
