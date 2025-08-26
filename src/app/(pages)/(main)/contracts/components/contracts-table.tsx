@@ -103,7 +103,7 @@ export const ContractsTable = ({ retrigger }: ContractsTableProps) => {
     fetchContracts();
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = () => {
     return "";
   };
 
@@ -161,11 +161,11 @@ export const ContractsTable = ({ retrigger }: ContractsTableProps) => {
                     {contract.description}
                   </TableCell>
                   <TableCell className="text-start">
-                    {formatDate(contract.startDate)}
+                    {formatDate()}
                   </TableCell>
                   <TableCell className="text-start">
                     {contract.endDate
-                      ? formatDate(contract.endDate)
+                      ? formatDate()
                       : "غير متوفر"}
                   </TableCell>
                   <TableCell className="text-start">

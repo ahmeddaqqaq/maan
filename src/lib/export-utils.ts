@@ -90,7 +90,7 @@ export function exportToExcel(data: Record<string, unknown>[], columns: ExportCo
 
 // Format helper functions
 export const formatters = {
-  date: (value: unknown) => {
+  date: () => {
     return '';
   },
   currency: (value: unknown) => {
