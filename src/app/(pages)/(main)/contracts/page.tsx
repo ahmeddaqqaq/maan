@@ -18,7 +18,7 @@ export default function ContractsPage() {
           <p className="text-gray-600">إدارة العقود وتفاصيلها</p>
         </div>
         <Button onClick={() => setShowCreateContract(true)}>
-          <Plus className="me-2 h-4 w-4" />
+          <Plus className="mr-2 h-4 w-4" />
           إضافة عقد
         </Button>
       </div>

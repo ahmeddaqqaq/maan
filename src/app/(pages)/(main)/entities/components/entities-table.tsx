@@ -118,7 +118,7 @@ export const EntitiesTable = ({ retrigger }: EntitiesTableProps) => {
           disabled={refreshing}
         >
           <RefreshCw
-            className={`h-4 w-4 me-2 ${refreshing ? "animate-spin" : ""}`}
+            className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
           />
           {refreshing ? "جارٍ التحديث..." : "تحديث"}
         </Button>
@@ -128,8 +128,8 @@ export const EntitiesTable = ({ retrigger }: EntitiesTableProps) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-start">الاسم</TableHead>
-              <TableHead className="text-end"></TableHead>
+              <TableHead className="text-right">الاسم</TableHead>
+              <TableHead className="text-left"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -145,11 +145,11 @@ export const EntitiesTable = ({ retrigger }: EntitiesTableProps) => {
             ) : (
               entities.map((entity) => (
                 <TableRow key={entity.id}>
-                  <TableCell className="font-medium text-start">
+                  <TableCell className="font-medium text-right">
                     {entity.name}
                   </TableCell>
-                  <TableCell className="text-end">
-                    <div className="flex items-center justify-end space-x-reverse space-x-2">
+                  <TableCell className="text-left">
+                    <div className="flex items-center justify-start space-x-2">
                       <Button
                         variant="outline"
                         size="sm"

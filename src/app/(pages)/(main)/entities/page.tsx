@@ -18,7 +18,7 @@ export default function EntitiesPage() {
           <p className="text-gray-600">إدارة الجهات وخصائصها</p>
         </div>
         <Button onClick={() => setShowCreateEntity(true)}>
-          <Plus className="me-2 h-4 w-4" />
+          <Plus className="mr-2 h-4 w-4" />
           إضافة جهة
         </Button>
       </div>

@@ -68,6 +68,7 @@ export function EditContractDialog({
     },
   });
 
+
   useEffect(() => {
     if (contract && open) {
       form.reset({
@@ -84,7 +85,7 @@ export function EditContractDialog({
 
   const onSubmit = async (data: UpdateContractFormData) => {
     if (!contract) return;
-
+    
     setIsLoading(true);
     try {
       const updateContractDto: UpdateContractDto = {
@@ -154,9 +155,7 @@ export function EditContractDialog({
               <div className="px-3 py-2 border rounded-md bg-muted">
                 {contract?.entity?.name || "غير متوفر"}
               </div>
-              <p className="text-xs text-muted-foreground">
-                لا يمكن تعديل الجهة للعقد
-              </p>
+              <p className="text-xs text-muted-foreground">لا يمكن تعديل الجهة للعقد</p>
             </div>
 
             <FormField
@@ -220,13 +219,13 @@ export function EditContractDialog({
                 name="extractionPrice"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>معامل التعديل (اختياري)</FormLabel>
+                    <FormLabel>سعر الاستخراج (اختياري)</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="number"
                         step="0.01"
-                        placeholder="أدخل معامل التعديل"
+                        placeholder="أدخل سعر الاستخراج"
                         onChange={(e) =>
                           field.onChange(
                             e.target.value ? Number(e.target.value) : undefined
@@ -245,13 +244,13 @@ export function EditContractDialog({
                 name="phosphatePrice"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>سعر الفوسفات الاساسي (اختياري)</FormLabel>
+                    <FormLabel>سعر الفوسفات (اختياري)</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="number"
                         step="0.01"
-                        placeholder="أدخل سعر الفوسفات الاساسي"
+                        placeholder="أدخل سعر الفوسفات"
                         onChange={(e) =>
                           field.onChange(
                             e.target.value ? Number(e.target.value) : undefined
@@ -266,7 +265,7 @@ export function EditContractDialog({
               />
             </div>
 
-            <div className="flex justify-end space-x-2 space-x-reverse">
+            <div className="flex justify-end space-x-2">
               <Button
                 type="button"
                 variant="outline"

@@ -33,9 +33,9 @@ export function ExportDropdown({ data, columns, filename, disabled }: ExportDrop
           size="sm" 
           disabled={disabled || isExporting || !data || data.length === 0}
         >
-          <FiDownload className="me-2 h-4 w-4" />
+          <FiDownload className="mr-2 h-4 w-4" />
           {isExporting ? 'Exporting...' : 'Export'}
-          <FiChevronDown className="ms-2 h-4 w-4" />
+          <FiChevronDown className="ml-2 h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

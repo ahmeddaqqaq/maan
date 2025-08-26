@@ -35,8 +35,7 @@ export const ContractsTable = ({ retrigger }: ContractsTableProps) => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalRows, setTotalRows] = useState(0);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [selectedContract, setSelectedContract] =
-    useState<ContractResponse | null>(null);
+  const [selectedContract, setSelectedContract] = useState<ContractResponse | null>(null);
   const pageSize = 7;
 
   useEffect(() => {
@@ -103,8 +102,8 @@ export const ContractsTable = ({ retrigger }: ContractsTableProps) => {
     fetchContracts();
   };
 
-  const formatDate = () => {
-    return "";
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("ar-EG");
   };
 
   if (loading) {
@@ -131,14 +130,14 @@ export const ContractsTable = ({ retrigger }: ContractsTableProps) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-start">الاسم</TableHead>
-              <TableHead className="text-start">الوصف</TableHead>
-              <TableHead className="text-start">تاريخ البدء</TableHead>
-              <TableHead className="text-start">تاريخ الانتهاء</TableHead>
-              <TableHead className="text-start">سعر الديزل</TableHead>
-              <TableHead className="text-start">معامل التعديل</TableHead>
-              <TableHead className="text-start">سعر الفوسفات الاساسي</TableHead>
-              <TableHead className="text-end"></TableHead>
+              <TableHead className="text-right">الاسم</TableHead>
+              <TableHead className="text-right">الوصف</TableHead>
+              <TableHead className="text-right">تاريخ البدء</TableHead>
+              <TableHead className="text-right">تاريخ الانتهاء</TableHead>
+              <TableHead className="text-right">سعر الديزل</TableHead>
+              <TableHead className="text-right">سعر الاستخراج</TableHead>
+              <TableHead className="text-right">سعر الفوسفات</TableHead>
+              <TableHead className="text-right"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -154,37 +153,37 @@ export const ContractsTable = ({ retrigger }: ContractsTableProps) => {
             ) : (
               contracts.map((contract) => (
                 <TableRow key={contract.id}>
-                  <TableCell className="font-medium text-start">
+                  <TableCell className="font-medium text-right">
                     {contract.name}
                   </TableCell>
-                  <TableCell className="max-w-xs truncate text-start">
+                  <TableCell className="max-w-xs truncate text-right">
                     {contract.description}
                   </TableCell>
-                  <TableCell className="text-start">
-                    {formatDate()}
+                  <TableCell className="text-right">
+                    {formatDate(contract.startDate)}
                   </TableCell>
-                  <TableCell className="text-start">
+                  <TableCell className="text-right">
                     {contract.endDate
-                      ? formatDate()
+                      ? formatDate(contract.endDate)
                       : "غير متوفر"}
                   </TableCell>
-                  <TableCell className="text-start">
+                  <TableCell className="text-right">
                     {contract.dieselPrice
                       ? `$${contract.dieselPrice}`
                       : "غير متوفر"}
                   </TableCell>
-                  <TableCell className="text-start">
+                  <TableCell className="text-right">
                     {contract.extractionPrice
                       ? `$${contract.extractionPrice}`
                       : "غير متوفر"}
                   </TableCell>
-                  <TableCell className="text-start">
+                  <TableCell className="text-right">
                     {contract.phosphatePrice
                       ? `$${contract.phosphatePrice}`
                       : "غير متوفر"}
                   </TableCell>
-                  <TableCell className="text-end">
-                    <div className="flex items-center justify-end space-x-reverse space-x-2">
+                  <TableCell className="text-left">
+                    <div className="flex items-center justify-start space-x-2">
                       <Button
                         variant="outline"
                         size="sm"

@@ -18,7 +18,7 @@ export default function MaterialsPage() {
           <p className="text-gray-600">إدارة المواد وخصائصها</p>
         </div>
         <Button onClick={() => setShowCreateMaterial(true)}>
-          <Plus className="me-2 h-4 w-4" />
+          <Plus className="mr-2 h-4 w-4" />
           إضافة مادة
         </Button>
       </div>

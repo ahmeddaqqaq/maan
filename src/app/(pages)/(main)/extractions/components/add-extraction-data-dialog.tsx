@@ -45,10 +45,10 @@ interface AddExtractionDataDialogProps {
 
 interface ExtractionData {
   [materialId: string]: {
-    quantity: string;
+    quantity: number;
     isUsed: boolean;
-    additionalValue?: string;
-    dieselPriceThisMonth?: string;
+    quantityInCubicMeters?: number;
+    dieselPriceThisMonth?: number;
     notes?: string;
   };
 }
@@ -70,13 +70,18 @@ export function AddExtractionDataDialog({
   const updateExtractionData = (
     materialId: string,
     field: string,
-    value: string | boolean
+    value: string | number | boolean
   ) => {
     setExtractionData((prev) => ({
       ...prev,
       [materialId]: {
         ...prev[materialId],
-        [field]: value,
+        [field]:
+          field === "quantity" ||
+          field === "quantityInCubicMeters" ||
+          field === "dieselPriceThisMonth"
+            ? Number(value)
+            : value,
       },
     }));
   };
@@ -114,17 +119,16 @@ export function AddExtractionDataDialog({
 
       materials.forEach((material) => {
         const data = extractionData[material.id.toString()];
-        const quantity = parseFloat(data?.quantity || "0");
-        if (data && quantity > 0) {
+        if (data && data.quantity > 0) {
           materialsData.push({
             materialId: material.id,
-            quantity: quantity,
+            quantity: data.quantity,
             isUsed: data.isUsed,
-            quantityInCubicMeters: data.isUsed && data.additionalValue
-              ? parseFloat(data.additionalValue)
+            quantityInCubicMeters: data.isUsed
+              ? data.quantityInCubicMeters
               : undefined,
-            dieselPriceThisMonth: data.isUsed && data.dieselPriceThisMonth
-              ? parseFloat(data.dieselPriceThisMonth)
+            dieselPriceThisMonth: data.isUsed
+              ? data.dieselPriceThisMonth
               : undefined,
             notes: data.notes || "",
           });
@@ -276,22 +280,22 @@ export function AddExtractionDataDialog({
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="min-w-[150px] text-start">
+                        <TableHead className="min-w-[150px] text-right">
                           المادة
                         </TableHead>
-                        <TableHead className="min-w-[100px] text-start">
+                        <TableHead className="min-w-[100px] text-right">
                           الكمية
                         </TableHead>
-                        <TableHead className="min-w-[100px] text-start">
+                        <TableHead className="min-w-[100px] text-right">
                           هل تم الاستخدام
                         </TableHead>
-                        <TableHead className="min-w-[120px] text-start">
-                          القيمة الإضافية
+                        <TableHead className="min-w-[120px] text-right">
+                          الأمتار المكعبة
                         </TableHead>
-                        <TableHead className="min-w-[120px] text-start">
+                        <TableHead className="min-w-[120px] text-right">
                           سعر الديزل
                         </TableHead>
-                        <TableHead className="min-w-[200px] text-start">
+                        <TableHead className="min-w-[200px] text-right">
                           ملاحظات
                         </TableHead>
                       </TableRow>
@@ -306,7 +310,7 @@ export function AddExtractionDataDialog({
 
                         return (
                           <TableRow key={material.id}>
-                            <TableCell className="font-medium text-start">
+                            <TableCell className="font-medium text-right">
                               {material.name} ({material.unit})
                             </TableCell>
                             <TableCell>
@@ -315,10 +319,10 @@ export function AddExtractionDataDialog({
                                 min="0"
                                 step="0.01"
                                 className="w-full"
-                                value={
-                                  getExtractionValue(materialId, "quantity") as string ||
+                                value={String(
+                                  getExtractionValue(materialId, "quantity") ||
                                     ""
-                                }
+                                )}
                                 onChange={(e) =>
                                   updateExtractionData(
                                     materialId,
@@ -352,16 +356,18 @@ export function AddExtractionDataDialog({
                                 disabled={!isUsed}
                                 value={
                                   isUsed
-                                    ? (getExtractionValue(
+                                    ? String(
+                                        getExtractionValue(
                                           materialId,
-                                          "additionalValue"
-                                        ) as string || "")
+                                          "quantityInCubicMeters"
+                                        ) || ""
+                                      )
                                     : ""
                                 }
                                 onChange={(e) =>
                                   updateExtractionData(
                                     materialId,
-                                    "additionalValue",
+                                    "quantityInCubicMeters",
                                     e.target.value
                                   )
                                 }
@@ -377,10 +383,12 @@ export function AddExtractionDataDialog({
                                 disabled={!isUsed}
                                 value={
                                   isUsed
-                                    ? (getExtractionValue(
+                                    ? String(
+                                        getExtractionValue(
                                           materialId,
                                           "dieselPriceThisMonth"
-                                        ) as string || "")
+                                        ) || ""
+                                      )
                                     : ""
                                 }
                                 onChange={(e) =>
@@ -436,12 +444,12 @@ export function AddExtractionDataDialog({
           >
             {saving ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin me-2" />
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 جاري الحفظ...
               </>
             ) : (
               <>
-                <Save className="h-4 w-4 me-2" />
+                <Save className="h-4 w-4 mr-2" />
                 حفظ البيانات
               </>
             )}

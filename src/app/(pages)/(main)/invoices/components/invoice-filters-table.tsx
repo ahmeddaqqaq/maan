@@ -246,6 +246,7 @@ export function InvoiceFiltersTable({
                 <th style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px;">المادة</th>
                 <th style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px;">الكمية</th>
                 <th style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px;">السعر الإجمالي</th>
+                <th style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px;">التاريخ</th>
               </tr>
             </thead>
             <tbody>
@@ -270,6 +271,9 @@ export function InvoiceFiltersTable({
                   <td style="border: 1px solid #dddddd; padding: 6px; text-align: center; font-size: 9px;">$${(
                     item.totalPrice || 0
                   ).toFixed(2)}</td>
+                  <td style="border: 1px solid #dddddd; padding: 6px; text-align: center; font-size: 9px;">${
+                    item.year
+                  }-${item.month.toString().padStart(2, "0")}</td>
                 </tr>
               `
                 )
@@ -293,6 +297,7 @@ export function InvoiceFiltersTable({
                 <th style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px;">المنجم</th>
                 <th style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px;">نوع المصروف</th>
                 <th style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px;">السعر</th>
+                <th style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px;">التاريخ</th>
               </tr>
             </thead>
             <tbody>
@@ -314,6 +319,9 @@ export function InvoiceFiltersTable({
                   <td style="border: 1px solid #dddddd; padding: 6px; text-align: center; font-size: 9px;">$${item.price.toFixed(
                     2
                   )}</td>
+                  <td style="border: 1px solid #dddddd; padding: 6px; text-align: center; font-size: 9px;">${
+                    item.year
+                  }-${item.month.toString().padStart(2, "0")}</td>
                 </tr>
               `
                 )
@@ -440,7 +448,7 @@ export function InvoiceFiltersTable({
       <CardContent>
         {loading ? (
           <div className="flex items-center justify-center p-8">
-            <Loader2 className="h-6 w-6 animate-spin me-2" />
+            <Loader2 className="h-6 w-6 animate-spin mr-2" />
             جاري تحميل البيانات المفلترة...
           </div>
         ) : !filters.dateRange?.from || !filters.dateRange?.to ? (
@@ -493,45 +501,45 @@ export function InvoiceFiltersTable({
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-start">الشركة</TableHead>
-                        <TableHead className="text-start">المنجم</TableHead>
-                        <TableHead className="text-start">المادة</TableHead>
-                        <TableHead className="text-start">الكمية</TableHead>
-                        <TableHead className="text-start">
+                        <TableHead className="text-right">الشركة</TableHead>
+                        <TableHead className="text-right">المنجم</TableHead>
+                        <TableHead className="text-right">المادة</TableHead>
+                        <TableHead className="text-right">الكمية</TableHead>
+                        <TableHead className="text-right">
                           هل تم الاستخدام
                         </TableHead>
-                        <TableHead className="text-start">
+                        <TableHead className="text-right">
                           السعر الإجمالي
                         </TableHead>
-                        <TableHead className="text-start">التاريخ</TableHead>
+                        <TableHead className="text-right">التاريخ</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {extractionData.slice(0, 20).map((item) => (
                         <TableRow key={item.id}>
-                          <TableCell className="text-start">
+                          <TableCell className="text-right">
                             {item.entity.name}
                           </TableCell>
-                          <TableCell className="text-start">
+                          <TableCell className="text-right">
                             {item.mine.name}
                           </TableCell>
-                          <TableCell className="text-start">
+                          <TableCell className="text-right">
                             {item.material.name}
                           </TableCell>
-                          <TableCell className="text-start">
+                          <TableCell className="text-right">
                             {item.quantity} {item.material.unit}
                           </TableCell>
-                          <TableCell className="text-start">
+                          <TableCell className="text-right">
                             <Badge
                               variant={item.isUsed ? "default" : "secondary"}
                             >
                               {item.isUsed ? "مستخدم" : "حمولة زائدة"}
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-start">
+                          <TableCell className="text-right">
                             ${(item.totalPrice || 0).toFixed(2)}
                           </TableCell>
-                          <TableCell className="text-start">
+                          <TableCell className="text-right">
                             {item.year}-{item.month.toString().padStart(2, "0")}
                           </TableCell>
                         </TableRow>
@@ -555,31 +563,31 @@ export function InvoiceFiltersTable({
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-start">الشركة</TableHead>
-                        <TableHead className="text-start">المنجم</TableHead>
-                        <TableHead className="text-start">
+                        <TableHead className="text-right">الشركة</TableHead>
+                        <TableHead className="text-right">المنجم</TableHead>
+                        <TableHead className="text-right">
                           نوع المصروف
                         </TableHead>
-                        <TableHead className="text-start">السعر</TableHead>
-                        <TableHead className="text-start">التاريخ</TableHead>
+                        <TableHead className="text-right">السعر</TableHead>
+                        <TableHead className="text-right">التاريخ</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {expenseData.slice(0, 20).map((item) => (
                         <TableRow key={item.id}>
-                          <TableCell className="text-start">
+                          <TableCell className="text-right">
                             {item.entity.name}
                           </TableCell>
-                          <TableCell className="text-start">
+                          <TableCell className="text-right">
                             {item.mine.name}
                           </TableCell>
-                          <TableCell className="text-start">
+                          <TableCell className="text-right">
                             {item.expense.name}
                           </TableCell>
-                          <TableCell className="text-start">
+                          <TableCell className="text-right">
                             ${item.price.toFixed(2)}
                           </TableCell>
-                          <TableCell className="text-start">
+                          <TableCell className="text-right">
                             {item.year}-{item.month.toString().padStart(2, "0")}
                           </TableCell>
                         </TableRow>

@@ -94,7 +94,7 @@ export function CreateEntityDialog({
               )}
             />
 
-            <div className="flex justify-end space-x-2 space-x-reverse">
+            <div className="flex justify-end space-x-2">
               <Button
                 type="button"
                 variant="outline"

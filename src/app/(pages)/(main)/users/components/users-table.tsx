@@ -140,11 +140,11 @@ export const UsersTable = ({ retrigger }: UsersTableProps) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-start">اسم المستخدم</TableHead>
-              <TableHead className="text-start">البريد الإلكتروني</TableHead>
-              <TableHead className="text-start">الدور</TableHead>
-              <TableHead className="text-start">الحالة</TableHead>
-              <TableHead className="text-end"></TableHead>
+              <TableHead className="text-right">اسم المستخدم</TableHead>
+              <TableHead className="text-right">البريد الإلكتروني</TableHead>
+              <TableHead className="text-right">الدور</TableHead>
+              <TableHead className="text-right">الحالة</TableHead>
+              <TableHead className="text-left"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -160,13 +160,13 @@ export const UsersTable = ({ retrigger }: UsersTableProps) => {
             ) : (
               users.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell className="font-medium text-start">
+                  <TableCell className="font-medium text-right">
                     {user.username}
                   </TableCell>
-                  <TableCell className="text-start">
+                  <TableCell className="text-right">
                     {user.email || "غير متاح"}
                   </TableCell>
-                  <TableCell className="text-start">
+                  <TableCell className="text-right">
                     <Badge variant={getRoleBadgeVariant(user.role)}>
                       {user.role === "ADMIN"
                         ? "مدير"
@@ -177,13 +177,13 @@ export const UsersTable = ({ retrigger }: UsersTableProps) => {
                         : "مستخدم عادي"}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-start">
+                  <TableCell className="text-right">
                     <Badge variant={user.isActive ? "default" : "secondary"}>
                       {user.isActive ? "نشط" : "غير نشط"}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-end">
-                    <div className="flex items-center justify-end space-x-reverse space-x-2">
+                  <TableCell className="text-left">
+                    <div className="flex items-center justify-start space-x-2">
                       <Button
                         variant="outline"
                         size="sm"
