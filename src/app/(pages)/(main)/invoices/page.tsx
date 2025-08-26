@@ -224,7 +224,10 @@ export default function InvoicesPage() {
             <Label>الشركات</Label>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-40 overflow-y-auto border rounded p-2">
               {entities.map((entity) => (
-                <div key={entity.id} className="flex items-center space-x-2 rtl:space-x-reverse">
+                <div
+                  key={entity.id}
+                  className="flex items-center space-x-2 rtl:space-x-reverse"
+                >
                   <Checkbox
                     id={`entity-${entity.id}`}
                     checked={filters.entities.includes(entity.id)}
@@ -245,7 +248,10 @@ export default function InvoicesPage() {
             <Label>المناجم</Label>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-40 overflow-y-auto border rounded p-2">
               {mines.map((mine) => (
-                <div key={mine.id} className="flex items-center space-x-2 rtl:space-x-reverse">
+                <div
+                  key={mine.id}
+                  className="flex items-center space-x-2 rtl:space-x-reverse"
+                >
                   <Checkbox
                     id={`mine-${mine.id}`}
                     checked={filters.mines.includes(mine.id)}
@@ -294,7 +300,10 @@ export default function InvoicesPage() {
               <Label>النفقات</Label>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-40 overflow-y-auto border rounded p-2">
                 {expenses.map((expense) => (
-                  <div key={expense.id} className="flex items-center space-x-2 rtl:space-x-reverse">
+                  <div
+                    key={expense.id}
+                    className="flex items-center space-x-2 rtl:space-x-reverse"
+                  >
                     <Checkbox
                       id={`expense-${expense.id}`}
                       checked={filters.expenses.includes(expense.id)}
