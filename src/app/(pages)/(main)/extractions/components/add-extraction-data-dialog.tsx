@@ -41,14 +41,18 @@ interface AddExtractionDataDialogProps {
   mineId?: number;
   materials: MaterialResponse[];
   onDataAdded: () => void;
+  selectedYear?: string;
+  selectedMonth?: string;
+  isEditMode?: boolean;
+  existingData?: any[];
 }
 
 interface ExtractionData {
   [materialId: string]: {
-    quantity: number;
+    quantity: string;
     isUsed: boolean;
-    quantityInCubicMeters?: number;
-    dieselPriceThisMonth?: number;
+    quantityInCubicMeters?: string;
+    dieselPriceThisMonth?: string;
     notes?: string;
   };
 }
@@ -59,10 +63,14 @@ export function AddExtractionDataDialog({
   mineId,
   materials,
   onDataAdded,
+  selectedYear,
+  selectedMonth: propSelectedMonth,
+  isEditMode = false,
+  existingData = [],
 }: AddExtractionDataDialogProps) {
-  const [selectedMonth, setSelectedMonth] = useState<number>(0);
-  const [selectedYear, setSelectedYear] = useState<number>(0);
-  const [selectedEntityId, setSelectedEntityId] = useState<number>(0);
+  const [selectedMonth, setSelectedMonth] = useState<string>("");
+  const [internalSelectedYear, setInternalSelectedYear] = useState<string>("");
+  const [selectedEntityId, setSelectedEntityId] = useState<string>("");
   const [entities, setEntities] = useState<EntityResponse[]>([]);
   const [extractionData, setExtractionData] = useState<ExtractionData>({});
   const [saving, setSaving] = useState(false);
@@ -70,18 +78,13 @@ export function AddExtractionDataDialog({
   const updateExtractionData = (
     materialId: string,
     field: string,
-    value: string | number | boolean
+    value: string | boolean
   ) => {
     setExtractionData((prev) => ({
       ...prev,
       [materialId]: {
         ...prev[materialId],
-        [field]:
-          field === "quantity" ||
-          field === "quantityInCubicMeters" ||
-          field === "dieselPriceThisMonth"
-            ? Number(value)
-            : value,
+        [field]: value,
       },
     }));
   };
@@ -94,7 +97,7 @@ export function AddExtractionDataDialog({
     );
   };
 
-  // Load entities when dialog opens
+  // Load entities when dialog opens and set year/month if provided
   useEffect(() => {
     const loadEntities = async () => {
       try {
@@ -107,11 +110,38 @@ export function AddExtractionDataDialog({
 
     if (open) {
       loadEntities();
+      // Pre-select year if provided from parent
+      if (selectedYear) {
+        setInternalSelectedYear(selectedYear);
+      }
+      // Pre-select month if provided (for edit mode)
+      if (propSelectedMonth) {
+        setSelectedMonth(propSelectedMonth);
+      }
+      // Pre-populate data in edit mode
+      if (isEditMode && existingData.length > 0) {
+        const newExtractionData: ExtractionData = {};
+        existingData.forEach((item) => {
+          newExtractionData[item.material.id.toString()] = {
+            quantity: item.quantity.toString(),
+            isUsed: item.isUsed,
+            quantityInCubicMeters: item.quantityInCubicMeters?.toString() || "",
+            dieselPriceThisMonth: item.dieselPriceThisMonth?.toString() || "",
+            notes: item.notes || "",
+          };
+          // Set entity ID from first item
+          if (!selectedEntityId && item.entity) {
+            setSelectedEntityId(item.entity.id.toString());
+          }
+        });
+        setExtractionData(newExtractionData);
+      }
     }
-  }, [open]);
+  }, [open, selectedYear, propSelectedMonth, isEditMode, existingData, selectedEntityId]);
 
   const saveExtractionData = async () => {
-    if (!mineId || !selectedMonth || !selectedYear || !selectedEntityId) return;
+    if (!mineId || !selectedMonth || !internalSelectedYear || !selectedEntityId)
+      return;
 
     setSaving(true);
     try {
@@ -119,17 +149,19 @@ export function AddExtractionDataDialog({
 
       materials.forEach((material) => {
         const data = extractionData[material.id.toString()];
-        if (data && data.quantity > 0) {
+        if (data && parseFloat(data.quantity) > 0) {
           materialsData.push({
             materialId: material.id,
-            quantity: data.quantity,
+            quantity: parseFloat(data.quantity),
             isUsed: data.isUsed,
-            quantityInCubicMeters: data.isUsed
-              ? data.quantityInCubicMeters
-              : undefined,
-            dieselPriceThisMonth: data.isUsed
-              ? data.dieselPriceThisMonth
-              : undefined,
+            quantityInCubicMeters:
+              data.isUsed && data.quantityInCubicMeters
+                ? parseFloat(data.quantityInCubicMeters)
+                : undefined,
+            dieselPriceThisMonth:
+              data.isUsed && data.dieselPriceThisMonth
+                ? parseFloat(data.dieselPriceThisMonth)
+                : undefined,
             notes: data.notes || "",
           });
         }
@@ -137,10 +169,10 @@ export function AddExtractionDataDialog({
 
       if (materialsData.length > 0) {
         const bulkData: BulkCreateMineMonthlyDataDto = {
-          month: selectedMonth,
-          year: selectedYear,
+          month: parseInt(selectedMonth),
+          year: parseInt(internalSelectedYear),
           mineId: mineId,
-          entityId: selectedEntityId,
+          entityId: parseInt(selectedEntityId),
           materials: materialsData,
         };
 
@@ -152,9 +184,9 @@ export function AddExtractionDataDialog({
       onDataAdded();
       onOpenChange(false);
       // Reset form
-      setSelectedMonth(0);
-      setSelectedYear(0);
-      setSelectedEntityId(0);
+      setSelectedMonth("");
+      setInternalSelectedYear("");
+      setSelectedEntityId("");
       setExtractionData({});
     } catch (error) {
       console.error("Failed to save data:", error);
@@ -167,9 +199,9 @@ export function AddExtractionDataDialog({
     if (!saving) {
       onOpenChange(false);
       // Reset form
-      setSelectedMonth(0);
-      setSelectedYear(0);
-      setSelectedEntityId(0);
+      setSelectedMonth("");
+      setInternalSelectedYear("");
+      setSelectedEntityId("");
       setExtractionData({});
     }
   };
@@ -200,7 +232,9 @@ export function AddExtractionDataDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="min-w-6xl w-full max-h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>إضافة بيانات الاستخراج</DialogTitle>
+          <DialogTitle>
+            {isEditMode ? "تعديل بيانات الاستخراج" : "إضافة بيانات الاستخراج"}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -209,8 +243,8 @@ export function AddExtractionDataDialog({
             <div className="space-y-2">
               <Label>الشركة</Label>
               <Select
-                value={selectedEntityId ? selectedEntityId.toString() : ""}
-                onValueChange={(value) => setSelectedEntityId(Number(value))}
+                value={selectedEntityId}
+                onValueChange={setSelectedEntityId}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="اختر الشركة" />
@@ -227,10 +261,7 @@ export function AddExtractionDataDialog({
 
             <div className="space-y-2">
               <Label>الشهر</Label>
-              <Select
-                value={selectedMonth ? selectedMonth.toString() : ""}
-                onValueChange={(value) => setSelectedMonth(Number(value))}
-              >
+              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="اختر الشهر" />
                 </SelectTrigger>
@@ -250,8 +281,8 @@ export function AddExtractionDataDialog({
             <div className="space-y-2">
               <Label>السنة</Label>
               <Select
-                value={selectedYear ? selectedYear.toString() : ""}
-                onValueChange={(value) => setSelectedYear(Number(value))}
+                value={internalSelectedYear}
+                onValueChange={setInternalSelectedYear}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="اختر السنة" />
@@ -268,13 +299,16 @@ export function AddExtractionDataDialog({
           </div>
 
           {/* Materials Input */}
-          {selectedEntityId && selectedMonth && selectedYear && (
+          {selectedEntityId && selectedMonth && internalSelectedYear && (
             <div className="flex-1 overflow-auto">
               <div className="space-y-4">
                 <h3 className="text-lg font-medium mb-4">
                   بيانات الاستخراج لشهر{" "}
-                  {months.find((m) => m.value === selectedMonth)?.label}{" "}
-                  {selectedYear}
+                  {
+                    months.find((m) => m.value === parseInt(selectedMonth))
+                      ?.label
+                  }{" "}
+                  {internalSelectedYear}
                 </h3>
                 <div className="overflow-x-auto">
                   <Table>
@@ -284,13 +318,13 @@ export function AddExtractionDataDialog({
                           المادة
                         </TableHead>
                         <TableHead className="min-w-[100px] text-right">
-                          الكمية
+                          م3
                         </TableHead>
                         <TableHead className="min-w-[100px] text-right">
                           هل تم الاستخدام
                         </TableHead>
                         <TableHead className="min-w-[120px] text-right">
-                          الأمتار المكعبة
+                          الأطنان
                         </TableHead>
                         <TableHead className="min-w-[120px] text-right">
                           سعر الديزل
@@ -314,24 +348,43 @@ export function AddExtractionDataDialog({
                               {material.name} ({material.unit})
                             </TableCell>
                             <TableCell>
-                              <Input
-                                type="number"
-                                min="0"
-                                step="0.01"
-                                className="w-full"
-                                value={String(
-                                  getExtractionValue(materialId, "quantity") ||
-                                    ""
-                                )}
-                                onChange={(e) =>
-                                  updateExtractionData(
-                                    materialId,
-                                    "quantity",
-                                    e.target.value
-                                  )
-                                }
-                                placeholder="0"
-                              />
+                              {!isUsed ? (
+                                <Input
+                                  className="w-full"
+                                  value={String(
+                                    getExtractionValue(
+                                      materialId,
+                                      "quantity"
+                                    ) || ""
+                                  )}
+                                  onChange={(e) =>
+                                    updateExtractionData(
+                                      materialId,
+                                      "quantity",
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="0"
+                                />
+                              ) : (
+                                <Input
+                                  className="w-full"
+                                  value={String(
+                                    getExtractionValue(
+                                      materialId,
+                                      "quantityInCubicMeters"
+                                    ) || ""
+                                  )}
+                                  onChange={(e) =>
+                                    updateExtractionData(
+                                      materialId,
+                                      "quantityInCubicMeters",
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="0"
+                                />
+                              )}
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center justify-center">
@@ -348,37 +401,35 @@ export function AddExtractionDataDialog({
                               </div>
                             </TableCell>
                             <TableCell>
-                              <Input
-                                type="number"
-                                min="0"
-                                step="0.01"
-                                className="w-full"
-                                disabled={!isUsed}
-                                value={
-                                  isUsed
-                                    ? String(
-                                        getExtractionValue(
-                                          materialId,
-                                          "quantityInCubicMeters"
-                                        ) || ""
-                                      )
-                                    : ""
-                                }
-                                onChange={(e) =>
-                                  updateExtractionData(
-                                    materialId,
-                                    "quantityInCubicMeters",
-                                    e.target.value
-                                  )
-                                }
-                                placeholder={isUsed ? "0" : "غير متاح"}
-                              />
+                              {isUsed ? (
+                                <Input
+                                  className="w-full"
+                                  value={String(
+                                    getExtractionValue(
+                                      materialId,
+                                      "quantity"
+                                    ) || ""
+                                  )}
+                                  onChange={(e) =>
+                                    updateExtractionData(
+                                      materialId,
+                                      "quantity",
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="0"
+                                />
+                              ) : (
+                                <Input
+                                  className="w-full"
+                                  disabled={true}
+                                  value=""
+                                  placeholder="غير متاح"
+                                />
+                              )}
                             </TableCell>
                             <TableCell>
                               <Input
-                                type="number"
-                                min="0"
-                                step="0.01"
                                 className="w-full"
                                 disabled={!isUsed}
                                 value={
@@ -439,18 +490,21 @@ export function AddExtractionDataDialog({
           <Button
             onClick={saveExtractionData}
             disabled={
-              saving || !selectedEntityId || !selectedMonth || !selectedYear
+              saving ||
+              !selectedEntityId ||
+              !selectedMonth ||
+              !internalSelectedYear
             }
           >
             {saving ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                جاري الحفظ...
+                {isEditMode ? "جاري التحديث..." : "جاري الحفظ..."}
               </>
             ) : (
               <>
                 <Save className="h-4 w-4 mr-2" />
-                حفظ البيانات
+                {isEditMode ? "تحديث البيانات" : "حفظ البيانات"}
               </>
             )}
           </Button>

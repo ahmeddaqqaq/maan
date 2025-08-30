@@ -5,16 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar } from "@/components/ui/calendar";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { CalendarIcon, Filter, Loader2 } from "lucide-react";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-import { DateRange } from "react-day-picker";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Filter, Loader2 } from "lucide-react";
 import { InvoiceFiltersTable } from "./components/invoice-filters-table";
 import { EntityService } from "../../../../../client/services/EntityService";
 import { MineService } from "../../../../../client/services/MineService";
@@ -30,7 +28,8 @@ export interface InvoiceFilters {
   mines: number[];
   materials: number[];
   expenses: number[];
-  dateRange: DateRange | undefined;
+  month: number | undefined;
+  year: number | undefined;
   includeExtractions: boolean;
   includeExpenses: boolean;
   onlyUsedMaterials: boolean;
@@ -48,9 +47,10 @@ export default function InvoicesPage() {
     mines: [],
     materials: [],
     expenses: [],
-    dateRange: undefined,
-    includeExtractions: true,
-    includeExpenses: true,
+    month: undefined,
+    year: new Date().getFullYear(),
+    includeExtractions: false,
+    includeExpenses: false,
     onlyUsedMaterials: false,
   });
 
@@ -81,14 +81,78 @@ export default function InvoicesPage() {
     loadData();
   }, []);
 
+  // Filter available options based on selections
+  const getFilteredMines = () => {
+    if (filters.entities.length === 0) return mines;
+    // Show mines that belong to selected entities
+    const selectedEntities = entities.filter(entity => 
+      filters.entities.includes(entity.id)
+    );
+    const availableMines = selectedEntities.flatMap(entity => entity.mines || []);
+    return mines.filter(mine => 
+      availableMines.some(availableMine => availableMine.id === mine.id)
+    );
+  };
+
+  const getFilteredMaterials = () => {
+    if (filters.entities.length === 0) return materials;
+    // Show materials that belong to selected entities
+    const selectedEntities = entities.filter(entity => 
+      filters.entities.includes(entity.id)
+    );
+    const availableMaterials = selectedEntities.flatMap(entity => entity.materials || []);
+    return materials.filter(material => 
+      availableMaterials.some(availableMaterial => availableMaterial.id === material.id)
+    );
+  };
+
+  const getFilteredExpenses = () => {
+    // Expenses are filtered by entityId at API level, show all if entities selected
+    return expenses;
+  };
+
   const updateFilter = <K extends keyof InvoiceFilters>(
     key: K,
     value: InvoiceFilters[K]
   ) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+    setFilters((prev) => {
+      const newFilters = { ...prev, [key]: value };
+      
+      // Clear dependent selections when parent changes
+      if (key === 'entities') {
+        // When entities change, clear mines, materials, and expenses that are no longer available
+        const newEntityIds = value as number[];
+        if (newEntityIds.length === 0) {
+          // If no entities selected, clear all dependent selections
+          return {
+            ...newFilters,
+            mines: [],
+            materials: [],
+            expenses: [],
+          };
+        } else {
+          // Filter out mines and materials that don't belong to selected entities
+          const selectedEntities = entities.filter(entity => 
+            newEntityIds.includes(entity.id)
+          );
+          const availableMineIds = selectedEntities.flatMap(entity => 
+            (entity.mines || []).map(mine => mine.id)
+          );
+          const availableMaterialIds = selectedEntities.flatMap(entity => 
+            (entity.materials || []).map(material => material.id)
+          );
+          
+          return {
+            ...newFilters,
+            mines: prev.mines.filter(mineId => availableMineIds.includes(mineId)),
+            materials: prev.materials.filter(materialId => availableMaterialIds.includes(materialId)),
+            expenses: [], // Clear expenses as they're filtered by API
+          };
+        }
+      }
+      
+      return newFilters;
+    });
   };
 
   const toggleFilterArray = (
@@ -109,9 +173,10 @@ export default function InvoicesPage() {
       mines: [],
       materials: [],
       expenses: [],
-      dateRange: undefined,
-      includeExtractions: true,
-      includeExpenses: true,
+      month: undefined,
+      year: new Date().getFullYear(),
+      includeExtractions: false,
+      includeExpenses: false,
       onlyUsedMaterials: false,
     });
   };
@@ -129,7 +194,7 @@ export default function InvoicesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">مولد الفواتير</h2>
+          <h2 className="text-2xl font-bold">الفواتير</h2>
           <p className="text-gray-600">إنشاء فواتير مفلترة للمواد والنفقات</p>
         </div>
       </div>
@@ -143,49 +208,64 @@ export default function InvoicesPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Date Range */}
-          <div className="space-y-2">
-            <Label>نطاق التاريخ</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-right font-normal",
-                    !filters.dateRange && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="me-2 h-4 w-4" />
-                  {filters.dateRange?.from ? (
-                    filters.dateRange.to ? (
-                      <>
-                        {format(filters.dateRange.from, "LLL dd, y")} -{" "}
-                        {format(filters.dateRange.to, "LLL dd, y")}
-                      </>
-                    ) : (
-                      format(filters.dateRange.from, "LLL dd, y")
-                    )
-                  ) : (
-                    "اختر نطاقًا زمنيًا"
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  initialFocus
-                  mode="range"
-                  defaultMonth={filters.dateRange?.from}
-                  selected={filters.dateRange}
-                  onSelect={(range) => updateFilter("dateRange", range)}
-                  numberOfMonths={2}
-                />
-              </PopoverContent>
-            </Popover>
+          {/* Month and Year Selection */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>الشهر</Label>
+              <Select
+                value={filters.month?.toString() || ""}
+                onValueChange={(value) =>
+                  updateFilter("month", value ? parseInt(value) : undefined)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر الشهر" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">01</SelectItem>
+                  <SelectItem value="2">02</SelectItem>
+                  <SelectItem value="3">03</SelectItem>
+                  <SelectItem value="4">04</SelectItem>
+                  <SelectItem value="5">05</SelectItem>
+                  <SelectItem value="6">06</SelectItem>
+                  <SelectItem value="7">07</SelectItem>
+                  <SelectItem value="8">08</SelectItem>
+                  <SelectItem value="9">09</SelectItem>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="11">11</SelectItem>
+                  <SelectItem value="12">12</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>السنة</Label>
+              <Select
+                value={filters.year?.toString() || ""}
+                onValueChange={(value) =>
+                  updateFilter("year", value ? parseInt(value) : undefined)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر السنة" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 10 }, (_, i) => {
+                    const year = new Date().getFullYear() - 5 + i;
+                    return (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Include Options */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+            <div className="flex items-center space-x-2">
               <Checkbox
                 id="include-extractions"
                 checked={filters.includeExtractions}
@@ -196,7 +276,7 @@ export default function InvoicesPage() {
               <Label htmlFor="include-extractions">تضمين استخراج المواد</Label>
             </div>
 
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+            <div className="flex items-center space-x-2">
               <Checkbox
                 id="include-expenses"
                 checked={filters.includeExpenses}
@@ -207,7 +287,7 @@ export default function InvoicesPage() {
               <Label htmlFor="include-expenses">تضمين النفقات</Label>
             </div>
 
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+            <div className="flex items-center space-x-2 ">
               <Checkbox
                 id="only-used-materials"
                 checked={filters.onlyUsedMaterials}
@@ -224,10 +304,7 @@ export default function InvoicesPage() {
             <Label>الشركات</Label>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-40 overflow-y-auto border rounded p-2">
               {entities.map((entity) => (
-                <div
-                  key={entity.id}
-                  className="flex items-center space-x-2 rtl:space-x-reverse"
-                >
+                <div key={entity.id} className="flex items-center space-x-2 ">
                   <Checkbox
                     id={`entity-${entity.id}`}
                     checked={filters.entities.includes(entity.id)}
@@ -247,11 +324,8 @@ export default function InvoicesPage() {
           <div className="space-y-2">
             <Label>المناجم</Label>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-40 overflow-y-auto border rounded p-2">
-              {mines.map((mine) => (
-                <div
-                  key={mine.id}
-                  className="flex items-center space-x-2 rtl:space-x-reverse"
-                >
+              {getFilteredMines().map((mine) => (
+                <div key={mine.id} className="flex items-center space-x-2 ">
                   <Checkbox
                     id={`mine-${mine.id}`}
                     checked={filters.mines.includes(mine.id)}
@@ -270,10 +344,10 @@ export default function InvoicesPage() {
             <div className="space-y-2">
               <Label>المواد</Label>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-40 overflow-y-auto border rounded p-2">
-                {materials.map((material) => (
+                {getFilteredMaterials().map((material) => (
                   <div
                     key={material.id}
-                    className="flex items-center space-x-2 rtl:space-x-reverse"
+                    className="flex items-center space-x-2 "
                   >
                     <Checkbox
                       id={`material-${material.id}`}
@@ -299,10 +373,10 @@ export default function InvoicesPage() {
             <div className="space-y-2">
               <Label>النفقات</Label>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-40 overflow-y-auto border rounded p-2">
-                {expenses.map((expense) => (
+                {getFilteredExpenses().map((expense) => (
                   <div
                     key={expense.id}
-                    className="flex items-center space-x-2 rtl:space-x-reverse"
+                    className="flex items-center space-x-2 "
                   >
                     <Checkbox
                       id={`expense-${expense.id}`}

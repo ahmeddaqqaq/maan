@@ -25,6 +25,8 @@ import {
   Download,
   MoreHorizontal,
   FileText,
+  Edit,
+  Trash2,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -63,6 +65,11 @@ export function MonthlyExpensesTable() {
   const [monthlyData, setMonthlyData] = useState<MonthlyExpenseData[]>([]);
   const [loading, setLoading] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editingMonth, setEditingMonth] = useState<{
+    year: number;
+    month: number;
+  } | null>(null);
 
   // تحميل المناجم والمصروفات عند تحميل المكون
   useEffect(() => {
@@ -153,6 +160,47 @@ export function MonthlyExpensesTable() {
     return Array.from(months).sort();
   };
 
+  const editMonthlyData = (year: number, month: number) => {
+    setEditingMonth({ year, month });
+    setShowEditDialog(true);
+  };
+
+  const deleteMonthlyData = async (year: number, month: number) => {
+    if (
+      !selectedMine ||
+      !confirm(
+        `هل أنت متأكد من حذف جميع بيانات المصروفات لشهر ${month}/${year}؟`
+      )
+    ) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Get all data for this month/year/mine combination
+      const dataToDelete = monthlyData.filter(
+        (item) => item.year === year && item.month === month
+      );
+
+      // Delete each record
+      await Promise.all(
+        dataToDelete.map((item) =>
+          ExpenseMonthlyDataService.expenseMonthlyDataControllerDelete({
+            id: item.id,
+          })
+        )
+      );
+
+      // Refresh data after deletion
+      refreshData();
+    } catch (error) {
+      console.error("Failed to delete monthly expense data:", error);
+      alert("فشل في حذف البيانات. يرجى المحاولة مرة أخرى.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const exportToCSV = () => {
     if (!selectedMine || !selectedYear || monthlyData.length === 0) return;
 
@@ -211,18 +259,18 @@ export function MonthlyExpensesTable() {
     );
 
     const arabicMonths = [
-      "يناير",
-      "فبراير",
-      "مارس",
-      "أبريل",
-      "مايو",
-      "يونيو",
-      "يوليو",
-      "أغسطس",
-      "سبتمبر",
-      "أكتوبر",
-      "نوفمبر",
-      "ديسمبر",
+      "01",
+      "02",
+      "03",
+      "04",
+      "05",
+      "06",
+      "07",
+      "08",
+      "09",
+      "10",
+      "11",
+      "12",
     ];
 
     // Calculate totals
@@ -263,7 +311,9 @@ export function MonthlyExpensesTable() {
           <div style="width: 48%;">
             <h3 style="margin: 0 0 10px 0; color: #34495e; border-bottom: 1px solid #bdc3c7; padding-bottom: 5px; font-size: 14px;">تفاصيل التقرير</h3>
             <p style="margin: 5px 0; font-size: 12px; color: #333333;">تاريخ الإنشاء: ${currentDate}</p>
-            <p style="margin: 5px 0; font-size: 12px; color: #333333; font-weight: bold;">إجمالي المصروفات: $${totalExpenses.toFixed(2)}</p>
+            <p style="margin: 5px 0; font-size: 12px; color: #333333; font-weight: bold;">إجمالي المصروفات: $${totalExpenses.toFixed(
+              2
+            )}</p>
           </div>
         </div>
 
@@ -587,12 +637,25 @@ export function MonthlyExpensesTable() {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem
+                                  onClick={() => editMonthlyData(year, month)}
+                                >
+                                  <Edit className="me-2 h-4 w-4" />
+                                  تعديل البيانات
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
                                   onClick={() =>
                                     exportMonthlyInvoice(year, month)
                                   }
                                 >
                                   <FileText className="me-2 h-4 w-4" />
                                   تصدير الفاتورة
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => deleteMonthlyData(year, month)}
+                                  className="text-destructive focus:text-destructive"
+                                >
+                                  <Trash2 className="me-2 h-4 w-4" />
+                                  حذف البيانات
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
@@ -618,7 +681,29 @@ export function MonthlyExpensesTable() {
         mineId={selectedMine ? parseInt(selectedMine) : undefined}
         expenses={expenses}
         onDataAdded={refreshData}
+        selectedYear={selectedYear}
       />
+
+      {editingMonth && (
+        <AddExpenseDataDialog
+          open={showEditDialog}
+          onOpenChange={(open) => {
+            setShowEditDialog(open);
+            if (!open) setEditingMonth(null);
+          }}
+          mineId={selectedMine ? parseInt(selectedMine) : undefined}
+          expenses={expenses}
+          onDataAdded={refreshData}
+          selectedYear={editingMonth.year.toString()}
+          selectedMonth={editingMonth.month.toString()}
+          isEditMode={true}
+          existingData={monthlyData.filter(
+            (item) =>
+              item.year === editingMonth.year &&
+              item.month === editingMonth.month
+          )}
+        />
+      )}
     </div>
   );
 }

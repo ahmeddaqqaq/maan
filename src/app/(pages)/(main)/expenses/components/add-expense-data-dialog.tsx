@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,11 +29,15 @@ interface AddExpenseDataDialogProps {
   mineId?: number;
   expenses: ExpenseResponse[];
   onDataAdded: () => void;
+  selectedYear?: string;
+  selectedMonth?: string;
+  isEditMode?: boolean;
+  existingData?: any[];
 }
 
 interface ExpenseData {
   [expenseId: string]: {
-    price: number;
+    price: string;
   };
 }
 
@@ -43,21 +47,22 @@ export function AddExpenseDataDialog({
   mineId,
   expenses,
   onDataAdded,
+  selectedYear,
+  selectedMonth: propSelectedMonth,
+  isEditMode = false,
+  existingData = [],
 }: AddExpenseDataDialogProps) {
-  const [selectedMonth, setSelectedMonth] = useState<number>(0);
-  const [selectedYear, setSelectedYear] = useState<number>(0);
+  const [selectedMonth, setSelectedMonth] = useState<string>("");
+  const [internalSelectedYear, setInternalSelectedYear] = useState<string>("");
   const [expenseData, setExpenseData] = useState<ExpenseData>({});
   const [saving, setSaving] = useState(false);
 
-  const updateExpenseData = (
-    expenseId: string,
-    value: string | number
-  ) => {
+  const updateExpenseData = (expenseId: string, value: string) => {
     setExpenseData((prev) => ({
       ...prev,
       [expenseId]: {
         ...prev[expenseId],
-        price: Number(value),
+        price: value,
       },
     }));
   };
@@ -66,8 +71,30 @@ export function AddExpenseDataDialog({
     return expenseData[expenseId]?.price || "";
   };
 
+  // Pre-select year/month and populate data for edit mode
+  useEffect(() => {
+    if (open) {
+      if (selectedYear) {
+        setInternalSelectedYear(selectedYear);
+      }
+      if (propSelectedMonth) {
+        setSelectedMonth(propSelectedMonth);
+      }
+      // Pre-populate data in edit mode
+      if (isEditMode && existingData.length > 0) {
+        const newExpenseData: ExpenseData = {};
+        existingData.forEach((item) => {
+          newExpenseData[item.expense.id.toString()] = {
+            price: item.price.toString(),
+          };
+        });
+        setExpenseData(newExpenseData);
+      }
+    }
+  }, [open, selectedYear, propSelectedMonth, isEditMode, existingData]);
+
   const saveExpenseData = async () => {
-    if (!mineId || !selectedMonth || !selectedYear) return;
+    if (!mineId || !selectedMonth || !internalSelectedYear) return;
 
     setSaving(true);
     try {
@@ -75,10 +102,10 @@ export function AddExpenseDataDialog({
 
       expenses.forEach((expense) => {
         const data = expenseData[expense.id.toString()];
-        if (data && data.price > 0) {
+        if (data && parseFloat(data.price) > 0) {
           expensesData.push({
             expenseId: expense.id,
-            price: data.price,
+            price: parseFloat(data.price),
             notes: "",
           });
         }
@@ -86,8 +113,8 @@ export function AddExpenseDataDialog({
 
       if (expensesData.length > 0) {
         const bulkData: BulkCreateExpenseMonthlyDataDto = {
-          month: selectedMonth,
-          year: selectedYear,
+          month: parseInt(selectedMonth),
+          year: parseInt(internalSelectedYear),
           mineId: mineId,
           entityId: 1, // TODO: Get from props or context
           expenses: expensesData,
@@ -100,8 +127,8 @@ export function AddExpenseDataDialog({
 
       onDataAdded();
       onOpenChange(false);
-      setSelectedMonth(0);
-      setSelectedYear(0);
+      setSelectedMonth("");
+      setInternalSelectedYear("");
       setExpenseData({});
     } catch (error) {
       console.error("فشل حفظ البيانات:", error);
@@ -113,26 +140,26 @@ export function AddExpenseDataDialog({
   const handleClose = () => {
     if (!saving) {
       onOpenChange(false);
-      setSelectedMonth(0);
-      setSelectedYear(0);
+      setSelectedMonth("");
+      setInternalSelectedYear("");
       setExpenseData({});
     }
   };
 
   // Get available months
   const months = [
-    { value: 1, label: "يناير" },
-    { value: 2, label: "فبراير" },
-    { value: 3, label: "مارس" },
-    { value: 4, label: "أبريل" },
-    { value: 5, label: "مايو" },
-    { value: 6, label: "يونيو" },
-    { value: 7, label: "يوليو" },
-    { value: 8, label: "أغسطس" },
-    { value: 9, label: "سبتمبر" },
-    { value: 10, label: "أكتوبر" },
-    { value: 11, label: "نوفمبر" },
-    { value: 12, label: "ديسمبر" },
+    { value: 1, label: "01" },
+    { value: 2, label: "02" },
+    { value: 3, label: "03" },
+    { value: 4, label: "04" },
+    { value: 5, label: "05" },
+    { value: 6, label: "06" },
+    { value: 7, label: "07" },
+    { value: 8, label: "08" },
+    { value: 9, label: "09" },
+    { value: 10, label: "10" },
+    { value: 11, label: "11" },
+    { value: 12, label: "12" },
   ];
 
   // Get available years (current year +/- 5 years)
@@ -145,7 +172,9 @@ export function AddExpenseDataDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-6xl w-full max-h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>إضافة بيانات المصروفات</DialogTitle>
+          <DialogTitle>
+            {isEditMode ? "تعديل بيانات المصروفات" : "إضافة بيانات المصروفات"}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -153,10 +182,7 @@ export function AddExpenseDataDialog({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>الشهر</Label>
-              <Select
-                value={selectedMonth ? selectedMonth.toString() : ""}
-                onValueChange={(value) => setSelectedMonth(Number(value))}
-              >
+              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="اختر الشهر" />
                 </SelectTrigger>
@@ -176,8 +202,8 @@ export function AddExpenseDataDialog({
             <div className="space-y-2">
               <Label>السنة</Label>
               <Select
-                value={selectedYear ? selectedYear.toString() : ""}
-                onValueChange={(value) => setSelectedYear(Number(value))}
+                value={internalSelectedYear}
+                onValueChange={setInternalSelectedYear}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="اختر السنة" />
@@ -194,13 +220,16 @@ export function AddExpenseDataDialog({
           </div>
 
           {/* Expenses Input */}
-          {selectedMonth && selectedYear && (
+          {selectedMonth && internalSelectedYear && (
             <div className="flex-1 overflow-auto">
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">
                   بيانات المصروفات لشهر{" "}
-                  {months.find((m) => m.value === selectedMonth)?.label}{" "}
-                  {selectedYear}
+                  {
+                    months.find((m) => m.value === parseInt(selectedMonth))
+                      ?.label
+                  }{" "}
+                  {internalSelectedYear}
                 </h3>
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                   {expenses.map((expense) => {
@@ -219,9 +248,6 @@ export function AddExpenseDataDialog({
                         </Label>
                         <Input
                           id={`expense-${expense.id}`}
-                          type="number"
-                          min="0"
-                          step="0.01"
                           value={getExpenseValue(expenseId) || ""}
                           onChange={(e) =>
                             updateExpenseData(expenseId, e.target.value)
@@ -243,17 +269,17 @@ export function AddExpenseDataDialog({
           </Button>
           <Button
             onClick={saveExpenseData}
-            disabled={saving || !selectedMonth || !selectedYear}
+            disabled={saving || !selectedMonth || !internalSelectedYear}
           >
             {saving ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin me-2" />
-                جارٍ الحفظ...
+                {isEditMode ? "جاري التحديث..." : "جارٍ الحفظ..."}
               </>
             ) : (
               <>
                 <Save className="h-4 w-4 me-2" />
-                حفظ البيانات
+                {isEditMode ? "تحديث البيانات" : "حفظ البيانات"}
               </>
             )}
           </Button>

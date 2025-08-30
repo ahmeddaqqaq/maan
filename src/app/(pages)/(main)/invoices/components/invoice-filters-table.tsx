@@ -11,7 +11,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { FileText, Loader2 } from "lucide-react";
 import { MineMonthlyDataService } from "../../../../../../client/services/MineMonthlyDataService";
 import { ExpenseMonthlyDataService } from "../../../../../../client/services/ExpenseMonthlyDataService";
@@ -86,7 +85,7 @@ export function InvoiceFiltersTable({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (filters.dateRange?.from && filters.dateRange?.to) {
+    if (filters.month && filters.year) {
       loadFilteredData();
     } else {
       setExtractionData([]);
@@ -95,51 +94,142 @@ export function InvoiceFiltersTable({
   }, [filters]);
 
   const loadFilteredData = async () => {
-    if (!filters.dateRange?.from || !filters.dateRange?.to) return;
+    if (!filters.month || !filters.year) return;
 
     setLoading(true);
     try {
-      const promises = [];
+      let allExtractionData: FilteredExtractionData[] = [];
+      let allExpenseData: FilteredExpenseData[] = [];
 
-      // Load extraction data if needed
+      // Load extraction data if needed (OR logic for multiple selections)
       if (filters.includeExtractions) {
-        promises.push(
-          MineMonthlyDataService.mineMonthlyDataControllerFindMany({
-            entityId:
-              filters.entities.length > 0 ? filters.entities[0] : undefined,
-            mineId: filters.mines.length > 0 ? filters.mines[0] : undefined,
-            materialId:
-              filters.materials.length > 0 ? filters.materials[0] : undefined,
-            isUsed: filters.onlyUsedMaterials,
-            skip: 0,
-            take: 1000, // Load more data for invoices
-          })
-        );
-      } else {
-        promises.push(Promise.resolve({ data: [] }));
+        const extractionPromises: Promise<{ data?: FilteredExtractionData[] }>[] = [];
+
+        // Only show data if specific filters are selected
+        if (filters.entities.length > 0 || filters.mines.length > 0 || filters.materials.length > 0) {
+          // Make separate API calls for each selected filter (OR logic)
+          
+          // For each selected entity
+          for (const entityId of filters.entities) {
+            extractionPromises.push(
+              MineMonthlyDataService.mineMonthlyDataControllerFindMany({
+                entityId,
+                month: filters.month,
+                year: filters.year,
+                ...(filters.onlyUsedMaterials && { isUsed: true }),
+                skip: 0,
+                take: 1000,
+              })
+            );
+          }
+
+          // For each selected mine
+          for (const mineId of filters.mines) {
+            extractionPromises.push(
+              MineMonthlyDataService.mineMonthlyDataControllerFindMany({
+                mineId,
+                month: filters.month,
+                year: filters.year,
+                ...(filters.onlyUsedMaterials && { isUsed: true }),
+                skip: 0,
+                take: 1000,
+              })
+            );
+          }
+
+          // For each selected material
+          for (const materialId of filters.materials) {
+            extractionPromises.push(
+              MineMonthlyDataService.mineMonthlyDataControllerFindMany({
+                materialId,
+                month: filters.month,
+                year: filters.year,
+                ...(filters.onlyUsedMaterials && { isUsed: true }),
+                skip: 0,
+                take: 1000,
+              })
+            );
+          }
+        }
+
+        if (extractionPromises.length > 0) {
+          const extractionResults = await Promise.all(extractionPromises);
+          const uniqueExtractionData = new Map<number, FilteredExtractionData>();
+          
+          extractionResults.forEach((result) => {
+            (result.data || []).forEach((item) => {
+              uniqueExtractionData.set(item.id, item);
+            });
+          });
+          
+          allExtractionData = Array.from(uniqueExtractionData.values());
+        }
       }
 
-      // Load expense data if needed
+      // Load expense data if needed (OR logic for multiple selections)
       if (filters.includeExpenses) {
-        promises.push(
-          ExpenseMonthlyDataService.expenseMonthlyDataControllerFindMany({
-            entityId:
-              filters.entities.length > 0 ? filters.entities[0] : undefined,
-            mineId: filters.mines.length > 0 ? filters.mines[0] : undefined,
-            expenseId:
-              filters.expenses.length > 0 ? filters.expenses[0] : undefined,
-            skip: 0,
-            take: 1000,
-          })
-        );
-      } else {
-        promises.push(Promise.resolve({ data: [] }));
+        const expensePromises: Promise<{ data?: FilteredExpenseData[] }>[] = [];
+
+        // Only show data if specific filters are selected
+        if (filters.entities.length > 0 || filters.mines.length > 0 || filters.expenses.length > 0) {
+          // Make separate API calls for each selected filter (OR logic)
+          
+          // For each selected entity
+          for (const entityId of filters.entities) {
+            expensePromises.push(
+              ExpenseMonthlyDataService.expenseMonthlyDataControllerFindMany({
+                entityId,
+                month: filters.month,
+                year: filters.year,
+                skip: 0,
+                take: 1000,
+              })
+            );
+          }
+
+          // For each selected mine
+          for (const mineId of filters.mines) {
+            expensePromises.push(
+              ExpenseMonthlyDataService.expenseMonthlyDataControllerFindMany({
+                mineId,
+                month: filters.month,
+                year: filters.year,
+                skip: 0,
+                take: 1000,
+              })
+            );
+          }
+
+          // For each selected expense
+          for (const expenseId of filters.expenses) {
+            expensePromises.push(
+              ExpenseMonthlyDataService.expenseMonthlyDataControllerFindMany({
+                expenseId,
+                month: filters.month,
+                year: filters.year,
+                skip: 0,
+                take: 1000,
+              })
+            );
+          }
+        }
+
+        if (expensePromises.length > 0) {
+          const expenseResults = await Promise.all(expensePromises);
+          const uniqueExpenseData = new Map<number, FilteredExpenseData>();
+          
+          expenseResults.forEach((result) => {
+            (result.data || []).forEach((item) => {
+              uniqueExpenseData.set(item.id, item);
+            });
+          });
+          
+          allExpenseData = Array.from(uniqueExpenseData.values());
+        }
       }
 
-      const [extractionRes, expenseRes] = await Promise.all(promises);
-
-      setExtractionData((extractionRes.data || []) as FilteredExtractionData[]);
-      setExpenseData((expenseRes.data || []) as FilteredExpenseData[]);
+      setExtractionData(allExtractionData);
+      setExpenseData(allExpenseData);
     } catch (error) {
       console.error("Failed to load filtered data:", error);
     } finally {
@@ -148,31 +238,24 @@ export function InvoiceFiltersTable({
   };
 
   const generateCombinedInvoice = async () => {
-    if (!filters.dateRange?.from || !filters.dateRange?.to) return;
-
-    const startDate = filters.dateRange.from;
-    const endDate = filters.dateRange.to;
+    if (!filters.month || !filters.year) return;
 
     const arabicMonths = [
-      "يناير",
-      "فبراير",
-      "مارس",
-      "أبريل",
-      "مايو",
-      "يونيو",
-      "يوليو",
-      "أغسطس",
-      "سبتمبر",
-      "أكتوبر",
-      "نوفمبر",
-      "ديسمبر",
+      "01",
+      "02",
+      "03",
+      "04",
+      "05",
+      "06",
+      "07",
+      "08",
+      "09",
+      "10",
+      "11",
+      "12",
     ];
 
-    const dateRange = `${
-      arabicMonths[startDate.getMonth()]
-    } ${startDate.getFullYear()} - ${
-      arabicMonths[endDate.getMonth()]
-    } ${endDate.getFullYear()}`;
+    const dateRange = `${arabicMonths[filters.month - 1]} ${filters.year}`;
     const currentDate = new Date().toLocaleDateString("ar-SA");
 
     // Group data by entity
@@ -193,7 +276,7 @@ export function InvoiceFiltersTable({
       (sum, item) => sum + item.price,
       0
     );
-    const grandTotal = totalExtractionValue + totalExpenseValue;
+    const grandTotal = totalExtractionValue - totalExpenseValue;
 
     const htmlContent = `
       <div style="
@@ -221,15 +304,15 @@ export function InvoiceFiltersTable({
           <div style="width: 48%;">
             <h3 style="margin: 0 0 10px 0; color: #34495e; border-bottom: 1px solid #bdc3c7; padding-bottom: 5px; font-size: 14px;">ملخص المالي</h3>
             <p style="margin: 5px 0; font-size: 12px; color: #333333;">تاريخ الإنشاء: ${currentDate}</p>
-            <p style="margin: 5px 0; font-size: 12px; color: #333333;">مجموع الاستخراج: $${totalExtractionValue.toFixed(
+            <p style="margin: 5px 0; font-size: 12px; color: #333333;">مجموع الاستخراج: <span style="color: #27ae60;">$${totalExtractionValue.toFixed(
               2
-            )}</p>
-            <p style="margin: 5px 0; font-size: 12px; color: #333333;">مجموع المصروفات: $${totalExpenseValue.toFixed(
+            )}</span></p>
+            <p style="margin: 5px 0; font-size: 12px; color: #333333;">مجموع المصروفات: <span style="color: #e74c3c;">-$${totalExpenseValue.toFixed(
               2
-            )}</p>
-            <p style="margin: 5px 0; font-size: 12px; color: #333333; font-weight: bold; border-top: 1px solid #ddd; padding-top: 5px;">المجموع الكلي: $${grandTotal.toFixed(
+            )}</span></p>
+            <p style="margin: 5px 0; font-size: 12px; color: #333333; font-weight: bold; border-top: 1px solid #ddd; padding-top: 5px;">صافي المجموع: <span style="color: ${grandTotal >= 0 ? '#27ae60' : '#e74c3c'};">$${grandTotal.toFixed(
               2
-            )}</p>
+            )}</span></p>
           </div>
         </div>
 
@@ -451,9 +534,9 @@ export function InvoiceFiltersTable({
             <Loader2 className="h-6 w-6 animate-spin mr-2" />
             جاري تحميل البيانات المفلترة...
           </div>
-        ) : !filters.dateRange?.from || !filters.dateRange?.to ? (
+        ) : !filters.month || !filters.year ? (
           <div className="text-center py-8 text-muted-foreground">
-            يرجى اختيار نطاق التاريخ لعرض بيانات الفاتورة.
+            يرجى اختيار الشهر والسنة لعرض بيانات الفاتورة.
           </div>
         ) : !hasData ? (
           <div className="text-center py-8 text-muted-foreground">
@@ -487,7 +570,7 @@ export function InvoiceFiltersTable({
                     extractionData.reduce(
                       (sum, item) => sum + (item.totalPrice || 0),
                       0
-                    ) + expenseData.reduce((sum, item) => sum + item.price, 0)
+                    ) - expenseData.reduce((sum, item) => sum + item.price, 0)
                   ).toFixed(2)}
                 </p>
               </div>
@@ -505,9 +588,6 @@ export function InvoiceFiltersTable({
                         <TableHead className="text-right">المنجم</TableHead>
                         <TableHead className="text-right">المادة</TableHead>
                         <TableHead className="text-right">الكمية</TableHead>
-                        <TableHead className="text-right">
-                          هل تم الاستخدام
-                        </TableHead>
                         <TableHead className="text-right">
                           السعر الإجمالي
                         </TableHead>
@@ -527,14 +607,7 @@ export function InvoiceFiltersTable({
                             {item.material.name}
                           </TableCell>
                           <TableCell className="text-right">
-                            {item.quantity} {item.material.unit}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Badge
-                              variant={item.isUsed ? "default" : "secondary"}
-                            >
-                              {item.isUsed ? "مستخدم" : "حمولة زائدة"}
-                            </Badge>
+                            {item.quantity} طن
                           </TableCell>
                           <TableCell className="text-right">
                             ${(item.totalPrice || 0).toFixed(2)}

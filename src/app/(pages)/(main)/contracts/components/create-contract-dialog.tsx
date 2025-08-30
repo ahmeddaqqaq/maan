@@ -40,13 +40,13 @@ import {
 
 const createContractSchema = z.object({
   name: z.string().min(1, "الاسم مطلوب"),
-  entityId: z.number().min(1, "الجهة مطلوبة"),
+  entityId: z.string().min(1, "الجهة مطلوبة"),
   description: z.string().min(1, "الوصف مطلوب"),
   startDate: z.string().min(1, "تاريخ البدء مطلوب"),
   endDate: z.string().optional(),
-  dieselPrice: z.number().optional(),
-  extractionPrice: z.number().optional(),
-  phosphatePrice: z.number().optional(),
+  dieselPrice: z.string().optional(),
+  extractionPrice: z.string().optional(),
+  phosphatePrice: z.string().optional(),
   // Mine fields
   mineName: z.string().min(1, "اسم المنجم مطلوب"),
   mineLocation: z.string().optional(),
@@ -72,13 +72,13 @@ export function CreateContractDialog({
     resolver: zodResolver(createContractSchema),
     defaultValues: {
       name: "",
-      entityId: 0,
+      entityId: "",
       description: "",
       startDate: "",
       endDate: "",
-      dieselPrice: undefined,
-      extractionPrice: undefined,
-      phosphatePrice: undefined,
+      dieselPrice: "",
+      extractionPrice: "",
+      phosphatePrice: "",
       mineName: "",
       mineLocation: "",
     },
@@ -105,13 +105,19 @@ export function CreateContractDialog({
       // First, create the contract
       const createContractDto: CreateContractDto = {
         name: data.name,
-        entityId: data.entityId,
+        entityId: parseInt(data.entityId),
         description: data.description,
         startDate: data.startDate,
         endDate: data.endDate || undefined,
-        dieselPrice: data.dieselPrice,
-        extractionPrice: data.extractionPrice,
-        phosphatePrice: data.phosphatePrice,
+        dieselPrice: data.dieselPrice
+          ? parseFloat(data.dieselPrice)
+          : undefined,
+        extractionPrice: data.extractionPrice
+          ? parseFloat(data.extractionPrice)
+          : undefined,
+        phosphatePrice: data.phosphatePrice
+          ? parseFloat(data.phosphatePrice)
+          : undefined,
       };
 
       const contractResponse = await ContractService.contractControllerCreate({
@@ -119,11 +125,12 @@ export function CreateContractDialog({
       });
 
       // Extract contract ID from response - handle different response structures
-      const contractId = contractResponse.data?.id || contractResponse.id || contractResponse;
-      
-      if (!contractId || typeof contractId !== 'number') {
-        console.error('Invalid contract response:', contractResponse);
-        throw new Error('Failed to get contract ID from response');
+      const contractId =
+        contractResponse.data?.id || contractResponse.id || contractResponse;
+
+      if (!contractId || typeof contractId !== "number") {
+        console.error("Invalid contract response:", contractResponse);
+        throw new Error("Failed to get contract ID from response");
       }
 
       // Then, create the mine with reference to the new contract
@@ -199,8 +206,8 @@ export function CreateContractDialog({
                     <FormItem>
                       <FormLabel>الجهة</FormLabel>
                       <Select
-                        onValueChange={(value) => field.onChange(Number(value))}
-                        value={field.value ? field.value.toString() : ""}
+                        onValueChange={field.onChange}
+                        value={field.value}
                       >
                         <FormControl>
                           <SelectTrigger className="w-full">
@@ -263,17 +270,8 @@ export function CreateContractDialog({
                         <FormControl>
                           <Input
                             {...field}
-                            type="number"
                             step="0.01"
                             placeholder="أدخل سعر الديزل"
-                            onChange={(e) =>
-                              field.onChange(
-                                e.target.value
-                                  ? Number(e.target.value)
-                                  : undefined
-                              )
-                            }
-                            value={field.value || ""}
                           />
                         </FormControl>
                         <FormMessage />
@@ -290,17 +288,8 @@ export function CreateContractDialog({
                         <FormControl>
                           <Input
                             {...field}
-                            type="number"
                             step="0.01"
                             placeholder="أدخل سعر الاستخراج"
-                            onChange={(e) =>
-                              field.onChange(
-                                e.target.value
-                                  ? Number(e.target.value)
-                                  : undefined
-                              )
-                            }
-                            value={field.value || ""}
                           />
                         </FormControl>
                         <FormMessage />
@@ -321,14 +310,6 @@ export function CreateContractDialog({
                           type="number"
                           step="0.01"
                           placeholder="أدخل سعر الفوسفات"
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value
-                                ? Number(e.target.value)
-                                : undefined
-                            )
-                          }
-                          value={field.value || ""}
                         />
                       </FormControl>
                       <FormMessage />

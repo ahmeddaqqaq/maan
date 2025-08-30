@@ -25,6 +25,8 @@ import {
   Download,
   MoreHorizontal,
   FileText,
+  Trash2,
+  Edit,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -76,6 +78,11 @@ export function MonthlyExtractionTable() {
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [loading, setLoading] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editingMonth, setEditingMonth] = useState<{
+    year: number;
+    month: number;
+  } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRows, setTotalRows] = useState(0);
@@ -232,6 +239,47 @@ export function MonthlyExtractionTable() {
     document.body.removeChild(link);
   };
 
+  const editMonthlyData = (year: number, month: number) => {
+    setEditingMonth({ year, month });
+    setShowEditDialog(true);
+  };
+
+  const deleteMonthlyData = async (year: number, month: number) => {
+    if (
+      !selectedMine ||
+      !confirm(
+        `هل أنت متأكد من حذف جميع بيانات الاستخراج لشهر ${month}/${year}؟`
+      )
+    ) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Get all data for this month/year/mine combination
+      const dataToDelete = monthlyData.filter(
+        (item) => item.year === year && item.month === month
+      );
+
+      // Delete each record
+      await Promise.all(
+        dataToDelete.map((item) =>
+          MineMonthlyDataService.mineMonthlyDataControllerDelete({
+            id: item.id,
+          })
+        )
+      );
+
+      // Refresh data after deletion
+      refreshData();
+    } catch (error) {
+      console.error("Failed to delete monthly data:", error);
+      alert("فشل في حذف البيانات. يرجى المحاولة مرة أخرى.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const exportMonthlyInvoice = async (year: number, month: number) => {
     if (!selectedMine || monthlyData.length === 0) return;
 
@@ -270,18 +318,18 @@ export function MonthlyExtractionTable() {
 
     // Get Arabic month names
     const arabicMonths = [
-      "يناير",
-      "فبراير",
-      "مارس",
-      "أبريل",
-      "مايو",
-      "يونيو",
-      "يوليو",
-      "أغسطس",
-      "سبتمبر",
-      "أكتوبر",
-      "نوفمبر",
-      "ديسمبر",
+      "01",
+      "02",
+      "03",
+      "04",
+      "05",
+      "06",
+      "07",
+      "08",
+      "09",
+      "10",
+      "11",
+      "12",
     ];
 
     const arabicDate = `${arabicMonths[month - 1]} ${year}`;
@@ -671,7 +719,23 @@ export function MonthlyExtractionTable() {
                                 key={material.id}
                                 className="text-right"
                               >
-                                {data ? data.quantity : "-"}
+                                {data ? (
+                                  <div className="space-y-1">
+                                    <div className="font-medium">
+                                      {data.isUsed
+                                        ? `${data.quantity} طن`
+                                        : data.quantity}
+                                    </div>
+                                    {data.isUsed &&
+                                      data.quantityInCubicMeters && (
+                                        <div className="text-xs text-muted-foreground">
+                                          {data.quantityInCubicMeters} م³
+                                        </div>
+                                      )}
+                                  </div>
+                                ) : (
+                                  "-"
+                                )}
                               </TableCell>
                             );
                           })}
@@ -685,12 +749,25 @@ export function MonthlyExtractionTable() {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem
+                                  onClick={() => editMonthlyData(year, month)}
+                                >
+                                  <Edit className="me-2 h-4 w-4" />
+                                  تعديل البيانات
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
                                   onClick={() =>
                                     exportMonthlyInvoice(year, month)
                                   }
                                 >
                                   <FileText className="me-2 h-4 w-4" />
                                   تصدير الفاتورة
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => deleteMonthlyData(year, month)}
+                                  className="text-destructive focus:text-destructive"
+                                >
+                                  <Trash2 className="me-2 h-4 w-4" />
+                                  حذف البيانات
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
@@ -778,7 +855,29 @@ export function MonthlyExtractionTable() {
         mineId={selectedMine ? parseInt(selectedMine) : undefined}
         materials={materials}
         onDataAdded={refreshData}
+        selectedYear={selectedYear}
       />
+
+      {editingMonth && (
+        <AddExtractionDataDialog
+          open={showEditDialog}
+          onOpenChange={(open) => {
+            setShowEditDialog(open);
+            if (!open) setEditingMonth(null);
+          }}
+          mineId={selectedMine ? parseInt(selectedMine) : undefined}
+          materials={materials}
+          onDataAdded={refreshData}
+          selectedYear={editingMonth.year.toString()}
+          selectedMonth={editingMonth.month.toString()}
+          isEditMode={true}
+          existingData={monthlyData.filter(
+            (item) =>
+              item.year === editingMonth.year &&
+              item.month === editingMonth.month
+          )}
+        />
+      )}
     </div>
   );
 }
