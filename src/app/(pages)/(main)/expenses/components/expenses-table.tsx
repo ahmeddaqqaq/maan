@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Table,
   TableBody,
@@ -35,43 +35,47 @@ export const ExpensesTable = ({ retrigger }: ExpensesTableProps) => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalRows, setTotalRows] = useState(0);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [selectedExpense, setSelectedExpense] = useState<ExpenseResponse | null>(null);
+  const [selectedExpense, setSelectedExpense] =
+    useState<ExpenseResponse | null>(null);
   const pageSize = 7;
+
+  const fetchExpenses = useCallback(
+    async (isRefresh = false) => {
+      try {
+        if (isRefresh) {
+          setRefreshing(true);
+        } else {
+          setLoading(true);
+        }
+        const skip = (currentPage - 1) * pageSize;
+        const response = await ExpenseService.expenseControllerFindMany({
+          skip,
+          take: pageSize,
+        });
+        setExpenses(response.data || []);
+        setTotalRows(response.rows || 0);
+        setTotalPages(Math.ceil((response.rows || 0) / pageSize));
+
+        if (isRefresh) {
+          toast.success("تم تحديث المصاريف بنجاح");
+        }
+      } catch (error) {
+        toast.error("فشل في جلب المصاريف");
+        console.error(error);
+      } finally {
+        if (isRefresh) {
+          setRefreshing(false);
+        } else {
+          setLoading(false);
+        }
+      }
+    },
+    [currentPage]
+  );
 
   useEffect(() => {
     fetchExpenses();
-  }, [retrigger, currentPage]);
-
-  const fetchExpenses = async (isRefresh = false) => {
-    try {
-      if (isRefresh) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
-      const skip = (currentPage - 1) * pageSize;
-      const response = await ExpenseService.expenseControllerFindMany({
-        skip,
-        take: pageSize,
-      });
-      setExpenses(response.data || []);
-      setTotalRows(response.rows || 0);
-      setTotalPages(Math.ceil((response.rows || 0) / pageSize));
-
-      if (isRefresh) {
-        toast.success("تم تحديث المصاريف بنجاح");
-      }
-    } catch (error) {
-      toast.error("فشل في جلب المصاريف");
-      console.error(error);
-    } finally {
-      if (isRefresh) {
-        setRefreshing(false);
-      } else {
-        setLoading(false);
-      }
-    }
-  };
+  }, [retrigger, currentPage, fetchExpenses]);
 
   const handleRefresh = async () => {
     await fetchExpenses(true);

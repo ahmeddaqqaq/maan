@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Table,
   TableBody,
@@ -35,43 +35,48 @@ export const EntitiesTable = ({ retrigger }: EntitiesTableProps) => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalRows, setTotalRows] = useState(0);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [selectedEntity, setSelectedEntity] = useState<EntityResponse | null>(null);
+  const [selectedEntity, setSelectedEntity] = useState<EntityResponse | null>(
+    null
+  );
   const pageSize = 7;
+
+  const fetchEntities = useCallback(
+    async (isRefresh = false) => {
+      try {
+        if (isRefresh) {
+          setRefreshing(true);
+        } else {
+          setLoading(true);
+        }
+        const skip = (currentPage - 1) * pageSize;
+        const response = await EntityService.entityControllerFindMany({
+          skip,
+          take: pageSize,
+        });
+        setEntities(response.data || []);
+        setTotalRows(response.rows || 0);
+        setTotalPages(Math.ceil((response.rows || 0) / pageSize));
+
+        if (isRefresh) {
+          toast.success("تم تحديث الجهات بنجاح");
+        }
+      } catch (error) {
+        toast.error("فشل في جلب الجهات");
+        console.error(error);
+      } finally {
+        if (isRefresh) {
+          setRefreshing(false);
+        } else {
+          setLoading(false);
+        }
+      }
+    },
+    [currentPage]
+  );
 
   useEffect(() => {
     fetchEntities();
-  }, [retrigger, currentPage]);
-
-  const fetchEntities = async (isRefresh = false) => {
-    try {
-      if (isRefresh) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
-      const skip = (currentPage - 1) * pageSize;
-      const response = await EntityService.entityControllerFindMany({
-        skip,
-        take: pageSize,
-      });
-      setEntities(response.data || []);
-      setTotalRows(response.rows || 0);
-      setTotalPages(Math.ceil((response.rows || 0) / pageSize));
-
-      if (isRefresh) {
-        toast.success("تم تحديث الجهات بنجاح");
-      }
-    } catch (error) {
-      toast.error("فشل في جلب الجهات");
-      console.error(error);
-    } finally {
-      if (isRefresh) {
-        setRefreshing(false);
-      } else {
-        setLoading(false);
-      }
-    }
-  };
+  }, [retrigger, currentPage, fetchEntities]);
 
   const handleRefresh = async () => {
     await fetchEntities(true);

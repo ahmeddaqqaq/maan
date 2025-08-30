@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Table,
   TableBody,
@@ -35,42 +35,46 @@ export const ContractsTable = ({ retrigger }: ContractsTableProps) => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalRows, setTotalRows] = useState(0);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [selectedContract, setSelectedContract] = useState<ContractResponse | null>(null);
+  const [selectedContract, setSelectedContract] =
+    useState<ContractResponse | null>(null);
   const pageSize = 7;
+
+  const fetchContracts = useCallback(
+    async (isRefresh = false) => {
+      try {
+        if (isRefresh) {
+          setRefreshing(true);
+        } else {
+          setLoading(true);
+        }
+        const skip = (currentPage - 1) * pageSize;
+        const response = await ContractService.contractControllerFindMany({
+          skip,
+          take: pageSize,
+        });
+        setContracts(response.data || []);
+        setTotalRows(response.rows || 0);
+        setTotalPages(Math.ceil((response.rows || 0) / pageSize));
+        if (isRefresh) {
+          toast.success("تم تحديث العقود بنجاح");
+        }
+      } catch (error) {
+        toast.error("فشل في جلب العقود");
+        console.error(error);
+      } finally {
+        if (isRefresh) {
+          setRefreshing(false);
+        } else {
+          setLoading(false);
+        }
+      }
+    },
+    [currentPage]
+  );
 
   useEffect(() => {
     fetchContracts();
-  }, [retrigger, currentPage]);
-
-  const fetchContracts = async (isRefresh = false) => {
-    try {
-      if (isRefresh) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
-      const skip = (currentPage - 1) * pageSize;
-      const response = await ContractService.contractControllerFindMany({
-        skip,
-        take: pageSize,
-      });
-      setContracts(response.data || []);
-      setTotalRows(response.rows || 0);
-      setTotalPages(Math.ceil((response.rows || 0) / pageSize));
-      if (isRefresh) {
-        toast.success("تم تحديث العقود بنجاح");
-      }
-    } catch (error) {
-      toast.error("فشل في جلب العقود");
-      console.error(error);
-    } finally {
-      if (isRefresh) {
-        setRefreshing(false);
-      } else {
-        setLoading(false);
-      }
-    }
-  };
+  }, [retrigger, currentPage, fetchContracts]);
 
   const handleRefresh = async () => {
     await fetchContracts(true);

@@ -44,7 +44,27 @@ interface AddExtractionDataDialogProps {
   selectedYear?: string;
   selectedMonth?: string;
   isEditMode?: boolean;
-  existingData?: any[];
+  existingData?: MineMonthlyData[];
+}
+
+interface MineMonthlyData {
+  id: number;
+  quantity: number;
+  isUsed: boolean;
+  quantityInCubicMeters?: number;
+  dieselPriceThisMonth?: number;
+  notes?: string;
+  month: number;
+  year: number;
+  material: {
+    id: number;
+    name: string;
+    unit: string;
+  };
+  entity?: {
+    id: number;
+    name: string;
+  };
 }
 
 interface ExtractionData {
@@ -137,7 +157,14 @@ export function AddExtractionDataDialog({
         setExtractionData(newExtractionData);
       }
     }
-  }, [open, selectedYear, propSelectedMonth, isEditMode, existingData, selectedEntityId]);
+  }, [
+    open,
+    selectedYear,
+    propSelectedMonth,
+    isEditMode,
+    existingData,
+    selectedEntityId,
+  ]);
 
   const saveExtractionData = async () => {
     if (!mineId || !selectedMonth || !internalSelectedYear || !selectedEntityId)

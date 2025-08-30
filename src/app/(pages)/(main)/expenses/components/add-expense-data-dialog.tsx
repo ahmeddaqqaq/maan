@@ -32,7 +32,19 @@ interface AddExpenseDataDialogProps {
   selectedYear?: string;
   selectedMonth?: string;
   isEditMode?: boolean;
-  existingData?: any[];
+  existingData?: ExpenseMonthlyData[];
+}
+
+interface ExpenseMonthlyData {
+  id: number;
+  price: number;
+  month: number;
+  year: number;
+  expense: {
+    id: number;
+    name: string;
+    unit: string;
+  };
 }
 
 interface ExpenseData {
