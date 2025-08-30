@@ -18,6 +18,8 @@ import { EntityResponse } from "../../../../../../client/models/EntityResponse";
 import { MineResponse } from "../../../../../../client/models/MineResponse";
 import { MaterialResponse } from "../../../../../../client/models/MaterialResponse";
 import { ExpenseResponse } from "../../../../../../client/models/ExpenseResponse";
+import { MineMonthlyDataManyResponse } from "../../../../../../client/models/MineMonthlyDataManyResponse";
+import { ExpenseMonthlyDataManyResponse } from "../../../../../../client/models/ExpenseMonthlyDataManyResponse";
 import { InvoiceFilters } from "../page";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -103,12 +105,16 @@ export function InvoiceFiltersTable({
 
       // Load extraction data if needed (OR logic for multiple selections)
       if (filters.includeExtractions) {
-        const extractionPromises: Promise<{ data?: FilteredExtractionData[] }>[] = [];
+        const extractionPromises: Promise<MineMonthlyDataManyResponse>[] = [];
 
         // Only show data if specific filters are selected
-        if (filters.entities.length > 0 || filters.mines.length > 0 || filters.materials.length > 0) {
+        if (
+          filters.entities.length > 0 ||
+          filters.mines.length > 0 ||
+          filters.materials.length > 0
+        ) {
           // Make separate API calls for each selected filter (OR logic)
-          
+
           // For each selected entity
           for (const entityId of filters.entities) {
             extractionPromises.push(
@@ -154,26 +160,33 @@ export function InvoiceFiltersTable({
 
         if (extractionPromises.length > 0) {
           const extractionResults = await Promise.all(extractionPromises);
-          const uniqueExtractionData = new Map<number, FilteredExtractionData>();
-          
+          const uniqueExtractionData = new Map<
+            number,
+            FilteredExtractionData
+          >();
+
           extractionResults.forEach((result) => {
             (result.data || []).forEach((item) => {
-              uniqueExtractionData.set(item.id, item);
+              uniqueExtractionData.set(item.id, item as unknown as FilteredExtractionData);
             });
           });
-          
+
           allExtractionData = Array.from(uniqueExtractionData.values());
         }
       }
 
       // Load expense data if needed (OR logic for multiple selections)
       if (filters.includeExpenses) {
-        const expensePromises: Promise<{ data?: FilteredExpenseData[] }>[] = [];
+        const expensePromises: Promise<ExpenseMonthlyDataManyResponse>[] = [];
 
         // Only show data if specific filters are selected
-        if (filters.entities.length > 0 || filters.mines.length > 0 || filters.expenses.length > 0) {
+        if (
+          filters.entities.length > 0 ||
+          filters.mines.length > 0 ||
+          filters.expenses.length > 0
+        ) {
           // Make separate API calls for each selected filter (OR logic)
-          
+
           // For each selected entity
           for (const entityId of filters.entities) {
             expensePromises.push(
@@ -217,13 +230,13 @@ export function InvoiceFiltersTable({
         if (expensePromises.length > 0) {
           const expenseResults = await Promise.all(expensePromises);
           const uniqueExpenseData = new Map<number, FilteredExpenseData>();
-          
+
           expenseResults.forEach((result) => {
             (result.data || []).forEach((item) => {
-              uniqueExpenseData.set(item.id, item);
+              uniqueExpenseData.set(item.id, item as unknown as FilteredExpenseData);
             });
           });
-          
+
           allExpenseData = Array.from(uniqueExpenseData.values());
         }
       }
@@ -310,9 +323,9 @@ export function InvoiceFiltersTable({
             <p style="margin: 5px 0; font-size: 12px; color: #333333;">مجموع المصروفات: <span style="color: #e74c3c;">-$${totalExpenseValue.toFixed(
               2
             )}</span></p>
-            <p style="margin: 5px 0; font-size: 12px; color: #333333; font-weight: bold; border-top: 1px solid #ddd; padding-top: 5px;">صافي المجموع: <span style="color: ${grandTotal >= 0 ? '#27ae60' : '#e74c3c'};">$${grandTotal.toFixed(
-              2
-            )}</span></p>
+            <p style="margin: 5px 0; font-size: 12px; color: #333333; font-weight: bold; border-top: 1px solid #ddd; padding-top: 5px;">صافي المجموع: <span style="color: ${
+              grandTotal >= 0 ? "#27ae60" : "#e74c3c"
+            };">$${grandTotal.toFixed(2)}</span></p>
           </div>
         </div>
 
