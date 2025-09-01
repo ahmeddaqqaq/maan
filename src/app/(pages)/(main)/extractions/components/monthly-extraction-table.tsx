@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -680,21 +680,36 @@ export function MonthlyExtractionTable() {
                     <TableRow>
                       <TableHead className="w-24 text-right">التاريخ</TableHead>
                       {materials.map((material) => (
-                        <TableHead
-                          key={material.id}
-                          className="text-right min-w-32"
-                        >
-                          <div className="space-y-1">
-                            <div className="font-medium">{material.name}</div>
-                            <div className="text-xs text-muted-foreground">
-                              ({material.unit})
+                        <React.Fragment key={material.id}>
+                          <TableHead className="text-right min-w-28">
+                            <div className="space-y-1">
+                              <div className="font-medium">{material.name}</div>
+                              <div className="text-xs text-muted-foreground">
+                                (طن)
+                              </div>
                             </div>
-                          </div>
-                        </TableHead>
+                          </TableHead>
+                          <TableHead className="text-right min-w-28">
+                            <div className="space-y-1">
+                              <div className="font-medium">{material.name}</div>
+                              <div className="text-xs text-muted-foreground">
+                                (م³)
+                              </div>
+                            </div>
+                          </TableHead>
+                        </React.Fragment>
                       ))}
-                      <TableHead className="text-right min-w-32">
+                      <TableHead className="text-right min-w-28">
                         <div className="space-y-1">
-                          <div className="font-medium">الإجمالي</div>
+                          <div className="font-medium">إجمالي الأطنان</div>
+                          <div className="text-xs text-muted-foreground">
+                            (طن)
+                          </div>
+                        </div>
+                      </TableHead>
+                      <TableHead className="text-right min-w-28">
+                        <div className="space-y-1">
+                          <div className="font-medium">إجمالي م³</div>
                           <div className="text-xs text-muted-foreground">
                             (م³)
                           </div>
@@ -715,14 +730,13 @@ export function MonthlyExtractionTable() {
                         (item) => item.year === year && item.month === month
                       );
 
-                      const totalQuantity = monthDataForRow.reduce(
-                        (sum, item) => {
-                          // For materials with isUsed flag, add quantityInCubicMeters, otherwise add quantity
-                          if (item.isUsed && item.quantityInCubicMeters) {
-                            return sum + item.quantityInCubicMeters;
-                          }
-                          return sum + item.quantity;
-                        },
+                      const totalTons = monthDataForRow.reduce(
+                        (sum, item) => sum + item.quantity,
+                        0
+                      );
+                      
+                      const totalCubicMeters = monthDataForRow.reduce(
+                        (sum, item) => sum + (item.quantityInCubicMeters || 0),
                         0
                       );
 
@@ -739,35 +753,30 @@ export function MonthlyExtractionTable() {
                                 item.material.id === material.id
                             );
                             return (
-                              <TableCell
-                                key={material.id}
-                                className="text-right"
-                              >
-                                {data ? (
-                                  <div className="space-y-1">
-                                    <div className="font-medium">
-                                      {data.isUsed
-                                        ? `${data.quantity} طن`
-                                        : data.quantity}
-                                    </div>
-                                    {data.isUsed &&
-                                      data.quantityInCubicMeters && (
-                                        <div className="text-xs text-muted-foreground">
-                                          {data.quantityInCubicMeters} م³
-                                        </div>
-                                      )}
+                              <React.Fragment key={material.id}>
+                                <TableCell className="text-right">
+                                  <div className="font-medium">
+                                    {data ? data.quantity.toFixed(2) : "-"}
                                   </div>
-                                ) : (
-                                  "-"
-                                )}
-                              </TableCell>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <div className="font-medium">
+                                    {data && data.quantityInCubicMeters 
+                                      ? data.quantityInCubicMeters.toFixed(2) 
+                                      : "-"}
+                                  </div>
+                                </TableCell>
+                              </React.Fragment>
                             );
                           })}
                           <TableCell className="text-right">
                             <div className="font-semibold text-primary">
-                              {totalQuantity > 0
-                                ? totalQuantity.toFixed(2)
-                                : "-"}
+                              {totalTons > 0 ? totalTons.toFixed(2) : "-"}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="font-semibold text-primary">
+                              {totalCubicMeters > 0 ? totalCubicMeters.toFixed(2) : "-"}
                             </div>
                           </TableCell>
                           <TableCell className="text-left">
@@ -813,51 +822,55 @@ export function MonthlyExtractionTable() {
                       </TableCell>
                       {materials.map((material) => {
                         // Calculate total for each material
-                        const materialTotal = monthlyData
+                        const materialTotalTons = monthlyData
                           .filter((item) => item.material.id === material.id)
                           .reduce((sum, item) => sum + item.quantity, 0);
 
-                        const materialCubicTotal = monthlyData
-                          .filter(
-                            (item) =>
-                              item.material.id === material.id && item.isUsed
-                          )
+                        const materialTotalCubic = monthlyData
+                          .filter((item) => item.material.id === material.id)
                           .reduce(
-                            (sum, item) =>
-                              sum + (item.quantityInCubicMeters || 0),
+                            (sum, item) => sum + (item.quantityInCubicMeters || 0),
                             0
                           );
 
                         return (
-                          <TableCell key={material.id} className="text-right">
-                            <div className="space-y-1">
+                          <React.Fragment key={material.id}>
+                            <TableCell className="text-right">
                               <div className="font-bold">
-                                {materialTotal > 0
-                                  ? `${materialTotal.toFixed(2)} م³`
+                                {materialTotalTons > 0
+                                  ? materialTotalTons.toFixed(2)
                                   : "-"}
                               </div>
-                              {materialCubicTotal > 0 && (
-                                <div className="text-xs text-muted-foreground font-semibold">
-                                  {materialCubicTotal.toFixed(2)} م³
-                                </div>
-                              )}
-                            </div>
-                          </TableCell>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="font-bold">
+                                {materialTotalCubic > 0
+                                  ? materialTotalCubic.toFixed(2)
+                                  : "-"}
+                              </div>
+                            </TableCell>
+                          </React.Fragment>
                         );
                       })}
                       <TableCell className="text-right">
                         <div className="font-bold text-primary">
                           {(() => {
-                            const grandTotal = monthlyData.reduce(
-                              (sum, item) => {
-                                if (item.isUsed && item.quantityInCubicMeters) {
-                                  return sum + item.quantityInCubicMeters;
-                                }
-                                return sum + item.quantity;
-                              },
+                            const grandTotalTons = monthlyData.reduce(
+                              (sum, item) => sum + item.quantity,
                               0
                             );
-                            return grandTotal > 0 ? grandTotal.toFixed(2) : "-";
+                            return grandTotalTons > 0 ? grandTotalTons.toFixed(2) : "-";
+                          })()}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="font-bold text-primary">
+                          {(() => {
+                            const grandTotalCubic = monthlyData.reduce(
+                              (sum, item) => sum + (item.quantityInCubicMeters || 0),
+                              0
+                            );
+                            return grandTotalCubic > 0 ? grandTotalCubic.toFixed(2) : "-";
                           })()}
                         </div>
                       </TableCell>
