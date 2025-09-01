@@ -16,7 +16,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Badge } from "@/components/ui/badge";
 
 export interface Option {
   label: string;
@@ -75,7 +74,9 @@ export function MultiSelect({
             {selectedCount === 0 ? (
               <span className="text-muted-foreground">{placeholder}</span>
             ) : selectedCount === 1 ? (
-              <span>{options.find((option) => option.value === selected[0])?.label}</span>
+              <span>
+                {options.find((option) => option.value === selected[0])?.label}
+              </span>
             ) : (
               <span>{selectedCount} عناصر محددة</span>
             )}
@@ -115,7 +116,9 @@ export function MultiSelect({
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    selected.includes(option.value) ? "opacity-100" : "opacity-0"
+                    selected.includes(option.value)
+                      ? "opacity-100"
+                      : "opacity-0"
                   )}
                 />
                 {option.label}

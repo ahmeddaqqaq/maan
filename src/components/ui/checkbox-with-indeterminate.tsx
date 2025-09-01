@@ -21,12 +21,6 @@ export function CheckboxWithIndeterminate({
 }: CheckboxWithIndeterminateProps) {
   const ref = React.useRef<HTMLButtonElement>(null);
 
-  React.useEffect(() => {
-    if (ref.current) {
-      ref.current.indeterminate = indeterminate;
-    }
-  }, [indeterminate]);
-
   if (indeterminate) {
     return (
       <div className="relative">

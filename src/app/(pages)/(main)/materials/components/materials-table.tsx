@@ -36,7 +36,8 @@ export const MaterialsTable = ({ retrigger }: MaterialsTableProps) => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalRows, setTotalRows] = useState(0);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [selectedMaterial, setSelectedMaterial] = useState<MaterialResponse | null>(null);
+  const [selectedMaterial, setSelectedMaterial] =
+    useState<MaterialResponse | null>(null);
   const pageSize = 7;
 
   useEffect(() => {
@@ -159,7 +160,7 @@ export const MaterialsTable = ({ retrigger }: MaterialsTableProps) => {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    {material.entity?.id || "غير متوفر"}
+                    {material.contract?.id || "غير متوفر"}
                   </TableCell>
                   <TableCell className="text-left">
                     <div className="flex items-center justify-start space-x-2">

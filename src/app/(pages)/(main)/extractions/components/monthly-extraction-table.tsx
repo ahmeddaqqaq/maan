@@ -933,17 +933,12 @@ export function MonthlyExtractionTable() {
                                       onClick={() => {
                                         if (
                                           confirm(
-                                            `هل أنت متأكد من حذف جميع بيانات شهر ${month}/${year}؟`
+                                            `هل أنت متأكد من حذف جميع بيانات شهر ${month}/${year} لجهة "${entityName}"؟`
                                           )
                                         ) {
-                                          const monthData =
-                                            allFilteredData.filter(
-                                              (item) =>
-                                                item.year === year &&
-                                                item.month === month
-                                            );
+                                          // Delete only data for this specific entity in this month
                                           Promise.all(
-                                            monthData.map((item) =>
+                                            entityData.map((item) =>
                                               MineMonthlyDataService.mineMonthlyDataControllerDelete(
                                                 {
                                                   id: item.id,
@@ -956,11 +951,11 @@ export function MonthlyExtractionTable() {
                                             })
                                             .catch((error) => {
                                               console.error(
-                                                "Failed to delete monthly data:",
+                                                "Failed to delete entity data:",
                                                 error
                                               );
                                               alert(
-                                                "فشل في حذف البيانات. يرجى المحاولة مرة أخرى."
+                                                "فشل في حذف بيانات الجهة. يرجى المحاولة مرة أخرى."
                                               );
                                             });
                                         }
@@ -968,7 +963,7 @@ export function MonthlyExtractionTable() {
                                       className="text-destructive focus:text-destructive"
                                     >
                                       <Trash2 className="me-2 h-4 w-4" />
-                                      حذف بيانات الشهر
+                                      حذف بيانات الجهة
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
