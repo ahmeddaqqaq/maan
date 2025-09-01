@@ -696,7 +696,7 @@ export function MonthlyExtractionTable() {
                         <div className="space-y-1">
                           <div className="font-medium">الإجمالي</div>
                           <div className="text-xs text-muted-foreground">
-                            (طن/م³)
+                            (م³)
                           </div>
                         </div>
                       </TableHead>
@@ -714,14 +714,17 @@ export function MonthlyExtractionTable() {
                       const monthDataForRow = monthlyData.filter(
                         (item) => item.year === year && item.month === month
                       );
-                      
-                      const totalQuantity = monthDataForRow.reduce((sum, item) => {
-                        // For materials with isUsed flag, add quantityInCubicMeters, otherwise add quantity
-                        if (item.isUsed && item.quantityInCubicMeters) {
-                          return sum + item.quantityInCubicMeters;
-                        }
-                        return sum + item.quantity;
-                      }, 0);
+
+                      const totalQuantity = monthDataForRow.reduce(
+                        (sum, item) => {
+                          // For materials with isUsed flag, add quantityInCubicMeters, otherwise add quantity
+                          if (item.isUsed && item.quantityInCubicMeters) {
+                            return sum + item.quantityInCubicMeters;
+                          }
+                          return sum + item.quantity;
+                        },
+                        0
+                      );
 
                       return (
                         <TableRow key={monthKey}>
@@ -762,7 +765,9 @@ export function MonthlyExtractionTable() {
                           })}
                           <TableCell className="text-right">
                             <div className="font-semibold text-primary">
-                              {totalQuantity > 0 ? totalQuantity.toFixed(2) : "-"}
+                              {totalQuantity > 0
+                                ? totalQuantity.toFixed(2)
+                                : "-"}
                             </div>
                           </TableCell>
                           <TableCell className="text-left">
@@ -811,16 +816,25 @@ export function MonthlyExtractionTable() {
                         const materialTotal = monthlyData
                           .filter((item) => item.material.id === material.id)
                           .reduce((sum, item) => sum + item.quantity, 0);
-                        
+
                         const materialCubicTotal = monthlyData
-                          .filter((item) => item.material.id === material.id && item.isUsed)
-                          .reduce((sum, item) => sum + (item.quantityInCubicMeters || 0), 0);
+                          .filter(
+                            (item) =>
+                              item.material.id === material.id && item.isUsed
+                          )
+                          .reduce(
+                            (sum, item) =>
+                              sum + (item.quantityInCubicMeters || 0),
+                            0
+                          );
 
                         return (
                           <TableCell key={material.id} className="text-right">
                             <div className="space-y-1">
                               <div className="font-bold">
-                                {materialTotal > 0 ? `${materialTotal.toFixed(2)} طن` : "-"}
+                                {materialTotal > 0
+                                  ? `${materialTotal.toFixed(2)} م³`
+                                  : "-"}
                               </div>
                               {materialCubicTotal > 0 && (
                                 <div className="text-xs text-muted-foreground font-semibold">
@@ -834,12 +848,15 @@ export function MonthlyExtractionTable() {
                       <TableCell className="text-right">
                         <div className="font-bold text-primary">
                           {(() => {
-                            const grandTotal = monthlyData.reduce((sum, item) => {
-                              if (item.isUsed && item.quantityInCubicMeters) {
-                                return sum + item.quantityInCubicMeters;
-                              }
-                              return sum + item.quantity;
-                            }, 0);
+                            const grandTotal = monthlyData.reduce(
+                              (sum, item) => {
+                                if (item.isUsed && item.quantityInCubicMeters) {
+                                  return sum + item.quantityInCubicMeters;
+                                }
+                                return sum + item.quantity;
+                              },
+                              0
+                            );
                             return grandTotal > 0 ? grandTotal.toFixed(2) : "-";
                           })()}
                         </div>
