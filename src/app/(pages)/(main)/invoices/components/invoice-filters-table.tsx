@@ -433,7 +433,7 @@ export function InvoiceFiltersTable({
         }
 
         <div style="margin-top: 40px; text-align: center; font-size: 10px; color: #7f8c8d; border-top: 1px solid #bdc3c7; padding-top: 20px;">
-          <p style="margin: 5px 0;">تم إنشاء هذه الفاتورة تلقائياً من نظام إدارة الفواتير</p>
+          <p style="margin: 5px 0;">تم إنشاء هذه الفاتورة تلقائياً من نظام إدارة التقارير</p>
           <p style="margin: 5px 0;">تم الإنشاء في ${currentDate}</p>
         </div>
       </div>
@@ -535,7 +535,7 @@ export function InvoiceFiltersTable({
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>بيانات الفواتير المفلترة</CardTitle>
+          <CardTitle>بيانات التقارير المفلترة</CardTitle>
           {hasData && (
             <Button onClick={generateCombinedInvoice}>
               <FileText className="h-4 w-4 me-2" />

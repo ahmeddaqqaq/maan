@@ -236,7 +236,7 @@ export default function InvoicesPage() {
     return (
       <div className="flex items-center justify-center p-8">
         <Loader2 className="h-6 w-6 animate-spin mr-2" />
-        جاري تحميل بيانات الفواتير...
+        جاري تحميل بيانات التقارير...
       </div>
     );
   }
@@ -245,8 +245,8 @@ export default function InvoicesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">الفواتير</h2>
-          <p className="text-gray-600">إنشاء فواتير مفلترة للمواد والنفقات</p>
+          <h2 className="text-2xl font-bold">التقارير</h2>
+          <p className="text-gray-600">إنشاء تقارير مفلترة للمواد والنفقات</p>
         </div>
       </div>
 
