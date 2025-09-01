@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -86,17 +86,7 @@ export function InvoiceFiltersTable({
   const [expenseData, setExpenseData] = useState<FilteredExpenseData[]>([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (filters.month && filters.year) {
-      loadFilteredData();
-    } else {
-      setExtractionData([]);
-      setExpenseData([]);
-    }
-  }, [filters]);
-
-  const loadFilteredData = async () => {
-    if (!filters.month || !filters.year) return;
+  const loadFilteredData = useCallback(async () => {
 
     setLoading(true);
     try {
@@ -120,8 +110,8 @@ export function InvoiceFiltersTable({
             extractionPromises.push(
               MineMonthlyDataService.mineMonthlyDataControllerFindMany({
                 entityId,
-                month: filters.month,
-                year: filters.year,
+                ...(filters.month && { month: filters.month }),
+                ...(filters.year && { year: filters.year }),
                 ...(filters.onlyUsedMaterials && { isUsed: true }),
                 skip: 0,
                 take: 1000,
@@ -134,8 +124,8 @@ export function InvoiceFiltersTable({
             extractionPromises.push(
               MineMonthlyDataService.mineMonthlyDataControllerFindMany({
                 mineId,
-                month: filters.month,
-                year: filters.year,
+                ...(filters.month && { month: filters.month }),
+                ...(filters.year && { year: filters.year }),
                 ...(filters.onlyUsedMaterials && { isUsed: true }),
                 skip: 0,
                 take: 1000,
@@ -148,8 +138,8 @@ export function InvoiceFiltersTable({
             extractionPromises.push(
               MineMonthlyDataService.mineMonthlyDataControllerFindMany({
                 materialId,
-                month: filters.month,
-                year: filters.year,
+                ...(filters.month && { month: filters.month }),
+                ...(filters.year && { year: filters.year }),
                 ...(filters.onlyUsedMaterials && { isUsed: true }),
                 skip: 0,
                 take: 1000,
@@ -195,8 +185,8 @@ export function InvoiceFiltersTable({
             expensePromises.push(
               ExpenseMonthlyDataService.expenseMonthlyDataControllerFindMany({
                 entityId,
-                month: filters.month,
-                year: filters.year,
+                ...(filters.month && { month: filters.month }),
+                ...(filters.year && { year: filters.year }),
                 skip: 0,
                 take: 1000,
               })
@@ -208,8 +198,8 @@ export function InvoiceFiltersTable({
             expensePromises.push(
               ExpenseMonthlyDataService.expenseMonthlyDataControllerFindMany({
                 mineId,
-                month: filters.month,
-                year: filters.year,
+                ...(filters.month && { month: filters.month }),
+                ...(filters.year && { year: filters.year }),
                 skip: 0,
                 take: 1000,
               })
@@ -221,8 +211,8 @@ export function InvoiceFiltersTable({
             expensePromises.push(
               ExpenseMonthlyDataService.expenseMonthlyDataControllerFindMany({
                 expenseId,
-                month: filters.month,
-                year: filters.year,
+                ...(filters.month && { month: filters.month }),
+                ...(filters.year && { year: filters.year }),
                 skip: 0,
                 take: 1000,
               })
@@ -254,10 +244,13 @@ export function InvoiceFiltersTable({
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
+
+  useEffect(() => {
+    loadFilteredData();
+  }, [loadFilteredData]);
 
   const generateCombinedInvoice = async () => {
-    if (!filters.month || !filters.year) return;
 
     const arabicMonths = [
       "01",
@@ -274,7 +267,11 @@ export function InvoiceFiltersTable({
       "12",
     ];
 
-    const dateRange = `${arabicMonths[filters.month - 1]} ${filters.year}`;
+    const dateRange = filters.month && filters.year 
+      ? `${arabicMonths[filters.month - 1]} ${filters.year}`
+      : filters.year ? `${filters.year}`
+      : filters.month ? `الشهر ${arabicMonths[filters.month - 1]}`
+      : 'جميع الفترات';
     const currentDate = new Date().toLocaleDateString("ar-SA");
 
     // Group data by entity
@@ -552,10 +549,6 @@ export function InvoiceFiltersTable({
           <div className="flex items-center justify-center p-8">
             <Loader2 className="h-6 w-6 animate-spin mr-2" />
             جاري تحميل البيانات المفلترة...
-          </div>
-        ) : !filters.month || !filters.year ? (
-          <div className="text-center py-8 text-muted-foreground">
-            يرجى اختيار الشهر والسنة لعرض بيانات الفاتورة.
           </div>
         ) : !hasData ? (
           <div className="text-center py-8 text-muted-foreground">
