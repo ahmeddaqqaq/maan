@@ -34,13 +34,16 @@ export class MaterialService {
         skip,
         take,
         search,
-        entityId,
-        isActive,
+        contractId,
+        isActive = true,
     }: {
         skip?: number,
         take?: number,
         search?: string,
-        entityId?: number,
+        contractId?: number,
+        /**
+         * Filter by active status. Default is true (returns only active records). Set to false to get inactive records, or omit to get active records.
+         */
         isActive?: boolean,
     }): CancelablePromise<MaterialManyResponse> {
         return __request(OpenAPI, {
@@ -50,7 +53,7 @@ export class MaterialService {
                 'skip': skip,
                 'take': take,
                 'search': search,
-                'entityId': entityId,
+                'contractId': contractId,
                 'isActive': isActive,
             },
         });
@@ -94,7 +97,7 @@ export class MaterialService {
         });
     }
     /**
-     * @returns any Material successfully deleted
+     * @returns any Material successfully soft deleted (marked as inactive)
      * @throws ApiError
      */
     public static materialControllerDelete({

@@ -7,7 +7,7 @@ export type MaterialResponse = {
     name: string;
     unit: string;
     isActive: boolean;
-    entity: Record<string, any>;
+    contract: Record<string, any>;
     createdAt: string;
     updatedAt: string;
 };

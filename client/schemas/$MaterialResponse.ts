@@ -2,8 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $CreateMaterialDto = {
+export const $MaterialResponse = {
     properties: {
+        id: {
+            type: 'number',
+            isRequired: true,
+        },
         name: {
             type: 'string',
             isRequired: true,
@@ -16,8 +20,20 @@ export const $CreateMaterialDto = {
             type: 'boolean',
             isRequired: true,
         },
-        entityId: {
-            type: 'number',
+        contract: {
+            type: 'dictionary',
+            contains: {
+                properties: {
+                },
+            },
+            isRequired: true,
+        },
+        createdAt: {
+            type: 'string',
+            isRequired: true,
+        },
+        updatedAt: {
+            type: 'string',
             isRequired: true,
         },
     },

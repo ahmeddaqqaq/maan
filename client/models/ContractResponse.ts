@@ -22,6 +22,7 @@ export type ContractResponse = {
     phosphatePrice?: number;
     entity: Record<string, any>;
     mines: Array<Record<string, any>>;
+    materials: Array<Record<string, any>>;
     createdAt: string;
     updatedAt: string;
 };

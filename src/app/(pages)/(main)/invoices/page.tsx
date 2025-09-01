@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { CheckboxWithIndeterminate } from "@/components/ui/checkbox-with-indeterminate";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
@@ -85,24 +86,30 @@ export default function InvoicesPage() {
   const getFilteredMines = () => {
     if (filters.entities.length === 0) return mines;
     // Show mines that belong to selected entities
-    const selectedEntities = entities.filter(entity => 
+    const selectedEntities = entities.filter((entity) =>
       filters.entities.includes(entity.id)
     );
-    const availableMines = selectedEntities.flatMap(entity => entity.mines || []);
-    return mines.filter(mine => 
-      availableMines.some(availableMine => availableMine.id === mine.id)
+    const availableMines = selectedEntities.flatMap(
+      (entity) => entity.mines || []
+    );
+    return mines.filter((mine) =>
+      availableMines.some((availableMine) => availableMine.id === mine.id)
     );
   };
 
   const getFilteredMaterials = () => {
     if (filters.entities.length === 0) return materials;
     // Show materials that belong to selected entities
-    const selectedEntities = entities.filter(entity => 
+    const selectedEntities = entities.filter((entity) =>
       filters.entities.includes(entity.id)
     );
-    const availableMaterials = selectedEntities.flatMap(entity => entity.materials || []);
-    return materials.filter(material => 
-      availableMaterials.some(availableMaterial => availableMaterial.id === material.id)
+    const availableMaterials = selectedEntities.flatMap(
+      (entity) => entity.materials || []
+    );
+    return materials.filter((material) =>
+      availableMaterials.some(
+        (availableMaterial) => availableMaterial.id === material.id
+      )
     );
   };
 
@@ -117,9 +124,9 @@ export default function InvoicesPage() {
   ) => {
     setFilters((prev) => {
       const newFilters = { ...prev, [key]: value };
-      
+
       // Clear dependent selections when parent changes
-      if (key === 'entities') {
+      if (key === "entities") {
         // When entities change, clear mines, materials, and expenses that are no longer available
         const newEntityIds = value as number[];
         if (newEntityIds.length === 0) {
@@ -132,25 +139,29 @@ export default function InvoicesPage() {
           };
         } else {
           // Filter out mines and materials that don't belong to selected entities
-          const selectedEntities = entities.filter(entity => 
+          const selectedEntities = entities.filter((entity) =>
             newEntityIds.includes(entity.id)
           );
-          const availableMineIds = selectedEntities.flatMap(entity => 
-            (entity.mines || []).map(mine => mine.id)
+          const availableMineIds = selectedEntities.flatMap((entity) =>
+            (entity.mines || []).map((mine) => mine.id)
           );
-          const availableMaterialIds = selectedEntities.flatMap(entity => 
-            (entity.materials || []).map(material => material.id)
+          const availableMaterialIds = selectedEntities.flatMap((entity) =>
+            (entity.materials || []).map((material) => material.id)
           );
-          
+
           return {
             ...newFilters,
-            mines: prev.mines.filter(mineId => availableMineIds.includes(mineId)),
-            materials: prev.materials.filter(materialId => availableMaterialIds.includes(materialId)),
+            mines: prev.mines.filter((mineId) =>
+              availableMineIds.includes(mineId)
+            ),
+            materials: prev.materials.filter((materialId) =>
+              availableMaterialIds.includes(materialId)
+            ),
             expenses: [], // Clear expenses as they're filtered by API
           };
         }
       }
-      
+
       return newFilters;
     });
   };
@@ -165,6 +176,46 @@ export default function InvoicesPage() {
       : [...currentArray, id];
 
     updateFilter(key, newArray);
+  };
+
+  const toggleSelectAll = (
+    key: "entities" | "mines" | "materials" | "expenses",
+    items: { id: number }[]
+  ) => {
+    const currentArray = filters[key];
+    const allIds = items.map((item) => item.id);
+    const isAllSelected = allIds.every((id) => currentArray.includes(id));
+
+    if (isAllSelected) {
+      // Deselect all
+      updateFilter(key, []);
+    } else {
+      // Select all
+      updateFilter(key, allIds);
+    }
+  };
+
+  const isAllSelected = (
+    key: "entities" | "mines" | "materials" | "expenses",
+    items: { id: number }[]
+  ) => {
+    if (items.length === 0) return false;
+    const currentArray = filters[key];
+    const allIds = items.map((item) => item.id);
+    return allIds.every((id) => currentArray.includes(id));
+  };
+
+  const isIndeterminate = (
+    key: "entities" | "mines" | "materials" | "expenses",
+    items: { id: number }[]
+  ) => {
+    if (items.length === 0) return false;
+    const currentArray = filters[key];
+    const allIds = items.map((item) => item.id);
+    const selectedCount = allIds.filter((id) =>
+      currentArray.includes(id)
+    ).length;
+    return selectedCount > 0 && selectedCount < allIds.length;
   };
 
   const clearFilters = () => {
@@ -218,7 +269,7 @@ export default function InvoicesPage() {
                   updateFilter("month", value ? parseInt(value) : undefined)
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="اختر الشهر" />
                 </SelectTrigger>
                 <SelectContent>
@@ -246,7 +297,7 @@ export default function InvoicesPage() {
                   updateFilter("year", value ? parseInt(value) : undefined)
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="اختر السنة" />
                 </SelectTrigger>
                 <SelectContent>
@@ -301,7 +352,23 @@ export default function InvoicesPage() {
 
           {/* Entity Selection */}
           <div className="space-y-2">
-            <Label>الشركات</Label>
+            <div className="flex items-center justify-between">
+              <Label>الشركات</Label>
+              <div className="flex items-center space-x-2">
+                <CheckboxWithIndeterminate
+                  id="select-all-entities"
+                  checked={isAllSelected("entities", entities)}
+                  indeterminate={isIndeterminate("entities", entities)}
+                  onCheckedChange={() => toggleSelectAll("entities", entities)}
+                />
+                <Label
+                  htmlFor="select-all-entities"
+                  className="text-sm font-medium"
+                >
+                  تحديد الكل
+                </Label>
+              </div>
+            </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-40 overflow-y-auto border rounded p-2">
               {entities.map((entity) => (
                 <div key={entity.id} className="flex items-center space-x-2 ">
@@ -322,7 +389,26 @@ export default function InvoicesPage() {
 
           {/* Mine Selection */}
           <div className="space-y-2">
-            <Label>المناجم</Label>
+            <div className="flex items-center justify-between">
+              <Label>المناجم</Label>
+              <div className="flex items-center space-x-2">
+                <CheckboxWithIndeterminate
+                  id="select-all-mines"
+                  checked={isAllSelected("mines", getFilteredMines())}
+                  indeterminate={isIndeterminate("mines", getFilteredMines())}
+                  onCheckedChange={() =>
+                    toggleSelectAll("mines", getFilteredMines())
+                  }
+                  disabled={getFilteredMines().length === 0}
+                />
+                <Label
+                  htmlFor="select-all-mines"
+                  className="text-sm font-medium"
+                >
+                  تحديد الكل
+                </Label>
+              </div>
+            </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-40 overflow-y-auto border rounded p-2">
               {getFilteredMines().map((mine) => (
                 <div key={mine.id} className="flex items-center space-x-2 ">
@@ -342,7 +428,29 @@ export default function InvoicesPage() {
           {/* Material Selection */}
           {filters.includeExtractions && (
             <div className="space-y-2">
-              <Label>المواد</Label>
+              <div className="flex items-center justify-between">
+                <Label>المواد</Label>
+                <div className="flex items-center space-x-2">
+                  <CheckboxWithIndeterminate
+                    id="select-all-materials"
+                    checked={isAllSelected("materials", getFilteredMaterials())}
+                    indeterminate={isIndeterminate(
+                      "materials",
+                      getFilteredMaterials()
+                    )}
+                    onCheckedChange={() =>
+                      toggleSelectAll("materials", getFilteredMaterials())
+                    }
+                    disabled={getFilteredMaterials().length === 0}
+                  />
+                  <Label
+                    htmlFor="select-all-materials"
+                    className="text-sm font-medium"
+                  >
+                    تحديد الكل
+                  </Label>
+                </div>
+              </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-40 overflow-y-auto border rounded p-2">
                 {getFilteredMaterials().map((material) => (
                   <div
@@ -371,7 +479,29 @@ export default function InvoicesPage() {
           {/* Expense Selection */}
           {filters.includeExpenses && (
             <div className="space-y-2">
-              <Label>النفقات</Label>
+              <div className="flex items-center justify-between">
+                <Label>النفقات</Label>
+                <div className="flex items-center space-x-2">
+                  <CheckboxWithIndeterminate
+                    id="select-all-expenses"
+                    checked={isAllSelected("expenses", getFilteredExpenses())}
+                    indeterminate={isIndeterminate(
+                      "expenses",
+                      getFilteredExpenses()
+                    )}
+                    onCheckedChange={() =>
+                      toggleSelectAll("expenses", getFilteredExpenses())
+                    }
+                    disabled={getFilteredExpenses().length === 0}
+                  />
+                  <Label
+                    htmlFor="select-all-expenses"
+                    className="text-sm font-medium"
+                  >
+                    تحديد الكل
+                  </Label>
+                </div>
+              </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-40 overflow-y-auto border rounded p-2">
                 {getFilteredExpenses().map((expense) => (
                   <div

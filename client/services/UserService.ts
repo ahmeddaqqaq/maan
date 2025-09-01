@@ -34,10 +34,15 @@ export class UserService {
         skip,
         take,
         search,
+        isActive = true,
     }: {
         skip?: number,
         take?: number,
         search?: string,
+        /**
+         * Filter by active status. Default is true (returns only active records). Set to false to get inactive records, or omit to get active records.
+         */
+        isActive?: boolean,
     }): CancelablePromise<UserManyResponse> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -46,6 +51,7 @@ export class UserService {
                 'skip': skip,
                 'take': take,
                 'search': search,
+                'isActive': isActive,
             },
         });
     }
@@ -88,7 +94,7 @@ export class UserService {
         });
     }
     /**
-     * @returns any User successfully deleted
+     * @returns any User successfully soft deleted (marked as inactive)
      * @throws ApiError
      */
     public static userControllerDelete({

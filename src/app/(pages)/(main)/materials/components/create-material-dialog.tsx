@@ -32,15 +32,15 @@ import { toast } from "sonner";
 import {
   CreateMaterialDto,
   MaterialService,
-  EntityService,
-  EntityResponse,
+  ContractResponse,
+  ContractService,
 } from "../../../../../../client";
 
 const createMaterialSchema = z.object({
   name: z.string().min(1, "الاسم مطلوب"),
   unit: z.string().min(1, "الوحدة مطلوبة"),
   isActive: z.boolean(),
-  entityId: z.number().min(1, "الجهة مطلوبة"),
+  contractId: z.number().min(1, "العقد مطلوب"),
 });
 
 type CreateMaterialFormData = z.infer<typeof createMaterialSchema>;
@@ -57,7 +57,7 @@ export function CreateMaterialDialog({
   onMaterialCreated,
 }: CreateMaterialDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [entities, setEntities] = useState<EntityResponse[]>([]);
+  const [contracts, setContracts] = useState<ContractResponse[]>([]);
 
   const form = useForm<CreateMaterialFormData>({
     resolver: zodResolver(createMaterialSchema),
@@ -65,22 +65,22 @@ export function CreateMaterialDialog({
       name: "",
       unit: "",
       isActive: true,
-      entityId: 0,
+      contractId: 0,
     },
   });
 
   useEffect(() => {
-    const loadEntities = async () => {
+    const loadContracts = async () => {
       try {
-        const response = await EntityService.entityControllerFindMany({});
-        setEntities(response.data || []);
+        const response = await ContractService.contractControllerFindMany({});
+        setContracts(response.data || []);
       } catch (error) {
-        console.error("فشل تحميل الجهات:", error);
+        console.error("فشل تحميل العقود:", error);
       }
     };
 
     if (open) {
-      loadEntities();
+      loadContracts();
     }
   }, [open]);
 
@@ -91,7 +91,7 @@ export function CreateMaterialDialog({
         name: data.name,
         unit: data.unit,
         isActive: data.isActive,
-        entityId: data.entityId,
+        contractId: data.contractId,
       };
 
       await MaterialService.materialControllerCreate({
@@ -151,10 +151,10 @@ export function CreateMaterialDialog({
 
             <FormField
               control={form.control}
-              name="entityId"
+              name="contractId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>الجهة</FormLabel>
+                  <FormLabel>العقد</FormLabel>
                   <Select
                     onValueChange={(value) => field.onChange(Number(value))}
                     value={field.value ? field.value.toString() : ""}
@@ -165,12 +165,12 @@ export function CreateMaterialDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {entities.map((entity) => (
+                      {contracts.map((contract) => (
                         <SelectItem
-                          key={entity.id}
-                          value={entity.id.toString()}
+                          key={contract.id}
+                          value={contract.id.toString()}
                         >
-                          {entity.name}
+                          {contract.name}
                         </SelectItem>
                       ))}
                     </SelectContent>

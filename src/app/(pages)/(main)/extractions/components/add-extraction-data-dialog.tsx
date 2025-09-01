@@ -170,6 +170,25 @@ export function AddExtractionDataDialog({
     if (!mineId || !selectedMonth || !internalSelectedYear || !selectedEntityId)
       return;
 
+    // Validate diesel price for materials marked as used
+    const validationErrors: string[] = [];
+    materials.forEach((material) => {
+      const data = extractionData[material.id.toString()];
+      if (data && parseFloat(data.quantity) > 0 && data.isUsed) {
+        if (
+          !data.dieselPriceThisMonth ||
+          parseFloat(data.dieselPriceThisMonth) <= 0
+        ) {
+          validationErrors.push(`سعر الديزل مطلوب للمادة: ${material.name}`);
+        }
+      }
+    });
+
+    if (validationErrors.length > 0) {
+      alert(validationErrors.join("\n"));
+      return;
+    }
+
     setSaving(true);
     try {
       const materialsData: MaterialDataDto[] = [];
@@ -354,7 +373,7 @@ export function AddExtractionDataDialog({
                           الأطنان
                         </TableHead>
                         <TableHead className="min-w-[120px] text-right">
-                          سعر الديزل
+                          سعر الديزل <span className="text-red-500">*</span>
                         </TableHead>
                         <TableHead className="min-w-[200px] text-right">
                           ملاحظات
@@ -457,8 +476,11 @@ export function AddExtractionDataDialog({
                             </TableCell>
                             <TableCell>
                               <Input
-                                className="w-full"
+                                className={`w-full ${
+                                  isUsed ? "border-red-300" : ""
+                                }`}
                                 disabled={!isUsed}
+                                required={isUsed}
                                 value={
                                   isUsed
                                     ? String(
@@ -476,7 +498,9 @@ export function AddExtractionDataDialog({
                                     e.target.value
                                   )
                                 }
-                                placeholder={isUsed ? "0.00" : "غير متاح"}
+                                placeholder={
+                                  isUsed ? "0.00 (مطلوب)" : "غير متاح"
+                                }
                               />
                             </TableCell>
                             <TableCell>

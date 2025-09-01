@@ -35,11 +35,16 @@ export class MineService {
         take,
         search,
         contractId,
+        isActive = true,
     }: {
         skip?: number,
         take?: number,
         search?: string,
         contractId?: number,
+        /**
+         * Filter by active status. Default is true (returns only active records). Set to false to get inactive records, or omit to get active records.
+         */
+        isActive?: boolean,
     }): CancelablePromise<MineManyResponse> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -49,6 +54,7 @@ export class MineService {
                 'take': take,
                 'search': search,
                 'contractId': contractId,
+                'isActive': isActive,
             },
         });
     }
@@ -91,7 +97,7 @@ export class MineService {
         });
     }
     /**
-     * @returns any Mine successfully deleted
+     * @returns any Mine successfully soft deleted (marked as inactive)
      * @throws ApiError
      */
     public static mineControllerDelete({

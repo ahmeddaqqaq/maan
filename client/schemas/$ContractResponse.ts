@@ -54,6 +54,17 @@ export const $ContractResponse = {
             },
             isRequired: true,
         },
+        materials: {
+            type: 'array',
+            contains: {
+                type: 'dictionary',
+                contains: {
+                    properties: {
+                    },
+                },
+            },
+            isRequired: true,
+        },
         createdAt: {
             type: 'string',
             isRequired: true,

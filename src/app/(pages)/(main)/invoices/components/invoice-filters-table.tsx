@@ -167,7 +167,10 @@ export function InvoiceFiltersTable({
 
           extractionResults.forEach((result) => {
             (result.data || []).forEach((item) => {
-              uniqueExtractionData.set(item.id, item as unknown as FilteredExtractionData);
+              uniqueExtractionData.set(
+                item.id,
+                item as unknown as FilteredExtractionData
+              );
             });
           });
 
@@ -233,7 +236,10 @@ export function InvoiceFiltersTable({
 
           expenseResults.forEach((result) => {
             (result.data || []).forEach((item) => {
-              uniqueExpenseData.set(item.id, item as unknown as FilteredExpenseData);
+              uniqueExpenseData.set(
+                item.id,
+                item as unknown as FilteredExpenseData
+              );
             });
           });
 

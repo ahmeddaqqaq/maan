@@ -51,22 +51,17 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
-interface MonthlyData {
-  id: number;
-  month: number;
-  year: number;
-  quantity: number;
-  isUsed: boolean;
-  dieselPriceThisMonth?: number;
-  quantityInCubicMeters?: number;
-  totalPrice?: number;
-  notes?: string;
-  material: {
+import { MineMonthlyDataResponse } from "../../../../../../client/models/MineMonthlyDataResponse";
+
+type MonthlyData = MineMonthlyDataResponse & {
+  entity: {
     id: number;
     name: string;
-    unit: string;
+    isActive?: boolean;
+    createdAt?: string;
+    updatedAt?: string;
   };
-}
+};
 
 export function MonthlyExtractionTable() {
   const [selectedMine, setSelectedMine] = useState<string>("");
@@ -108,25 +103,26 @@ export function MonthlyExtractionTable() {
     loadData();
   }, []);
 
-  // Load extraction data when mine, year, or page changes
+  // Load extraction data when a mine is selected
   useEffect(() => {
-    if (!selectedMine || !selectedYear) return;
+    if (!selectedMine) {
+      setMonthlyData([]);
+      return;
+    }
 
     const loadExtractionData = async () => {
       setLoading(true);
       try {
-        const skip = (currentPage - 1) * pageSize;
-        const response =
+        const extractionDataResponse =
           await MineMonthlyDataService.mineMonthlyDataControllerFindMany({
+            skip: 0,
+            take: 10000, // Large number to get all data
             mineId: parseInt(selectedMine),
-            year: parseInt(selectedYear),
-            skip,
-            take: pageSize,
           });
 
-        setMonthlyData(response.data || []);
-        setTotalRows(response.rows || 0);
-        setTotalPages(Math.ceil((response.rows || 0) / pageSize));
+        setMonthlyData((extractionDataResponse.data || []) as MonthlyData[]);
+        setTotalRows(extractionDataResponse.rows || 0);
+        setTotalPages(Math.ceil((extractionDataResponse.rows || 0) / pageSize));
       } catch (error) {
         console.error("Failed to load extraction data:", error);
       } finally {
@@ -135,32 +131,61 @@ export function MonthlyExtractionTable() {
     };
 
     loadExtractionData();
-  }, [selectedMine, selectedYear, currentPage]);
+  }, [selectedMine]);
 
-  const refreshData = () => {
-    if (selectedMine && selectedYear) {
-      // Reload the data
-      const loadExtractionData = async () => {
-        setLoading(true);
-        try {
-          const skip = (currentPage - 1) * pageSize;
-          const response =
-            await MineMonthlyDataService.mineMonthlyDataControllerFindMany({
-              mineId: parseInt(selectedMine),
-              year: selectedYear != "" ? parseInt(selectedYear) : undefined,
-              skip,
-              take: pageSize,
-            });
-          setMonthlyData(response.data || []);
-          setTotalRows(response.rows || 0);
-          setTotalPages(Math.ceil((response.rows || 0) / pageSize));
-        } catch (error) {
-          console.error("Failed to load extraction data:", error);
-        } finally {
-          setLoading(false);
-        }
-      };
-      loadExtractionData();
+  // State for filtered and paginated data
+  const [filteredData, setFilteredData] = useState<MonthlyData[]>([]);
+
+  // Helper to get filtered data (all filtered data, not just current page)
+  const getAllFilteredData = () => {
+    let filtered = [...monthlyData];
+
+    if (selectedYear) {
+      filtered = filtered.filter(
+        (item) => item.year === parseInt(selectedYear)
+      );
+    }
+
+    return filtered;
+  };
+
+  // Filter and paginate data when filters or page changes
+  useEffect(() => {
+    let filtered = [...monthlyData];
+
+    // Apply year filter
+    if (selectedYear) {
+      filtered = filtered.filter(
+        (item) => item.year === parseInt(selectedYear)
+      );
+    }
+
+    // Calculate pagination
+    const skip = (currentPage - 1) * pageSize;
+    const paginatedData = filtered.slice(skip, skip + pageSize);
+
+    setFilteredData(paginatedData);
+    setTotalRows(filtered.length);
+    setTotalPages(Math.ceil(filtered.length / pageSize));
+  }, [monthlyData, selectedYear, currentPage]);
+
+  const refreshData = async () => {
+    if (!selectedMine) return;
+
+    setLoading(true);
+    try {
+      const response =
+        await MineMonthlyDataService.mineMonthlyDataControllerFindMany({
+          skip: 0,
+          take: 10000, // Large number to get all data
+          mineId: parseInt(selectedMine),
+        });
+      setMonthlyData((response.data || []) as MonthlyData[]);
+      // Filtering and pagination will be handled by the useEffect
+    } catch (error) {
+      console.error("Failed to load extraction data:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -181,38 +206,67 @@ export function MonthlyExtractionTable() {
 
   const getUniqueMonths = () => {
     const months = new Set<string>();
-    monthlyData.forEach((data) => {
+    let dataToUse = [...monthlyData];
+
+    if (selectedYear) {
+      dataToUse = dataToUse.filter(
+        (item) => item.year === parseInt(selectedYear)
+      );
+    }
+
+    dataToUse.forEach((data) => {
       months.add(`${data.year}-${data.month}`);
     });
     return Array.from(months).sort();
   };
 
   const exportToCSV = () => {
-    if (!selectedMine || !selectedYear || monthlyData.length === 0) return;
+    const dataToExport = getAllFilteredData();
+    if (!selectedMine || dataToExport.length === 0) return;
 
-    // Create CSV headers
+    // Create CSV headers - include entity column
     const headers = [
       "Date",
+      "Entity",
       ...materials.map((material) => `${material.name} (${material.unit})`),
     ];
 
-    // Create CSV rows
-    const rows = getUniqueMonths().map((monthKey) => {
+    // Create CSV rows - one row per entity per month
+    const rows = getUniqueMonths().flatMap((monthKey) => {
       const [year, month] = monthKey.split("-").map(Number);
       const monthDate = `${year}-${month.toString().padStart(2, "0")}`;
 
-      const row = [monthDate];
-      materials.forEach((material) => {
-        const data = monthlyData.find(
-          (item) =>
-            item.year === year &&
-            item.month === month &&
-            item.material.id === material.id
-        );
-        row.push(data ? data.quantity.toString() : "0");
+      // Get data for this month
+      const monthDataForRow = dataToExport.filter(
+        (item) => item.year === year && item.month === month
+      );
+
+      // Group data by entity for this month
+      const entitiesMap = new Map<string, typeof monthDataForRow>();
+      monthDataForRow.forEach((item) => {
+        const entityName =
+          (item.entity as { name?: string })?.name || "غير محدد";
+        if (!entitiesMap.has(entityName)) {
+          entitiesMap.set(entityName, []);
+        }
+        entitiesMap.get(entityName)?.push(item);
       });
 
-      return row;
+      // Create a row for each entity
+      return Array.from(entitiesMap.entries()).map(
+        ([entityName, entityData]) => {
+          const row = [monthDate, entityName];
+
+          materials.forEach((material) => {
+            const data = entityData.find(
+              (item) => item.material.id === material.id
+            );
+            row.push(data ? data.quantity.toString() : "0");
+          });
+
+          return row;
+        }
+      );
     });
 
     // Combine headers and rows
@@ -225,11 +279,11 @@ export function MonthlyExtractionTable() {
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
+    const mineName = mines.find((m) => m.id.toString() === selectedMine)?.name;
+    const yearSuffix = selectedYear ? `-${selectedYear}` : "";
     link.setAttribute(
       "download",
-      `extraction-data-${
-        mines.find((m) => m.id.toString() === selectedMine)?.name
-      }-${selectedYear}.csv`
+      `extraction-data-${mineName}${yearSuffix}.csv`
     );
     link.style.visibility = "hidden";
     document.body.appendChild(link);
@@ -242,54 +296,32 @@ export function MonthlyExtractionTable() {
     setShowEditDialog(true);
   };
 
-  const deleteMonthlyData = async (year: number, month: number) => {
-    if (
-      !selectedMine ||
-      !confirm(
-        `هل أنت متأكد من حذف جميع بيانات الاستخراج لشهر ${month}/${year}؟`
-      )
-    ) {
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // Get all data for this month/year/mine combination
-      const dataToDelete = monthlyData.filter(
-        (item) => item.year === year && item.month === month
-      );
-
-      // Delete each record
-      await Promise.all(
-        dataToDelete.map((item) =>
-          MineMonthlyDataService.mineMonthlyDataControllerDelete({
-            id: item.id,
-          })
-        )
-      );
-
-      // Refresh data after deletion
-      refreshData();
-    } catch (error) {
-      console.error("Failed to delete monthly data:", error);
-      alert("فشل في حذف البيانات. يرجى المحاولة مرة أخرى.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const exportMonthlyInvoice = async (year: number, month: number) => {
-    if (!selectedMine || monthlyData.length === 0) return;
+    if (!selectedMine) return;
+
+    // Get data for the specific mine and month
+    const filteredInvoiceData = monthlyData;
+    if (filteredInvoiceData.length === 0) return;
 
     const mineName =
       mines.find((m) => m.id.toString() === selectedMine)?.name ||
       "منجم غير معروف";
 
     // Get data for the specific month - only used materials
-    const monthData = monthlyData.filter(
+    const monthData = filteredInvoiceData.filter(
       (item) =>
         item.year === year && item.month === month && item.isUsed === true
     );
+
+    // Group by entity to show each entity's contribution
+    const entitiesMap = new Map<string, MonthlyData[]>();
+    monthData.forEach((item) => {
+      const entityName = (item.entity as { name?: string })?.name || "غير محدد";
+      if (!entitiesMap.has(entityName)) {
+        entitiesMap.set(entityName, []);
+      }
+      entitiesMap.get(entityName)?.push(item);
+    });
 
     // Calculate totals based on business requirements
     const totalQuantity = monthData.reduce(
@@ -373,6 +405,7 @@ export function MonthlyExtractionTable() {
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; border: 1px solid #dddddd;">
           <thead>
             <tr style="background-color: #f8f9fa;">
+              <th style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-weight: bold; color: #333333; font-size: 11px;">الجهة</th>
               <th style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-weight: bold; color: #333333; font-size: 11px;">اسم المادة</th>
               <th style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-weight: bold; color: #333333; font-size: 11px;">الكمية (طن)</th>
               <th style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-weight: bold; color: #333333; font-size: 11px;">الكمية (متر مكعب)</th>
@@ -383,12 +416,15 @@ export function MonthlyExtractionTable() {
           <tbody>
             ${
               monthData.length > 0
-                ? monthData
-                    .map((item, index) => {
-                      return `
+                ? Array.from(entitiesMap.entries())
+                    .flatMap(([entityName, entityItems], groupIndex) => {
+                      return entityItems.map((item, itemIndex) => {
+                        const globalIndex = groupIndex * 1000 + itemIndex; // Ensure unique index
+                        return `
               <tr style="background-color: ${
-                index % 2 === 0 ? "#f9f9f9" : "#ffffff"
+                globalIndex % 2 === 0 ? "#f9f9f9" : "#ffffff"
               };">
+                <td style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px; color: #333333; font-weight: bold;">${entityName}</td>
                 <td style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px; color: #333333;">${
                   item.material.name
                 }</td>
@@ -409,11 +445,12 @@ export function MonthlyExtractionTable() {
                   ${item.notes || "-"}
                 </td>
               </tr>`;
+                      });
                     })
                     .join("") +
                   `
               <tr style="background-color: #e8f4f8; border-top: 2px solid #2c3e50;">
-                <td style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-size: 11px; color: #2c3e50; font-weight: bold;">الإجمالي للمواد المستخدمة</td>
+                <td style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-size: 11px; color: #2c3e50; font-weight: bold;" colspan="2">الإجمالي للمواد المستخدمة</td>
                 <td style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-size: 11px; color: #2c3e50; font-weight: bold;">${totalQuantity.toFixed(
                   2
                 )} طن</td>
@@ -427,7 +464,7 @@ export function MonthlyExtractionTable() {
               </tr>`
                 : `
               <tr>
-                <td colspan="5" style="border: 1px solid #dddddd; padding: 20px; text-align: center; color: #7f8c8d; font-size: 12px;">
+                <td colspan="6" style="border: 1px solid #dddddd; padding: 20px; text-align: center; color: #7f8c8d; font-size: 12px;">
                   لا توجد مواد مستخدمة لهذا الشهر
                 </td>
               </tr>
@@ -647,9 +684,7 @@ export function MonthlyExtractionTable() {
             <div className="flex items-end">
               <Button
                 onClick={exportToCSV}
-                disabled={
-                  !selectedMine || !selectedYear || monthlyData.length === 0
-                }
+                disabled={!selectedMine || filteredData.length === 0}
                 variant="outline"
                 className="w-full"
               >
@@ -662,24 +697,26 @@ export function MonthlyExtractionTable() {
       </Card>
 
       {/* Extraction Table */}
-      {selectedMine && selectedYear && (
+      {selectedMine && (
         <Card>
           <CardHeader>
             <CardTitle>
               {mines.find((m) => m.id.toString() === selectedMine)?.name} -{" "}
-              بيانات الاستخراج {selectedYear}
+              بيانات الاستخراج {selectedYear || "جميع السنوات"}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
-              {monthlyData.length > 0 ? (
+              {filteredData.length > 0 ? (
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-24 text-right">التاريخ</TableHead>
+                      <TableHead className="text-right">الجهة</TableHead>
                       {materials.map((material) => {
-                        // Check if this material has any used entries in the data
-                        const hasUsedEntries = monthlyData.some(
+                        // Check if this material has any used entries in the filtered data
+                        const allFilteredData = getAllFilteredData();
+                        const hasUsedEntries = allFilteredData.some(
                           (item) =>
                             item.material.id === material.id && item.isUsed
                         );
@@ -749,133 +786,196 @@ export function MonthlyExtractionTable() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {getUniqueMonths().map((monthKey) => {
+                    {getUniqueMonths().flatMap((monthKey) => {
                       const [year, month] = monthKey.split("-").map(Number);
                       const monthDate = `${year}-${month
                         .toString()
                         .padStart(2, "0")}`;
 
-                      // Calculate totals for this month
-                      const monthDataForRow = monthlyData.filter(
+                      // Calculate totals for this month using filtered data
+                      const allFilteredData = getAllFilteredData();
+                      const monthDataForRow = allFilteredData.filter(
                         (item) => item.year === year && item.month === month
                       );
 
-                      const totalTons = monthDataForRow
-                        .filter((item) => item.isUsed)
-                        .reduce((sum, item) => sum + item.quantity, 0);
+                      // Group data by entity for this month
+                      const entitiesMap = new Map<
+                        string,
+                        typeof monthDataForRow
+                      >();
+                      monthDataForRow.forEach((item) => {
+                        const entityName =
+                          (item.entity as { name?: string })?.name ||
+                          "غير محدد";
+                        if (!entitiesMap.has(entityName)) {
+                          entitiesMap.set(entityName, []);
+                        }
+                        entitiesMap.get(entityName)?.push(item);
+                      });
 
-                      const totalCubicMeters = monthDataForRow.reduce(
-                        (sum, item) => {
-                          if (item.isUsed) {
-                            return sum + (item.quantityInCubicMeters || 0);
-                          } else {
-                            return sum + item.quantity; // Not used materials: quantity is in m³
-                          }
-                        },
-                        0
-                      );
+                      // Create a row for each entity in this month
+                      return Array.from(entitiesMap.entries()).map(
+                        ([entityName, entityData]) => {
+                          const totalTons = entityData
+                            .filter((item) => item.isUsed)
+                            .reduce((sum, item) => sum + item.quantity, 0);
 
-                      return (
-                        <TableRow key={monthKey}>
-                          <TableCell className="font-medium text-right">
-                            {monthDate}
-                          </TableCell>
-                          {materials.map((material) => {
-                            const data = monthlyData.find(
-                              (item) =>
-                                item.year === year &&
-                                item.month === month &&
-                                item.material.id === material.id
-                            );
+                          const totalCubicMeters = entityData.reduce(
+                            (sum, item) => {
+                              if (item.isUsed) {
+                                return sum + (item.quantityInCubicMeters || 0);
+                              } else {
+                                return sum + item.quantity; // Not used materials: quantity is in m³
+                              }
+                            },
+                            0
+                          );
 
-                            // Check if this material has any used entries
-                            const hasUsedEntries = monthlyData.some(
-                              (item) =>
-                                item.material.id === material.id && item.isUsed
-                            );
+                          return (
+                            <TableRow key={`${monthKey}-${entityName}`}>
+                              <TableCell className="font-medium text-right">
+                                {monthDate}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {entityName}
+                              </TableCell>
+                              {materials.map((material) => {
+                                const data = entityData.find(
+                                  (item) => item.material.id === material.id
+                                );
 
-                            if (hasUsedEntries) {
-                              // For used materials: show both tons and cubic meters
-                              return (
-                                <React.Fragment key={material.id}>
-                                  <TableCell className="text-right">
-                                    <div className="font-medium">
-                                      {data && data.isUsed
-                                        ? data.quantity.toFixed(2)
-                                        : "-"}
-                                    </div>
-                                  </TableCell>
-                                  <TableCell className="text-right">
-                                    <div className="font-medium">
-                                      {data &&
-                                      data.isUsed &&
-                                      data.quantityInCubicMeters
-                                        ? data.quantityInCubicMeters.toFixed(2)
-                                        : "-"}
-                                    </div>
-                                  </TableCell>
-                                </React.Fragment>
-                              );
-                            } else {
-                              // For not used materials: show only cubic meters (from quantity field)
-                              return (
-                                <TableCell
-                                  key={material.id}
-                                  className="text-right"
-                                >
-                                  <div className="font-medium">
-                                    {data ? data.quantity.toFixed(2) : "-"}
-                                  </div>
-                                </TableCell>
-                              );
-                            }
-                          })}
-                          <TableCell className="text-right">
-                            <div className="font-semibold text-primary">
-                              {totalTons > 0 ? totalTons.toFixed(2) : "-"}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="font-semibold text-primary">
-                              {totalCubicMeters > 0
-                                ? totalCubicMeters.toFixed(2)
-                                : "-"}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-left">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                  <span className="sr-only">Open menu</span>
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                  onClick={() => editMonthlyData(year, month)}
-                                >
-                                  <Edit className="me-2 h-4 w-4" />
-                                  تعديل البيانات
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() =>
-                                    exportMonthlyInvoice(year, month)
-                                  }
-                                >
-                                  <FileText className="me-2 h-4 w-4" />
-                                  تصدير الفاتورة
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => deleteMonthlyData(year, month)}
-                                  className="text-destructive focus:text-destructive"
-                                >
-                                  <Trash2 className="me-2 h-4 w-4" />
-                                  حذف البيانات
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
+                                // Check if this material has any used entries in filtered data
+                                const hasUsedEntries = allFilteredData.some(
+                                  (item) =>
+                                    item.material.id === material.id &&
+                                    item.isUsed
+                                );
+
+                                if (hasUsedEntries) {
+                                  // For used materials: show both tons and cubic meters
+                                  return (
+                                    <React.Fragment key={material.id}>
+                                      <TableCell className="text-right">
+                                        <div className="font-medium">
+                                          {data && data.isUsed
+                                            ? data.quantity.toFixed(2)
+                                            : "-"}
+                                        </div>
+                                      </TableCell>
+                                      <TableCell className="text-right">
+                                        <div className="font-medium">
+                                          {data &&
+                                          data.isUsed &&
+                                          data.quantityInCubicMeters
+                                            ? data.quantityInCubicMeters.toFixed(
+                                                2
+                                              )
+                                            : "-"}
+                                        </div>
+                                      </TableCell>
+                                    </React.Fragment>
+                                  );
+                                } else {
+                                  // For not used materials: show only cubic meters (from quantity field)
+                                  return (
+                                    <TableCell
+                                      key={material.id}
+                                      className="text-right"
+                                    >
+                                      <div className="font-medium">
+                                        {data ? data.quantity.toFixed(2) : "-"}
+                                      </div>
+                                    </TableCell>
+                                  );
+                                }
+                              })}
+                              <TableCell className="text-right">
+                                <div className="font-semibold text-primary">
+                                  {totalTons > 0 ? totalTons.toFixed(2) : "-"}
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <div className="font-semibold text-primary">
+                                  {totalCubicMeters > 0
+                                    ? totalCubicMeters.toFixed(2)
+                                    : "-"}
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-left">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      className="h-8 w-8 p-0"
+                                    >
+                                      <span className="sr-only">Open menu</span>
+                                      <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        editMonthlyData(year, month)
+                                      }
+                                    >
+                                      <Edit className="me-2 h-4 w-4" />
+                                      تعديل البيانات
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        exportMonthlyInvoice(year, month)
+                                      }
+                                    >
+                                      <FileText className="me-2 h-4 w-4" />
+                                      تصدير الفاتورة
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        if (
+                                          confirm(
+                                            `هل أنت متأكد من حذف جميع بيانات شهر ${month}/${year}؟`
+                                          )
+                                        ) {
+                                          const monthData =
+                                            allFilteredData.filter(
+                                              (item) =>
+                                                item.year === year &&
+                                                item.month === month
+                                            );
+                                          Promise.all(
+                                            monthData.map((item) =>
+                                              MineMonthlyDataService.mineMonthlyDataControllerDelete(
+                                                {
+                                                  id: item.id,
+                                                }
+                                              )
+                                            )
+                                          )
+                                            .then(() => {
+                                              refreshData();
+                                            })
+                                            .catch((error) => {
+                                              console.error(
+                                                "Failed to delete monthly data:",
+                                                error
+                                              );
+                                              alert(
+                                                "فشل في حذف البيانات. يرجى المحاولة مرة أخرى."
+                                              );
+                                            });
+                                        }
+                                      }}
+                                      className="text-destructive focus:text-destructive"
+                                    >
+                                      <Trash2 className="me-2 h-4 w-4" />
+                                      حذف بيانات الشهر
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        }
                       );
                     })}
                     {/* Totals Row */}
@@ -883,9 +983,13 @@ export function MonthlyExtractionTable() {
                       <TableCell className="font-bold text-right">
                         الإجمالي
                       </TableCell>
+                      <TableCell className="font-bold text-right">
+                        جميع الجهات
+                      </TableCell>
                       {materials.map((material) => {
-                        // Calculate total for each material
-                        const materialData = monthlyData.filter(
+                        // Calculate total for each material using filtered data
+                        const allFilteredData = getAllFilteredData();
+                        const materialData = allFilteredData.filter(
                           (item) => item.material.id === material.id
                         );
                         const hasUsedEntries = materialData.some(
@@ -945,7 +1049,8 @@ export function MonthlyExtractionTable() {
                       <TableCell className="text-right">
                         <div className="font-bold text-primary">
                           {(() => {
-                            const grandTotalTons = monthlyData
+                            const allFilteredData = getAllFilteredData();
+                            const grandTotalTons = allFilteredData
                               .filter((item) => item.isUsed)
                               .reduce((sum, item) => sum + item.quantity, 0);
                             return grandTotalTons > 0
@@ -957,7 +1062,8 @@ export function MonthlyExtractionTable() {
                       <TableCell className="text-right">
                         <div className="font-bold text-primary">
                           {(() => {
-                            const grandTotalCubic = monthlyData.reduce(
+                            const allFilteredData = getAllFilteredData();
+                            const grandTotalCubic = allFilteredData.reduce(
                               (sum, item) => {
                                 if (item.isUsed) {
                                   return (
@@ -981,7 +1087,9 @@ export function MonthlyExtractionTable() {
                 </Table>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
-                  لا توجد بيانات استخراج لهذا المنجم والسنة.
+                  {!selectedMine
+                    ? "يرجى اختيار منجم لعرض بيانات الاستخراج"
+                    : "لا توجد بيانات استخراج لهذا المنجم. اختر سنة واضغط 'إضافة بيانات' لبدء إدخال البيانات."}
                 </div>
               )}
             </div>
@@ -1073,7 +1181,7 @@ export function MonthlyExtractionTable() {
           selectedYear={editingMonth.year.toString()}
           selectedMonth={editingMonth.month.toString()}
           isEditMode={true}
-          existingData={monthlyData.filter(
+          existingData={getAllFilteredData().filter(
             (item) =>
               item.year === editingMonth.year &&
               item.month === editingMonth.month

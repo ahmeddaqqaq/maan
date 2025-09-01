@@ -6,6 +6,6 @@ export type CreateMaterialDto = {
     name: string;
     unit: string;
     isActive: boolean;
-    entityId: number;
+    contractId: number;
 };
 
