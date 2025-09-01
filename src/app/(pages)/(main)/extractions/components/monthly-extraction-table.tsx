@@ -730,13 +730,18 @@ export function MonthlyExtractionTable() {
                         (item) => item.year === year && item.month === month
                       );
 
-                      const totalTons = monthDataForRow.reduce(
-                        (sum, item) => sum + item.quantity,
-                        0
-                      );
+                      const totalTons = monthDataForRow
+                        .filter(item => item.isUsed)
+                        .reduce((sum, item) => sum + item.quantity, 0);
                       
                       const totalCubicMeters = monthDataForRow.reduce(
-                        (sum, item) => sum + (item.quantityInCubicMeters || 0),
+                        (sum, item) => {
+                          if (item.isUsed) {
+                            return sum + (item.quantityInCubicMeters || 0);
+                          } else {
+                            return sum + item.quantity; // Not used materials: quantity is in m³
+                          }
+                        },
                         0
                       );
 
@@ -756,14 +761,18 @@ export function MonthlyExtractionTable() {
                               <React.Fragment key={material.id}>
                                 <TableCell className="text-right">
                                   <div className="font-medium">
-                                    {data ? data.quantity.toFixed(2) : "-"}
+                                    {data && data.isUsed 
+                                      ? data.quantity.toFixed(2)  // Used materials show quantity in tons
+                                      : "-"} 
                                   </div>
                                 </TableCell>
                                 <TableCell className="text-right">
                                   <div className="font-medium">
-                                    {data && data.quantityInCubicMeters 
-                                      ? data.quantityInCubicMeters.toFixed(2) 
-                                      : "-"}
+                                    {data ? (
+                                      data.isUsed 
+                                        ? (data.quantityInCubicMeters ? data.quantityInCubicMeters.toFixed(2) : "-") // Used materials show cubic meters from quantityInCubicMeters
+                                        : data.quantity.toFixed(2) // Not used materials show quantity as cubic meters
+                                    ) : "-"}
                                   </div>
                                 </TableCell>
                               </React.Fragment>
@@ -822,16 +831,20 @@ export function MonthlyExtractionTable() {
                       </TableCell>
                       {materials.map((material) => {
                         // Calculate total for each material
-                        const materialTotalTons = monthlyData
-                          .filter((item) => item.material.id === material.id)
+                        const materialData = monthlyData.filter((item) => item.material.id === material.id);
+                        
+                        const materialTotalTons = materialData
+                          .filter(item => item.isUsed)
                           .reduce((sum, item) => sum + item.quantity, 0);
 
-                        const materialTotalCubic = monthlyData
-                          .filter((item) => item.material.id === material.id)
-                          .reduce(
-                            (sum, item) => sum + (item.quantityInCubicMeters || 0),
-                            0
-                          );
+                        const materialTotalCubic = materialData
+                          .reduce((sum, item) => {
+                            if (item.isUsed) {
+                              return sum + (item.quantityInCubicMeters || 0);
+                            } else {
+                              return sum + item.quantity; // Not used: quantity is in m³
+                            }
+                          }, 0);
 
                         return (
                           <React.Fragment key={material.id}>
@@ -855,10 +868,9 @@ export function MonthlyExtractionTable() {
                       <TableCell className="text-right">
                         <div className="font-bold text-primary">
                           {(() => {
-                            const grandTotalTons = monthlyData.reduce(
-                              (sum, item) => sum + item.quantity,
-                              0
-                            );
+                            const grandTotalTons = monthlyData
+                              .filter(item => item.isUsed)
+                              .reduce((sum, item) => sum + item.quantity, 0);
                             return grandTotalTons > 0 ? grandTotalTons.toFixed(2) : "-";
                           })()}
                         </div>
@@ -867,7 +879,13 @@ export function MonthlyExtractionTable() {
                         <div className="font-bold text-primary">
                           {(() => {
                             const grandTotalCubic = monthlyData.reduce(
-                              (sum, item) => sum + (item.quantityInCubicMeters || 0),
+                              (sum, item) => {
+                                if (item.isUsed) {
+                                  return sum + (item.quantityInCubicMeters || 0);
+                                } else {
+                                  return sum + item.quantity;
+                                }
+                              },
                               0
                             );
                             return grandTotalCubic > 0 ? grandTotalCubic.toFixed(2) : "-";
