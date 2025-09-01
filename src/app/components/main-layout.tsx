@@ -30,7 +30,7 @@ const navigation: NavItem[] = [
   { name: "المصروفات", href: "/expenses", icon: Receipt },
   { name: "الشركات", href: "/entities", icon: Building2 },
   { name: "العقود", href: "/contracts", icon: FileText },
-  { name: "الفواتير", href: "/invoices", icon: Calculator },
+  { name: "التقارير", href: "/invoices", icon: Calculator },
 ];
 
 interface MainLayoutProps {
