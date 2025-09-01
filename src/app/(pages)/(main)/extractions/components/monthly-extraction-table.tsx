@@ -66,6 +66,7 @@ type MonthlyData = MineMonthlyDataResponse & {
 export function MonthlyExtractionTable() {
   const [selectedMine, setSelectedMine] = useState<string>("");
   const [selectedYear, setSelectedYear] = useState<string>("");
+  const [selectedMonth, setSelectedMonth] = useState<string>("");
   const [materials, setMaterials] = useState<MaterialResponse[]>([]);
   const [mines, setMines] = useState<MineResponse[]>([]);
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
@@ -146,6 +147,12 @@ export function MonthlyExtractionTable() {
       );
     }
 
+    if (selectedMonth) {
+      filtered = filtered.filter(
+        (item) => item.month === parseInt(selectedMonth)
+      );
+    }
+
     return filtered;
   };
 
@@ -160,6 +167,13 @@ export function MonthlyExtractionTable() {
       );
     }
 
+    // Apply month filter
+    if (selectedMonth) {
+      filtered = filtered.filter(
+        (item) => item.month === parseInt(selectedMonth)
+      );
+    }
+
     // Calculate pagination
     const skip = (currentPage - 1) * pageSize;
     const paginatedData = filtered.slice(skip, skip + pageSize);
@@ -167,7 +181,7 @@ export function MonthlyExtractionTable() {
     setFilteredData(paginatedData);
     setTotalRows(filtered.length);
     setTotalPages(Math.ceil(filtered.length / pageSize));
-  }, [monthlyData, selectedYear, currentPage]);
+  }, [monthlyData, selectedYear, selectedMonth, currentPage]);
 
   const refreshData = async () => {
     if (!selectedMine) return;
@@ -204,6 +218,11 @@ export function MonthlyExtractionTable() {
     setCurrentPage(1);
   };
 
+  const handleMonthChange = (value: string) => {
+    setSelectedMonth(value);
+    setCurrentPage(1);
+  };
+
   const getUniqueMonths = () => {
     const months = new Set<string>();
     let dataToUse = [...monthlyData];
@@ -211,6 +230,12 @@ export function MonthlyExtractionTable() {
     if (selectedYear) {
       dataToUse = dataToUse.filter(
         (item) => item.year === parseInt(selectedYear)
+      );
+    }
+
+    if (selectedMonth) {
+      dataToUse = dataToUse.filter(
+        (item) => item.month === parseInt(selectedMonth)
       );
     }
 
@@ -281,9 +306,10 @@ export function MonthlyExtractionTable() {
     link.setAttribute("href", url);
     const mineName = mines.find((m) => m.id.toString() === selectedMine)?.name;
     const yearSuffix = selectedYear ? `-${selectedYear}` : "";
+    const monthSuffix = selectedMonth ? `-${selectedMonth.padStart(2, "0")}` : "";
     link.setAttribute(
       "download",
-      `extraction-data-${mineName}${yearSuffix}.csv`
+      `extraction-data-${mineName}${yearSuffix}${monthSuffix}.csv`
     );
     link.style.visibility = "hidden";
     document.body.appendChild(link);
@@ -615,6 +641,319 @@ export function MonthlyExtractionTable() {
     }
   };
 
+  const exportTableAsPDF = async () => {
+    if (!selectedMine || getAllFilteredData().length === 0) return;
+
+    const mineName = mines.find((m) => m.id.toString() === selectedMine)?.name || "منجم غير معروف";
+    const currentDate = new Date().toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "2-digit", 
+      day: "2-digit",
+    });
+
+    // Get filtered data for the table
+    const tableData = getAllFilteredData();
+    
+    // Build filter description
+    let filterDescription = "";
+    if (selectedYear && selectedMonth) {
+      const arabicMonths = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+      filterDescription = `${arabicMonths[parseInt(selectedMonth) - 1]} ${selectedYear}`;
+    } else if (selectedYear) {
+      filterDescription = `سنة ${selectedYear}`;
+    } else if (selectedMonth) {
+      const arabicMonths = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+      filterDescription = `شهر ${arabicMonths[parseInt(selectedMonth) - 1]}`;
+    } else {
+      filterDescription = "جميع البيانات";
+    }
+
+    // Group data by month and entity for display
+    const groupedData = new Map<string, Map<string, MonthlyData[]>>();
+    tableData.forEach((item) => {
+      const monthKey = `${item.year}-${item.month}`;
+      const entityName = (item.entity as { name?: string })?.name || "غير محدد";
+      
+      if (!groupedData.has(monthKey)) {
+        groupedData.set(monthKey, new Map());
+      }
+      if (!groupedData.get(monthKey)?.has(entityName)) {
+        groupedData.get(monthKey)?.set(entityName, []);
+      }
+      groupedData.get(monthKey)?.get(entityName)?.push(item);
+    });
+
+    // Calculate grand totals
+    const grandTotalTons = tableData.filter(item => item.isUsed).reduce((sum, item) => sum + item.quantity, 0);
+    const grandTotalCubic = tableData.reduce((sum, item) => {
+      if (item.isUsed) {
+        return sum + (item.quantityInCubicMeters || 0);
+      } else {
+        return sum + item.quantity;
+      }
+    }, 0);
+
+    // Create table rows HTML
+    const tableRows = Array.from(groupedData.entries()).flatMap(([monthKey, entitiesMap]) => {
+      const [year, month] = monthKey.split("-").map(Number);
+      const monthDate = `${year}-${month.toString().padStart(2, "0")}`;
+      
+      return Array.from(entitiesMap.entries()).map(([entityName, entityData], entityIndex) => {
+        const totalTons = entityData.filter(item => item.isUsed).reduce((sum, item) => sum + item.quantity, 0);
+        const totalCubic = entityData.reduce((sum, item) => {
+          if (item.isUsed) {
+            return sum + (item.quantityInCubicMeters || 0);
+          } else {
+            return sum + item.quantity;
+          }
+        }, 0);
+
+        // Create cells for each material
+        const materialCells = materials.map(material => {
+          const data = entityData.find(item => item.material.id === material.id);
+          const hasUsedEntries = tableData.some(item => item.material.id === material.id && item.isUsed);
+          
+          if (hasUsedEntries) {
+            return `
+              <td style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px; color: #333333;">
+                ${data && data.isUsed ? data.quantity.toFixed(2) : "-"}
+              </td>
+              <td style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px; color: #333333;">
+                ${data && data.isUsed && data.quantityInCubicMeters ? data.quantityInCubicMeters.toFixed(2) : "-"}
+              </td>
+            `;
+          } else {
+            return `
+              <td style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px; color: #333333;">
+                ${data ? data.quantity.toFixed(2) : "-"}
+              </td>
+            `;
+          }
+        }).join("");
+
+        return `
+          <tr style="background-color: ${entityIndex % 2 === 0 ? "#f9f9f9" : "#ffffff"};">
+            <td style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px; color: #333333; font-weight: bold;">${monthDate}</td>
+            <td style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px; color: #333333;">${entityName}</td>
+            ${materialCells}
+            <td style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px; color: #333333; font-weight: bold;">
+              ${totalTons > 0 ? totalTons.toFixed(2) : "-"}
+            </td>
+            <td style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px; color: #333333; font-weight: bold;">
+              ${totalCubic > 0 ? totalCubic.toFixed(2) : "-"}
+            </td>
+          </tr>
+        `;
+      });
+    }).join("");
+
+    // Create header cells for materials
+    const materialHeaders = materials.map(material => {
+      const hasUsedEntries = tableData.some(item => item.material.id === material.id && item.isUsed);
+      
+      if (hasUsedEntries) {
+        return `
+          <th style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-weight: bold; color: #333333; font-size: 11px;">
+            ${material.name}<br/><small>(طن)</small>
+          </th>
+          <th style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-weight: bold; color: #333333; font-size: 11px;">
+            ${material.name}<br/><small>(م³)</small>
+          </th>
+        `;
+      } else {
+        return `
+          <th style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-weight: bold; color: #333333; font-size: 11px;">
+            ${material.name}<br/><small>(م³)</small>
+          </th>
+        `;
+      }
+    }).join("");
+
+    // Create totals row for materials
+    const materialTotalCells = materials.map(material => {
+      const materialData = tableData.filter(item => item.material.id === material.id);
+      const hasUsedEntries = materialData.some(item => item.isUsed);
+      
+      if (hasUsedEntries) {
+        const materialTotalTons = materialData.filter(item => item.isUsed).reduce((sum, item) => sum + item.quantity, 0);
+        const materialTotalCubic = materialData.filter(item => item.isUsed).reduce((sum, item) => sum + (item.quantityInCubicMeters || 0), 0);
+        return `
+          <td style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-size: 11px; color: #2c3e50; font-weight: bold;">
+            ${materialTotalTons > 0 ? materialTotalTons.toFixed(2) : "-"}
+          </td>
+          <td style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-size: 11px; color: #2c3e50; font-weight: bold;">
+            ${materialTotalCubic > 0 ? materialTotalCubic.toFixed(2) : "-"}
+          </td>
+        `;
+      } else {
+        const materialTotalCubic = materialData.reduce((sum, item) => sum + item.quantity, 0);
+        return `
+          <td style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-size: 11px; color: #2c3e50; font-weight: bold;">
+            ${materialTotalCubic > 0 ? materialTotalCubic.toFixed(2) : "-"}
+          </td>
+        `;
+      }
+    }).join("");
+
+    const htmlContent = `
+      <div style="
+        font-family: 'Arial', 'Tahoma', sans-serif;
+        direction: rtl;
+        text-align: right;
+        padding: 20px;
+        width: 1200px;
+        background: #ffffff;
+        color: #333333;
+        line-height: 1.6;
+        box-sizing: border-box;
+      ">
+        <div style="text-align: center; border-bottom: 2px solid #333333; padding-bottom: 20px; margin-bottom: 30px;">
+          <h1 style="font-size: 24px; margin: 0; color: #2c3e50; font-weight: bold;">تقرير الاستخراجات الشهرية</h1>
+          <p style="font-size: 14px; margin: 10px 0; color: #000000;">${filterDescription}</p>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
+          <div style="width: 48%;">
+            <h3 style="margin: 0 0 10px 0; color: #34495e; border-bottom: 1px solid #bdc3c7; padding-bottom: 5px; font-size: 14px;">معلومات المنجم</h3>
+            <p style="margin: 5px 0; font-size: 12px; color: #333333;">اسم المنجم: ${mineName}</p>
+            <p style="margin: 5px 0; font-size: 12px; color: #333333;">الفترة: ${filterDescription}</p>
+          </div>
+          <div style="width: 48%;">
+            <h3 style="margin: 0 0 10px 0; color: #34495e; border-bottom: 1px solid #bdc3c7; padding-bottom: 5px; font-size: 14px;">ملخص البيانات</h3>
+            <p style="margin: 5px 0; font-size: 12px; color: #333333;">تاريخ الإنشاء: ${currentDate}</p>
+            <p style="margin: 5px 0; font-size: 12px; color: #333333;">إجمالي الأطنان: ${grandTotalTons.toFixed(2)} طن</p>
+            <p style="margin: 5px 0; font-size: 12px; color: #333333;">إجمالي الأمتار المكعبة: ${grandTotalCubic.toFixed(2)} م³</p>
+          </div>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; border: 1px solid #dddddd;">
+          <thead>
+            <tr style="background-color: #f8f9fa;">
+              <th style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-weight: bold; color: #333333; font-size: 11px;">التاريخ</th>
+              <th style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-weight: bold; color: #333333; font-size: 11px;">الجهة</th>
+              ${materialHeaders}
+              <th style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-weight: bold; color: #333333; font-size: 11px;">إجمالي الأطنان</th>
+              <th style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-weight: bold; color: #333333; font-size: 11px;">إجمالي م³</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+            <tr style="background-color: #e8f4f8; border-top: 2px solid #2c3e50;">
+              <td style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-size: 11px; color: #2c3e50; font-weight: bold;" colspan="2">الإجمالي العام</td>
+              ${materialTotalCells}
+              <td style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-size: 11px; color: #2c3e50; font-weight: bold;">${grandTotalTons > 0 ? grandTotalTons.toFixed(2) : "-"}</td>
+              <td style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-size: 11px; color: #2c3e50; font-weight: bold;">${grandTotalCubic > 0 ? grandTotalCubic.toFixed(2) : "-"}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="margin-top: 40px; text-align: center; font-size: 10px; color: #7f8c8d; border-top: 1px solid #bdc3c7; padding-top: 20px;">
+          <p style="margin: 5px 0;">تم الإنشاء في ${currentDate}</p>
+        </div>
+      </div>
+    `;
+
+    // Create iframe for PDF generation (similar to existing function)
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "absolute";
+    iframe.style.top = "-9999px";
+    iframe.style.left = "-9999px";
+    iframe.style.width = "1200px";
+    iframe.style.height = "800px";
+    iframe.style.border = "none";
+    document.body.appendChild(iframe);
+
+    // Wait for iframe to load
+    await new Promise<void>((resolve) => {
+      iframe.onload = () => resolve();
+      iframe.src = "about:blank";
+    });
+
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!iframeDoc) {
+      document.body.removeChild(iframe);
+      throw new Error("Could not access iframe document");
+    }
+
+    // Write the HTML content to the iframe
+    iframeDoc.open();
+    iframeDoc.write(`
+      <!DOCTYPE html>
+      <html lang="ar" dir="rtl">
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          body {
+            font-family: 'Arial', 'Tahoma', sans-serif;
+            background: #ffffff;
+            color: #333333;
+          }
+        </style>
+      </head>
+      <body>
+        ${htmlContent}
+      </body>
+      </html>
+    `);
+    iframeDoc.close();
+
+    try {
+      // Wait a bit for fonts to load
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      // Get the content element from iframe
+      const contentElement = iframeDoc.body.firstElementChild as HTMLElement;
+
+      // Convert HTML to canvas
+      const canvas = await html2canvas(contentElement, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+        width: 1200,
+        height: contentElement.scrollHeight || 800,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: 1200,
+        windowHeight: 800,
+        foreignObjectRendering: true,
+      });
+
+      // Remove iframe
+      document.body.removeChild(iframe);
+
+      // Create PDF
+      const pdf = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const imgData = canvas.toDataURL("image/png", 1.0);
+      const imgWidth = 297; // A4 landscape width in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      // Add image to PDF
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+
+      // Save with proper filename
+      const filename = `تقرير-استخراجات-${mineName.replace(/\s+/g, "-")}-${filterDescription.replace(/\s+/g, "-")}.pdf`;
+      pdf.save(filename);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      // Remove iframe in case of error
+      if (document.body.contains(iframe)) {
+        document.body.removeChild(iframe);
+      }
+      alert("حدث خطأ أثناء إنشاء ملف PDF. يرجى المحاولة مرة أخرى.");
+    }
+  };
+
   if (loading && materials.length === 0) {
     return (
       <Card>
@@ -634,7 +973,7 @@ export function MonthlyExtractionTable() {
           <CardTitle>بيانات الاستخراج الشهرية</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
             <div className="space-y-2">
               <Label htmlFor="mine-select">اختر المنجم</Label>
               <Select value={selectedMine} onValueChange={handleMineChange}>
@@ -670,6 +1009,29 @@ export function MonthlyExtractionTable() {
               </Select>
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="month-select">اختر الشهر</Label>
+              <Select value={selectedMonth} onValueChange={handleMonthChange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="اختر شهر" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 12 }, (_, i) => {
+                    const monthNum = i + 1;
+                    const monthNames = [
+                      "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
+                      "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
+                    ];
+                    return (
+                      <SelectItem key={monthNum} value={monthNum.toString()}>
+                        {monthNum} - {monthNames[i]}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="flex items-end">
               <Button
                 onClick={() => setShowAddDialog(true)}
@@ -692,6 +1054,18 @@ export function MonthlyExtractionTable() {
                 تصدير CSV
               </Button>
             </div>
+
+            <div className="flex items-end">
+              <Button
+                onClick={exportTableAsPDF}
+                disabled={!selectedMine || filteredData.length === 0}
+                variant="outline"
+                className="w-full"
+              >
+                <FileText className="h-4 w-4 me-2" />
+                تصدير PDF
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -702,7 +1076,14 @@ export function MonthlyExtractionTable() {
           <CardHeader>
             <CardTitle>
               {mines.find((m) => m.id.toString() === selectedMine)?.name} -{" "}
-              بيانات الاستخراج {selectedYear || "جميع السنوات"}
+              بيانات الاستخراج{" "}
+              {selectedYear && selectedMonth
+                ? `${selectedYear}/${selectedMonth.padStart(2, "0")}`
+                : selectedYear
+                ? `سنة ${selectedYear}`
+                : selectedMonth
+                ? `شهر ${selectedMonth}`
+                : "جميع البيانات"}
             </CardTitle>
           </CardHeader>
           <CardContent>
