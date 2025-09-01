@@ -87,7 +87,6 @@ export function InvoiceFiltersTable({
   const [loading, setLoading] = useState(false);
 
   const loadFilteredData = useCallback(async () => {
-
     setLoading(true);
     try {
       let allExtractionData: FilteredExtractionData[] = [];
@@ -251,7 +250,6 @@ export function InvoiceFiltersTable({
   }, [loadFilteredData]);
 
   const generateCombinedInvoice = async () => {
-
     const arabicMonths = [
       "01",
       "02",
@@ -267,11 +265,14 @@ export function InvoiceFiltersTable({
       "12",
     ];
 
-    const dateRange = filters.month && filters.year 
-      ? `${arabicMonths[filters.month - 1]} ${filters.year}`
-      : filters.year ? `${filters.year}`
-      : filters.month ? `الشهر ${arabicMonths[filters.month - 1]}`
-      : 'جميع الفترات';
+    const dateRange =
+      filters.month && filters.year
+        ? `${arabicMonths[filters.month - 1]} ${filters.year}`
+        : filters.year
+        ? `${filters.year}`
+        : filters.month
+        ? `الشهر ${arabicMonths[filters.month - 1]}`
+        : "جميع الفترات";
     const currentDate = new Date().toLocaleDateString("ar-SA");
 
     // Group data by entity
@@ -343,7 +344,8 @@ export function InvoiceFiltersTable({
                 <th style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px;">الجهة</th>
                 <th style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px;">المنجم</th>
                 <th style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px;">المادة</th>
-                <th style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px;">الكمية</th>
+                <th style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px;">الكمية طن</th>
+                <th style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px;">الكمية م3</th>
                 <th style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px;">السعر الإجمالي</th>
                 <th style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px;">التاريخ</th>
               </tr>
@@ -366,7 +368,10 @@ export function InvoiceFiltersTable({
                   }</td>
                   <td style="border: 1px solid #dddddd; padding: 6px; text-align: center; font-size: 9px;">${
                     item.quantity
-                  } ${item.material.unit}</td>
+                  }</td>
+                  <td style="border: 1px solid #dddddd; padding: 6px; text-align: center; font-size: 9px;">${
+                    item.quantityInCubicMeters
+                  }</td>
                   <td style="border: 1px solid #dddddd; padding: 6px; text-align: center; font-size: 9px;">$${(
                     item.totalPrice || 0
                   ).toFixed(2)}</td>
@@ -599,7 +604,8 @@ export function InvoiceFiltersTable({
                         <TableHead className="text-right">الشركة</TableHead>
                         <TableHead className="text-right">المنجم</TableHead>
                         <TableHead className="text-right">المادة</TableHead>
-                        <TableHead className="text-right">الكمية</TableHead>
+                        <TableHead className="text-right">الكمية طن</TableHead>
+                        <TableHead className="text-right">الكمية م3</TableHead>
                         <TableHead className="text-right">
                           السعر الإجمالي
                         </TableHead>
@@ -619,7 +625,10 @@ export function InvoiceFiltersTable({
                             {item.material.name}
                           </TableCell>
                           <TableCell className="text-right">
-                            {item.quantity} طن
+                            {item.quantity}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {item.quantityInCubicMeters}
                           </TableCell>
                           <TableCell className="text-right">
                             ${(item.totalPrice || 0).toFixed(2)}
