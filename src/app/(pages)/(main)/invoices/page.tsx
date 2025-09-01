@@ -324,7 +324,7 @@ export default function InvoicesPage() {
                   updateFilter("includeExtractions", checked === true)
                 }
               />
-              <Label htmlFor="include-extractions">تضمين استخراج المواد</Label>
+              <Label htmlFor="include-extractions">متر مكعب</Label>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -346,7 +346,7 @@ export default function InvoicesPage() {
                   updateFilter("onlyUsedMaterials", checked === true)
                 }
               />
-              <Label htmlFor="only-used-materials">المواد المستخدمة فقط</Label>
+              <Label htmlFor="only-used-materials">الأطنان</Label>
             </div>
           </div>
 
