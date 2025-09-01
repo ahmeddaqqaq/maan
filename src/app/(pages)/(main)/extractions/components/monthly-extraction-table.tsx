@@ -692,6 +692,7 @@ export function MonthlyExtractionTable() {
         return sum + item.quantity;
       }
     }, 0);
+    const grandTotalPrice = tableData.filter(item => item.isUsed).reduce((sum, item) => sum + (item.totalPrice || 0), 0);
 
     // Create table rows HTML
     const tableRows = Array.from(groupedData.entries()).flatMap(([monthKey, entitiesMap]) => {
@@ -707,6 +708,10 @@ export function MonthlyExtractionTable() {
             return sum + item.quantity;
           }
         }, 0);
+
+        const totalPrice = entityData
+          .filter(item => item.isUsed)
+          .reduce((sum, item) => sum + (item.totalPrice || 0), 0);
 
         // Create cells for each material
         const materialCells = materials.map(material => {
@@ -741,6 +746,9 @@ export function MonthlyExtractionTable() {
             </td>
             <td style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px; color: #333333; font-weight: bold;">
               ${totalCubic > 0 ? totalCubic.toFixed(2) : "-"}
+            </td>
+            <td style="border: 1px solid #dddddd; padding: 8px; text-align: center; font-size: 10px; color: #27ae60; font-weight: bold;">
+              ${totalPrice > 0 ? "$" + totalPrice.toFixed(2) : "-"}
             </td>
           </tr>
         `;
@@ -823,6 +831,7 @@ export function MonthlyExtractionTable() {
             <p style="margin: 5px 0; font-size: 12px; color: #333333;">تاريخ الإنشاء: ${currentDate}</p>
             <p style="margin: 5px 0; font-size: 12px; color: #333333;">إجمالي الأطنان: ${grandTotalTons.toFixed(2)} طن</p>
             <p style="margin: 5px 0; font-size: 12px; color: #333333;">إجمالي الأمتار المكعبة: ${grandTotalCubic.toFixed(2)} م³</p>
+            <p style="margin: 5px 0; font-size: 12px; color: #27ae60; font-weight: bold;">إجمالي السعر: $${grandTotalPrice.toFixed(2)}</p>
           </div>
         </div>
 
@@ -834,6 +843,7 @@ export function MonthlyExtractionTable() {
               ${materialHeaders}
               <th style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-weight: bold; color: #333333; font-size: 11px;">إجمالي الأطنان</th>
               <th style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-weight: bold; color: #333333; font-size: 11px;">إجمالي م³</th>
+              <th style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-weight: bold; color: #333333; font-size: 11px;">إجمالي السعر</th>
             </tr>
           </thead>
           <tbody>
@@ -843,6 +853,12 @@ export function MonthlyExtractionTable() {
               ${materialTotalCells}
               <td style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-size: 11px; color: #2c3e50; font-weight: bold;">${grandTotalTons > 0 ? grandTotalTons.toFixed(2) : "-"}</td>
               <td style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-size: 11px; color: #2c3e50; font-weight: bold;">${grandTotalCubic > 0 ? grandTotalCubic.toFixed(2) : "-"}</td>
+              <td style="border: 1px solid #dddddd; padding: 10px; text-align: center; font-size: 11px; color: #27ae60; font-weight: bold;">
+                ${(() => {
+                  const grandTotalPrice = tableData.filter(item => item.isUsed).reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+                  return grandTotalPrice > 0 ? "$" + grandTotalPrice.toFixed(2) : "-";
+                })()}
+              </td>
             </tr>
           </tbody>
         </table>
@@ -1163,6 +1179,14 @@ export function MonthlyExtractionTable() {
                           </div>
                         </div>
                       </TableHead>
+                      <TableHead className="text-right min-w-32">
+                        <div className="space-y-1">
+                          <div className="font-medium">إجمالي السعر</div>
+                          <div className="text-xs text-muted-foreground">
+                            (المواد المستخدمة)
+                          </div>
+                        </div>
+                      </TableHead>
                       <TableHead className="w-16 text-left"></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -1211,6 +1235,10 @@ export function MonthlyExtractionTable() {
                             },
                             0
                           );
+
+                          const totalPrice = entityData
+                            .filter((item) => item.isUsed)
+                            .reduce((sum, item) => sum + (item.totalPrice || 0), 0);
 
                           return (
                             <TableRow key={`${monthKey}-${entityName}`}>
@@ -1280,6 +1308,11 @@ export function MonthlyExtractionTable() {
                                   {totalCubicMeters > 0
                                     ? totalCubicMeters.toFixed(2)
                                     : "-"}
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <div className="font-semibold text-green-600">
+                                  {totalPrice > 0 ? `$${totalPrice.toFixed(2)}` : "-"}
                                 </div>
                               </TableCell>
                               <TableCell className="text-left">
@@ -1453,6 +1486,19 @@ export function MonthlyExtractionTable() {
                             );
                             return grandTotalCubic > 0
                               ? grandTotalCubic.toFixed(2)
+                              : "-";
+                          })()}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="font-bold text-green-600">
+                          {(() => {
+                            const allFilteredData = getAllFilteredData();
+                            const grandTotalPrice = allFilteredData
+                              .filter((item) => item.isUsed)
+                              .reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+                            return grandTotalPrice > 0
+                              ? `$${grandTotalPrice.toFixed(2)}`
                               : "-";
                           })()}
                         </div>
