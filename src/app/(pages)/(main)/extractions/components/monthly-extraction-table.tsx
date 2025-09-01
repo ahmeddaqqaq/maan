@@ -70,9 +70,7 @@ interface MonthlyData {
 
 export function MonthlyExtractionTable() {
   const [selectedMine, setSelectedMine] = useState<string>("");
-  const [selectedYear, setSelectedYear] = useState<string>(
-    new Date().getFullYear().toString()
-  );
+  const [selectedYear, setSelectedYear] = useState<string>("");
   const [materials, setMaterials] = useState<MaterialResponse[]>([]);
   const [mines, setMines] = useState<MineResponse[]>([]);
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
@@ -149,7 +147,7 @@ export function MonthlyExtractionTable() {
           const response =
             await MineMonthlyDataService.mineMonthlyDataControllerFindMany({
               mineId: parseInt(selectedMine),
-              year: parseInt(selectedYear),
+              year: selectedYear != "" ? parseInt(selectedYear) : undefined,
               skip,
               take: pageSize,
             });
@@ -679,26 +677,58 @@ export function MonthlyExtractionTable() {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-24 text-right">التاريخ</TableHead>
-                      {materials.map((material) => (
-                        <React.Fragment key={material.id}>
-                          <TableHead className="text-right min-w-28">
-                            <div className="space-y-1">
-                              <div className="font-medium">{material.name}</div>
-                              <div className="text-xs text-muted-foreground">
-                                (طن)
+                      {materials.map((material) => {
+                        // Check if this material has any used entries in the data
+                        const hasUsedEntries = monthlyData.some(
+                          (item) =>
+                            item.material.id === material.id && item.isUsed
+                        );
+
+                        if (hasUsedEntries) {
+                          // For used materials: show both tons and cubic meters columns
+                          return (
+                            <React.Fragment key={material.id}>
+                              <TableHead className="text-right min-w-28">
+                                <div className="space-y-1">
+                                  <div className="font-medium">
+                                    {material.name}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">
+                                    (طن)
+                                  </div>
+                                </div>
+                              </TableHead>
+                              <TableHead className="text-right min-w-28">
+                                <div className="space-y-1">
+                                  <div className="font-medium">
+                                    {material.name}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">
+                                    (م³)
+                                  </div>
+                                </div>
+                              </TableHead>
+                            </React.Fragment>
+                          );
+                        } else {
+                          // For not used materials: show only cubic meters column
+                          return (
+                            <TableHead
+                              key={material.id}
+                              className="text-right min-w-32"
+                            >
+                              <div className="space-y-1">
+                                <div className="font-medium">
+                                  {material.name}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  (م³)
+                                </div>
                               </div>
-                            </div>
-                          </TableHead>
-                          <TableHead className="text-right min-w-28">
-                            <div className="space-y-1">
-                              <div className="font-medium">{material.name}</div>
-                              <div className="text-xs text-muted-foreground">
-                                (م³)
-                              </div>
-                            </div>
-                          </TableHead>
-                        </React.Fragment>
-                      ))}
+                            </TableHead>
+                          );
+                        }
+                      })}
                       <TableHead className="text-right min-w-28">
                         <div className="space-y-1">
                           <div className="font-medium">إجمالي الأطنان</div>
@@ -731,9 +761,9 @@ export function MonthlyExtractionTable() {
                       );
 
                       const totalTons = monthDataForRow
-                        .filter(item => item.isUsed)
+                        .filter((item) => item.isUsed)
                         .reduce((sum, item) => sum + item.quantity, 0);
-                      
+
                       const totalCubicMeters = monthDataForRow.reduce(
                         (sum, item) => {
                           if (item.isUsed) {
@@ -757,26 +787,48 @@ export function MonthlyExtractionTable() {
                                 item.month === month &&
                                 item.material.id === material.id
                             );
-                            return (
-                              <React.Fragment key={material.id}>
-                                <TableCell className="text-right">
-                                  <div className="font-medium">
-                                    {data && data.isUsed 
-                                      ? data.quantity.toFixed(2)  // Used materials show quantity in tons
-                                      : "-"} 
-                                  </div>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                  <div className="font-medium">
-                                    {data ? (
-                                      data.isUsed 
-                                        ? (data.quantityInCubicMeters ? data.quantityInCubicMeters.toFixed(2) : "-") // Used materials show cubic meters from quantityInCubicMeters
-                                        : data.quantity.toFixed(2) // Not used materials show quantity as cubic meters
-                                    ) : "-"}
-                                  </div>
-                                </TableCell>
-                              </React.Fragment>
+
+                            // Check if this material has any used entries
+                            const hasUsedEntries = monthlyData.some(
+                              (item) =>
+                                item.material.id === material.id && item.isUsed
                             );
+
+                            if (hasUsedEntries) {
+                              // For used materials: show both tons and cubic meters
+                              return (
+                                <React.Fragment key={material.id}>
+                                  <TableCell className="text-right">
+                                    <div className="font-medium">
+                                      {data && data.isUsed
+                                        ? data.quantity.toFixed(2)
+                                        : "-"}
+                                    </div>
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    <div className="font-medium">
+                                      {data &&
+                                      data.isUsed &&
+                                      data.quantityInCubicMeters
+                                        ? data.quantityInCubicMeters.toFixed(2)
+                                        : "-"}
+                                    </div>
+                                  </TableCell>
+                                </React.Fragment>
+                              );
+                            } else {
+                              // For not used materials: show only cubic meters (from quantity field)
+                              return (
+                                <TableCell
+                                  key={material.id}
+                                  className="text-right"
+                                >
+                                  <div className="font-medium">
+                                    {data ? data.quantity.toFixed(2) : "-"}
+                                  </div>
+                                </TableCell>
+                              );
+                            }
                           })}
                           <TableCell className="text-right">
                             <div className="font-semibold text-primary">
@@ -785,7 +837,9 @@ export function MonthlyExtractionTable() {
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="font-semibold text-primary">
-                              {totalCubicMeters > 0 ? totalCubicMeters.toFixed(2) : "-"}
+                              {totalCubicMeters > 0
+                                ? totalCubicMeters.toFixed(2)
+                                : "-"}
                             </div>
                           </TableCell>
                           <TableCell className="text-left">
@@ -831,47 +885,72 @@ export function MonthlyExtractionTable() {
                       </TableCell>
                       {materials.map((material) => {
                         // Calculate total for each material
-                        const materialData = monthlyData.filter((item) => item.material.id === material.id);
-                        
-                        const materialTotalTons = materialData
-                          .filter(item => item.isUsed)
-                          .reduce((sum, item) => sum + item.quantity, 0);
+                        const materialData = monthlyData.filter(
+                          (item) => item.material.id === material.id
+                        );
+                        const hasUsedEntries = materialData.some(
+                          (item) => item.isUsed
+                        );
 
-                        const materialTotalCubic = materialData
-                          .reduce((sum, item) => {
-                            if (item.isUsed) {
-                              return sum + (item.quantityInCubicMeters || 0);
-                            } else {
-                              return sum + item.quantity; // Not used: quantity is in m³
-                            }
-                          }, 0);
+                        if (hasUsedEntries) {
+                          // For used materials: show totals for both tons and cubic meters
+                          const materialTotalTons = materialData
+                            .filter((item) => item.isUsed)
+                            .reduce((sum, item) => sum + item.quantity, 0);
 
-                        return (
-                          <React.Fragment key={material.id}>
-                            <TableCell className="text-right">
-                              <div className="font-bold">
-                                {materialTotalTons > 0
-                                  ? materialTotalTons.toFixed(2)
-                                  : "-"}
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-right">
+                          const materialTotalCubic = materialData
+                            .filter((item) => item.isUsed)
+                            .reduce(
+                              (sum, item) =>
+                                sum + (item.quantityInCubicMeters || 0),
+                              0
+                            );
+
+                          return (
+                            <React.Fragment key={material.id}>
+                              <TableCell className="text-right">
+                                <div className="font-bold">
+                                  {materialTotalTons > 0
+                                    ? materialTotalTons.toFixed(2)
+                                    : "-"}
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <div className="font-bold">
+                                  {materialTotalCubic > 0
+                                    ? materialTotalCubic.toFixed(2)
+                                    : "-"}
+                                </div>
+                              </TableCell>
+                            </React.Fragment>
+                          );
+                        } else {
+                          // For not used materials: show only cubic meters total
+                          const materialTotalCubic = materialData.reduce(
+                            (sum, item) => sum + item.quantity,
+                            0
+                          );
+
+                          return (
+                            <TableCell key={material.id} className="text-right">
                               <div className="font-bold">
                                 {materialTotalCubic > 0
                                   ? materialTotalCubic.toFixed(2)
                                   : "-"}
                               </div>
                             </TableCell>
-                          </React.Fragment>
-                        );
+                          );
+                        }
                       })}
                       <TableCell className="text-right">
                         <div className="font-bold text-primary">
                           {(() => {
                             const grandTotalTons = monthlyData
-                              .filter(item => item.isUsed)
+                              .filter((item) => item.isUsed)
                               .reduce((sum, item) => sum + item.quantity, 0);
-                            return grandTotalTons > 0 ? grandTotalTons.toFixed(2) : "-";
+                            return grandTotalTons > 0
+                              ? grandTotalTons.toFixed(2)
+                              : "-";
                           })()}
                         </div>
                       </TableCell>
@@ -881,14 +960,18 @@ export function MonthlyExtractionTable() {
                             const grandTotalCubic = monthlyData.reduce(
                               (sum, item) => {
                                 if (item.isUsed) {
-                                  return sum + (item.quantityInCubicMeters || 0);
+                                  return (
+                                    sum + (item.quantityInCubicMeters || 0)
+                                  );
                                 } else {
                                   return sum + item.quantity;
                                 }
                               },
                               0
                             );
-                            return grandTotalCubic > 0 ? grandTotalCubic.toFixed(2) : "-";
+                            return grandTotalCubic > 0
+                              ? grandTotalCubic.toFixed(2)
+                              : "-";
                           })()}
                         </div>
                       </TableCell>
